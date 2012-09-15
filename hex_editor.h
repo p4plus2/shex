@@ -16,10 +16,10 @@ class hex_editor : public QWidget
 		explicit hex_editor(QWidget *parent = 0);
 		static QString get_address(int address);
 		virtual QSize minimumSizeHint() const;
-		int get_max_lines();
 
 	signals:
-		void move_slider(int position);
+		void update_slider(int position);
+		void update_range(int value);
 
 	public slots:
 		void update_cursor();
@@ -65,10 +65,12 @@ class hex_editor : public QWidget
 		QString get_line(int index);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y);
-		bool check_paste_data();
 		int get_buffer_position(int x, int y, bool byte_align = true);
+		
 		inline int column_width(int size){ return size * font_width; }
 		inline int column_height(int size){ return size * font_height; }
+		inline int get_max_lines(){ return buffer.size() / columns - rows; }
+		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 };
 
 #endif // HEX_EDITOR_H

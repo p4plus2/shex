@@ -1,19 +1,18 @@
 #include "main_window.h"
 #include "hex_editor.h"
+#include "dynamic_scrollbar.h"
 
 #include <QHBoxLayout>
-#include <QScrollBar>
 
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
 {
 	hex_editor *editor = new hex_editor(this);
-	QScrollBar *scrollbar = new QScrollBar(this);
+	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(this);
 	
 	connect(scrollbar, SIGNAL(valueChanged(int)), editor, SLOT(slider_update(int)));
-	connect(editor, SIGNAL(move_slider(int)), scrollbar, SLOT(setValue(int)));
-	
-	scrollbar->setRange(0,editor->get_max_lines());
+	connect(editor, SIGNAL(update_slider(int)), scrollbar, SLOT(setValue(int)));
+	connect(editor, SIGNAL(update_range(int)), scrollbar, SLOT(set_range(int)));
 	
 	QWidget* widget = new QWidget(this);
 	

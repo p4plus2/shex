@@ -37,6 +37,8 @@ hex_editor::hex_editor(QWidget *parent) :
 	    this, SLOT(context_menu(const QPoint&)));
 	
 	clipboard = QApplication::clipboard();
+	
+	emit update_range(get_max_lines());
 }
 
 QString hex_editor::get_address(int address)
@@ -50,11 +52,6 @@ QString hex_editor::get_address(int address)
 QSize hex_editor::minimumSizeHint() const
 {
 	return QSize(total_width, rows*font_height+font_height+vertical_offset+vertical_shift);
-}
-
-int hex_editor::get_max_lines()
-{
-	return buffer.size() / columns - rows;
 }
 
 void hex_editor::slider_update(int position)
@@ -323,7 +320,7 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 			cursor_position.setY(cursor_position.y()-(column_height(-steps)));
 		}
 	}
-	emit move_slider(offset / columns);
+	emit update_slider(offset / columns);
 	update();
 }
 
@@ -384,6 +381,7 @@ void hex_editor::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
 	rows = (size().height() - vertical_shift - font_height)/ font_height;
+	update_range(get_max_lines());
 }
 
 void hex_editor::font_setup()
@@ -460,7 +458,7 @@ void hex_editor::update_cursor_position(int x, int y)
 		y -= font_height;
 		if(offset < buffer.size() - columns * rows){
 			offset += columns;
-			emit move_slider(offset / columns);
+			emit update_slider(offset / columns);
 		}else{
 			x_column = (columns - 1) * column_width(4) - column_width(3);
 		}
@@ -468,7 +466,7 @@ void hex_editor::update_cursor_position(int x, int y)
 	if(y < 0 && offset > 0){
 		y += font_height;
 		offset -= columns;
-		emit move_slider(offset / columns);
+		emit update_slider(offset / columns);
 	}
 	if(y > 0 && y < column_height(rows)){
 		cursor_position.setY(y - (y % font_height) + vertical_offset);
@@ -480,11 +478,6 @@ void hex_editor::update_cursor_position(int x, int y)
 	}
 	cursor_state = true;
 	update();
-}
-
-bool hex_editor::check_paste_data()
-{
-	return !clipboard->mimeData()->hasText();
 }
 
 int hex_editor::get_buffer_position(int x, int y, bool byte_align)

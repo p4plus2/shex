@@ -12,6 +12,7 @@ class dynamic_scrollbar : public QScrollBar
 	signals:
 		
 	public slots:
+		void set_range(int value);
 		
 };
 
