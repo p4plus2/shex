@@ -1,0 +1,6 @@
+*.o
+shex
+smw.smc
+*.swp
+moc_*
+Makefile*
