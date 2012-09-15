@@ -4,3 +4,4 @@ smw.smc
 *.swp
 moc_*
 Makefile*
+*.user
