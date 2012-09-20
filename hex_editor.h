@@ -20,6 +20,7 @@ class hex_editor : public QWidget
 	signals:
 		void update_slider(int position);
 		void update_range(int value);
+		void toggle_scroll_mode(bool mode);
 
 	public slots:
 		void update_cursor();
@@ -60,6 +61,7 @@ class hex_editor : public QWidget
 		int vertical_offset;
 		int vertical_shift;
 		QClipboard *clipboard;
+		bool scroll_mode;
 		
 		void font_setup();
 		QString get_line(int index);

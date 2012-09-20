@@ -25,6 +25,8 @@ hex_editor::hex_editor(QWidget *parent) :
 	cursor_state = false;
 	font_setup();
 	
+	scroll_mode = false;
+	
 	total_width = column_width(get_line(0).length());
 	vertical_offset = 6;
 	vertical_shift = column_height(1);
@@ -248,6 +250,17 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			break;
 			case Qt::Key_A:
 				select_all();
+			break;
+		}
+		update();
+		return;
+	}
+	
+	if(event->modifiers() == Qt::AltModifier){
+		switch(event->key()){
+			case Qt::Key_S:
+				scroll_mode = !scroll_mode;
+				emit toggle_scroll_mode(scroll_mode);
 			break;
 		}
 		update();
