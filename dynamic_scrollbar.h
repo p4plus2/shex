@@ -22,6 +22,7 @@ class dynamic_scrollbar : public QScrollBar
 	private:
 		bool mode;
 		int original_pagestep;
+		scrollbar_style *scroll_style;
 		
 };
 

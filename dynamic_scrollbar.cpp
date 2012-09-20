@@ -7,7 +7,8 @@ dynamic_scrollbar::dynamic_scrollbar(QWidget *parent) :
         QScrollBar(parent)
 {
 	original_pagestep = pageStep();
-	setStyle(new scrollbar_style);
+	scroll_style = new scrollbar_style();
+	setStyle(scroll_style);
 	toggle_mode(false);
 }
 
@@ -19,6 +20,9 @@ void dynamic_scrollbar::set_range(int value)
 void dynamic_scrollbar::toggle_mode(bool m)
 {
 	mode = m;
-	dynamic_cast<scrollbar_style *>(style())->toggle(mode);
+	scroll_style->toggle(mode);
 	setPageStep(mode ? 0 : original_pagestep);
+	if(mode){
+		setValue(maximum() / 2 - scroll_style->pixelMetric(QStyle::PM_ScrollBarSliderMin, 0, 0) / 2);
+	}
 }
