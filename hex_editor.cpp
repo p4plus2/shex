@@ -4,7 +4,6 @@
 #include <QFontMetrics>
 #include <QApplication>
 #include <QAction>
-#include <QTimer>
 #include <QMenu>
 #include <cctype>
 #include "QDebug"
@@ -22,6 +21,8 @@ hex_editor::hex_editor(QWidget *parent) :
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(update_cursor()));
 	timer->start(1000);
+	scroll_timer = new QTimer(this);
+	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(auto_scroll_update()));
 	cursor_state = false;
 	font_setup();
 	
@@ -58,9 +59,49 @@ QSize hex_editor::minimumSizeHint() const
 
 void hex_editor::slider_update(int position)
 {
-	cursor_position.setY(cursor_position.y() + (offset - position * columns));
-	offset = position * columns;
-	update();
+	if(!scroll_mode){
+		cursor_position.setY(cursor_position.y() + (offset - position * columns));
+		offset = position * columns;
+		update();
+	}else{
+		position -= height() / 2;
+		if(position < 0){
+			scroll_direction = false;
+			position = -position;
+		}else if(position > 0){
+			scroll_direction = true;
+		}else{
+			scroll_speed = INT_MAX;
+			scroll_timer->setInterval(scroll_speed);
+			return;
+		}
+		scroll_speed = qAbs(((position - (height() /2))-1) / 15);
+		qDebug() << scroll_speed;
+		scroll_timer->setInterval(scroll_speed);
+	}
+}
+
+void hex_editor::auto_scroll_update()
+{
+	int scroll_factor = 1;
+	if(scroll_speed < 5){
+		scroll_factor = qAbs(scroll_speed - 20);
+	}
+	if(!scroll_direction){
+		update_cursor_position(cursor_position.x(), cursor_position.y() - font_height * scroll_factor);
+	}else{
+		update_cursor_position(cursor_position.x(), cursor_position.y() + font_height * scroll_factor);
+	}
+}
+
+void hex_editor::control_auto_scroll(bool enabled)
+{
+	auto_scrolling = enabled;
+	if(auto_scrolling){
+		scroll_timer->start(scroll_speed);
+	}else{
+		scroll_timer->stop();
+	}
 }
 
 void hex_editor::update_cursor()
@@ -260,6 +301,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		switch(event->key()){
 			case Qt::Key_S:
 				scroll_mode = !scroll_mode;
+				emit update_range(get_max_lines());
 				emit toggle_scroll_mode(scroll_mode);
 			break;
 		}
@@ -333,7 +375,9 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 			cursor_position.setY(cursor_position.y()-(column_height(-steps)));
 		}
 	}
-	emit update_slider(offset / columns);
+	if(!scroll_mode){
+		emit update_slider(offset / columns);
+	}
 	update();
 }
 
@@ -394,7 +438,7 @@ void hex_editor::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
 	rows = (size().height() - vertical_shift - font_height)/ font_height;
-	update_range(get_max_lines());
+	emit update_range(get_max_lines());
 }
 
 void hex_editor::font_setup()
@@ -471,7 +515,9 @@ void hex_editor::update_cursor_position(int x, int y)
 		y -= font_height;
 		if(offset < buffer.size() - columns * rows){
 			offset += columns;
-			emit update_slider(offset / columns);
+			if(!scroll_mode){
+				emit update_slider(offset / columns);
+			}
 		}else{
 			x_column = (columns - 1) * column_width(4) - column_width(3);
 		}
@@ -479,7 +525,9 @@ void hex_editor::update_cursor_position(int x, int y)
 	if(y < 0 && offset > 0){
 		y += font_height;
 		offset -= columns;
-		emit update_slider(offset / columns);
+		if(!scroll_mode){
+			emit update_slider(offset / columns);
+		}
 	}
 	if(y > 0 && y < column_height(rows)){
 		cursor_position.setY(y - (y % font_height) + vertical_offset);

@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QFont>
 #include <QClipboard>
+#include <QTimer>
 
 class hex_editor : public QWidget
 {
@@ -25,6 +26,8 @@ class hex_editor : public QWidget
 	public slots:
 		void update_cursor();
 		void slider_update(int position);
+		void auto_scroll_update();
+		void control_auto_scroll(bool enabled);
 		void context_menu(const QPoint& position);
 		void cut();
 		void copy();
@@ -62,6 +65,10 @@ class hex_editor : public QWidget
 		int vertical_shift;
 		QClipboard *clipboard;
 		bool scroll_mode;
+		bool auto_scrolling;
+		QTimer *scroll_timer;
+		int scroll_speed;
+		bool scroll_direction;
 		
 		void font_setup();
 		QString get_line(int index);

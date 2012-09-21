@@ -14,6 +14,7 @@ main_window::main_window(QWidget *parent)
 	connect(editor, SIGNAL(update_slider(int)), scrollbar, SLOT(setValue(int)));
 	connect(editor, SIGNAL(update_range(int)), scrollbar, SLOT(set_range(int)));
 	connect(editor, SIGNAL(toggle_scroll_mode(bool)), scrollbar, SLOT(toggle_mode(bool)));
+	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
 	
 	QWidget* widget = new QWidget(this);
 	

@@ -14,10 +14,13 @@ class dynamic_scrollbar : public QScrollBar
 		explicit dynamic_scrollbar(QWidget *parent = 0);
 		
 	signals:
+		void auto_scroll_action(bool);
 		
 	public slots:
 		void set_range(int value);
 		void toggle_mode(bool m);
+		void reset_slider();
+		void send_auto_scroll();
 		
 	private:
 		bool mode;
