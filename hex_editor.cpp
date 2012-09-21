@@ -76,7 +76,6 @@ void hex_editor::slider_update(int position)
 			return;
 		}
 		scroll_speed = qAbs(((position - (height() /2))-1) / 15);
-		qDebug() << scroll_speed;
 		scroll_timer->setInterval(scroll_speed);
 	}
 }
@@ -87,10 +86,12 @@ void hex_editor::auto_scroll_update()
 	if(scroll_speed < 5){
 		scroll_factor = qAbs(scroll_speed - 20);
 	}
-	if(!scroll_direction){
-		update_cursor_position(cursor_position.x(), cursor_position.y() - font_height * scroll_factor);
-	}else{
-		update_cursor_position(cursor_position.x(), cursor_position.y() + font_height * scroll_factor);
+	for(int i = 0; i < scroll_factor; i++){
+		if(!scroll_direction){
+			update_cursor_position(cursor_position.x(), cursor_position.y() - font_height);
+		}else{
+			update_cursor_position(cursor_position.x(), cursor_position.y() + font_height);
+		}
 	}
 }
 
@@ -451,8 +452,6 @@ void hex_editor::font_setup()
 	QFontMetrics font_info(font);
 	font_width = font_info.averageCharWidth();
 	font_height = font_info.height();
-	
-	qDebug() << font_height << font_width;
 }
 
 QString hex_editor::get_line(int index)

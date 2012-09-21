@@ -27,7 +27,6 @@ void dynamic_scrollbar::toggle_mode(bool m)
 	if(mode){
 		setRange(0, height());
 		setValue(height() / 2);
-		qDebug() << "scroll height" << height();
 	}
 }
 
