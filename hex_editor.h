@@ -73,7 +73,7 @@ class hex_editor : public QWidget
 		void font_setup();
 		QString get_line(int index);
 		void update_nibble(char byte);
-		void update_cursor_position(int x, int y);
+		void update_cursor_position(int x, int y, bool do_update = true);
 		int get_buffer_position(int x, int y, bool byte_align = true);
 		
 		inline int column_width(int size){ return size * font_width; }

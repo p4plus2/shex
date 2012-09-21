@@ -88,11 +88,12 @@ void hex_editor::auto_scroll_update()
 	}
 	for(int i = 0; i < scroll_factor; i++){
 		if(!scroll_direction){
-			update_cursor_position(cursor_position.x(), cursor_position.y() - font_height);
+			update_cursor_position(cursor_position.x(), cursor_position.y() - font_height, false);
 		}else{
-			update_cursor_position(cursor_position.x(), cursor_position.y() + font_height);
+			update_cursor_position(cursor_position.x(), cursor_position.y() + font_height, false);
 		}
 	}
+	update();
 }
 
 void hex_editor::control_auto_scroll(bool enabled)
@@ -195,6 +196,7 @@ void hex_editor::delete_text()
 	buffer.remove(position1, position2-position1);
 	selection_active = false;
 	cursor_position = selection_start;
+	update();
 }
 
 void hex_editor::select_all()
@@ -327,7 +329,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			delete_text();
 		break;
 		case Qt::Key_Backspace:
-			update_cursor_position(cursor_position.x()-column_width(3), cursor_position.y());
+			update_cursor_position(cursor_position.x()-column_width(3), cursor_position.y(), false);
 			delete_text();
 		break;
 
@@ -352,7 +354,6 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		default:
 		break;
 	}
-	update();
 }
 
 void hex_editor::wheelEvent(QWheelEvent *event)
@@ -493,7 +494,7 @@ void hex_editor::update_nibble(char byte)
 	update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
 }
 
-void hex_editor::update_cursor_position(int x, int y)
+void hex_editor::update_cursor_position(int x, int y, bool do_update)
 {
 	int x_column = x - (x % font_width);
 	if(x < column_width(11)-font_width){
@@ -537,7 +538,9 @@ void hex_editor::update_cursor_position(int x, int y)
 		cursor_position.setX(x_column + font_width);
 	}
 	cursor_state = true;
-	update();
+	if(do_update){
+		update();
+	}
 }
 
 int hex_editor::get_buffer_position(int x, int y, bool byte_align)
