@@ -380,7 +380,6 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 	if(!scroll_mode){
 		emit update_slider(offset / columns);
 	}
-	update();
 }
 
 void hex_editor::mousePressEvent(QMouseEvent *event)
