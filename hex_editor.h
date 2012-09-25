@@ -69,8 +69,10 @@ class hex_editor : public QWidget
 		QTimer *scroll_timer;
 		int scroll_speed;
 		bool scroll_direction;
+		QPoint mouse_position;
 		
 		void font_setup();
+		void selection_update(int x, int y);
 		QString get_line(int index);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);

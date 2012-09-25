@@ -82,8 +82,16 @@ void hex_editor::slider_update(int position)
 
 void hex_editor::auto_scroll_update()
 {
+	if(is_dragging){
+		if(!scroll_direction){
+			selection_update(mouse_position.x(), mouse_position.y());
+		}else{
+			selection_update(mouse_position.x(), mouse_position.y());
+		}
+		return;
+	}
 	int scroll_factor = 1;
-	if(scroll_speed < 5 && auto_scrolling){
+	if(scroll_speed < 5){
 		scroll_factor = qAbs(scroll_speed - 20);
 	}
 	for(int i = 0; i < scroll_factor; i++){
@@ -408,30 +416,14 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 
 void hex_editor::mouseMoveEvent(QMouseEvent *event)
 {
-	int x = event->x();
-	int y = event->y();
-	bool override = false;
+	mouse_position = event->pos();
 	if(is_dragging){
 		selection_active = true;
-		if(x < column_width(11)){
-			x = column_width(11);
-		}else if(x >= column_width(11+columns*3-1)-font_width){
-			x = column_width(11+columns*3-3)-font_width;
-			override = true;
-		}
-		update_cursor_position(x, y-vertical_shift-font_height/2);
-		if(cursor_position.x() % 3 != 1){
-			update_cursor_position(x+font_width, y-vertical_shift-font_height/2);
-		}
-		selection_current = cursor_position;
-		if(override){
-			selection_current.setX(selection_current.x()+column_width(2));
-			cursor_position = selection_current;
-		}
-		if(y > column_height(rows)){
+		selection_update(event->x(), event->y());
+		if(event->y() > column_height(rows)){
 			scroll_timer->start(20);
 			scroll_direction = true;
-		}else if(y < vertical_shift){
+		}else if(event->y() < vertical_shift){
 			scroll_timer->start(20);
 			scroll_direction = false;
 		}
@@ -440,25 +432,9 @@ void hex_editor::mouseMoveEvent(QMouseEvent *event)
 
 void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 {
+	mouse_position = event->pos();
 	if(is_dragging){
-		int x = event->x();
-		int y = event->y();
-		bool override = false;
-		if(x < column_width(11)){
-			x = column_width(11);
-		}else if(x >= column_width(11+columns*3-1)-font_width){
-			x = column_width(11+columns*3-3)-font_width;
-		}
-		
-		update_cursor_position(x, y-vertical_shift-font_height/2);
-		if(cursor_position.x() % 3 != 1 && selection_current != selection_start){
-			update_cursor_position(x+font_width, y-vertical_shift-font_height/2);
-		}
-		selection_current = cursor_position;
-		if(override){
-			selection_current.setX(selection_current.x()+column_width(2));
-			cursor_position = selection_current;
-		}
+		selection_update(event->x(), event->y());
 		scroll_timer->stop();
 	}
 	is_dragging = false;
@@ -484,6 +460,37 @@ void hex_editor::font_setup()
 	QFontMetrics font_info(font);
 	font_width = font_info.averageCharWidth();
 	font_height = font_info.height();
+}
+
+void hex_editor::selection_update(int x, int y)
+{
+	bool override = false;
+	if(x < column_width(11)){
+		x = column_width(11);
+	}else if(x >= column_width(10+columns*3)-font_width){
+		x = column_width(8+columns*3)-font_width;
+		override = true;
+	}
+	if(y < vertical_shift && offset == 0){
+		x = column_width(11);
+	}
+	update_cursor_position(x, y-vertical_shift-font_height/2);
+	if(cursor_position.x() % 3 != 1){
+		update_cursor_position(x+font_width, y-vertical_shift-font_height/2);
+	}
+	selection_current = cursor_position;
+	if(override){
+		selection_current.setX(selection_current.x()+column_width(2));
+		cursor_position = selection_current;
+	}
+	if(offset == buffer.size() - columns * rows && y > column_height(rows)){
+		selection_current.setX(column_width(11+columns*3)-font_width);
+		cursor_position = selection_current;
+	}
+	if(!offset && y < vertical_shift){
+		selection_current.setX(column_width(11));
+		cursor_position = selection_current;
+	}
 }
 
 QString hex_editor::get_line(int index)
