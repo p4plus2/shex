@@ -83,7 +83,7 @@ void hex_editor::slider_update(int position)
 void hex_editor::auto_scroll_update()
 {
 	int scroll_factor = 1;
-	if(scroll_speed < 5){
+	if(scroll_speed < 5 && auto_scrolling){
 		scroll_factor = qAbs(scroll_speed - 20);
 	}
 	for(int i = 0; i < scroll_factor; i++){
@@ -393,7 +393,7 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 		event->ignore();
 		return;
 	}
-	if(event->x() > column_width(11) && event->x() < column_width(11)+column_width(columns*3)-font_width){
+	if(event->x() > column_width(11) && event->x() < column_width(11+columns*3)-font_width){
 		update_cursor_position(event->x(), event->y()-vertical_shift-font_height/2);
 		if(!is_dragging){
 			is_dragging = true;
@@ -408,26 +408,58 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 
 void hex_editor::mouseMoveEvent(QMouseEvent *event)
 {
-	if(event->x() > column_width(11) && 
-	   event->x() < column_width(11)+column_width(columns*3)-font_width && is_dragging){
+	int x = event->x();
+	int y = event->y();
+	bool override = false;
+	if(is_dragging){
 		selection_active = true;
-		update_cursor_position(event->x(), event->y()-vertical_shift-font_height/2);
+		if(x < column_width(11)){
+			x = column_width(11);
+		}else if(x >= column_width(11+columns*3-1)-font_width){
+			x = column_width(11+columns*3-3)-font_width;
+			override = true;
+		}
+		update_cursor_position(x, y-vertical_shift-font_height/2);
 		if(cursor_position.x() % 3 != 1){
-			update_cursor_position(event->x()+font_width, event->y()-vertical_shift-font_height/2);
+			update_cursor_position(x+font_width, y-vertical_shift-font_height/2);
 		}
 		selection_current = cursor_position;
+		if(override){
+			selection_current.setX(selection_current.x()+column_width(2));
+			cursor_position = selection_current;
+		}
+		if(y > column_height(rows)){
+			scroll_timer->start(20);
+			scroll_direction = true;
+		}else if(y < vertical_shift){
+			scroll_timer->start(20);
+			scroll_direction = false;
+		}
 	}
 }
 
 void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 {
-	if(event->x() > column_width(11) && 
-	   event->x() < column_width(11)+column_width(columns*3)-font_width && is_dragging){
-		update_cursor_position(event->x(), event->y()-vertical_shift-font_height/2);
+	if(is_dragging){
+		int x = event->x();
+		int y = event->y();
+		bool override = false;
+		if(x < column_width(11)){
+			x = column_width(11);
+		}else if(x >= column_width(11+columns*3-1)-font_width){
+			x = column_width(11+columns*3-3)-font_width;
+		}
+		
+		update_cursor_position(x, y-vertical_shift-font_height/2);
 		if(cursor_position.x() % 3 != 1 && selection_current != selection_start){
-			update_cursor_position(event->x()+font_width, event->y()-vertical_shift-font_height/2);
+			update_cursor_position(x+font_width, y-vertical_shift-font_height/2);
 		}
 		selection_current = cursor_position;
+		if(override){
+			selection_current.setX(selection_current.x()+column_width(2));
+			cursor_position = selection_current;
+		}
+		scroll_timer->stop();
 	}
 	is_dragging = false;
 	if(selection_current == selection_start){
