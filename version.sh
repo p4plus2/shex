@@ -3,11 +3,15 @@ last_commit=$(git rev-parse HEAD)
 commit_count=$(git log --pretty=format:'' | wc -l)
 version_number=$((commit_count + 1))
 git_branch=$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')
-if git diff --quiet 2>/dev/null >&2; then
-    wip_build=""
-else
-    wip_build="-WIP"
+
+if (($(git status 2> /dev/null | wc -l) == 8)); then
+	if git status 2> /dev/null | grep version\.h > /dev/null; then
+		wip_build=""
+	else
+		wip_build="-WIP"
+	fi
 fi
+
 
 rm -f version.cpp
 
