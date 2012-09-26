@@ -1,5 +1,7 @@
+#!/bin/sh
 last_commit=$(git rev-parse HEAD)
-version_number=$(git shortlog | grep -E '^[ ]+\w+' | wc -l)
+commit_count=$(git log --pretty=format:'' | wc -l)
+version_number=$((commit_count + 1))
 git_branch=$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')
 if git diff --quiet 2>/dev/null >&2; then
     wip_build=""
