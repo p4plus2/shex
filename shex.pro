@@ -17,6 +17,10 @@ SOURCES += main.cpp\
 
 HEADERS  += main_window.h \
     hex_editor.h \
-    dynamic_scrollbar.h
+    dynamic_scrollbar.h \
+    version.h
+
+OTHER_FILES += \
+    version.sh
 
 

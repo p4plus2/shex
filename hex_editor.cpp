@@ -1,4 +1,5 @@
 #include "hex_editor.h"
+#include "version.h"
 #include <QPainter>
 #include <QTextStream>
 #include <QFontMetrics>
@@ -314,6 +315,9 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 				scroll_mode = !scroll_mode;
 				emit update_range(get_max_lines());
 				emit toggle_scroll_mode(scroll_mode);
+			break;
+			case Qt::Key_V:
+				display_version_dialog();
 			break;
 		}
 		update();
