@@ -150,10 +150,12 @@ void hex_editor::cut()
 	int position2 = get_buffer_position(selection_current.x(), selection_current.y());
 	if(position1 > position2){
 		qSwap(position1, position2);
+		qSwap(selection_start, selection_current);
 	}
 	
 	clipboard->setText(buffer.mid(position1, position2-position1).toHex());
 	buffer.remove(position1, position2-position1);
+	cursor_position = selection_start;
 	selection_active = false;
 }
 
@@ -205,6 +207,7 @@ void hex_editor::delete_text()
 	int position2 = get_buffer_position(selection_current.x(), selection_current.y());
 	if(position1 > position2){
 		qSwap(position1, position2);
+		qSwap(selection_current, selection_start);
 	}
 	
 	buffer.remove(position1, position2-position1);
@@ -228,6 +231,10 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	painter.translate(0, vertical_shift);
 	int hex_offset = column_width(11);
 	
+	QColor text = palette().color(QPalette::WindowText);
+	painter.setPen(text);
+	painter.setFont(font);
+	
 	for(int i = hex_offset; i < columns * column_width(3) + hex_offset; i += column_width(6)){
 		painter.fillRect(i-1, vertical_offset, column_width(2)+2, 
 		                 column_height(rows)+6, palette().color(QPalette::AlternateBase));
@@ -237,6 +244,9 @@ void hex_editor::paintEvent(QPaintEvent *event)
 		QRect active_line(hex_offset-1, cursor_position.y()-1+vertical_offset, 
 		                  columns*column_width(3)-font_width+2, font_height);
 		painter.fillRect(active_line, palette().color(QPalette::Highlight));
+		if(cursor_state){
+			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 1, font_height, text);
+		}
 	}
 	
 	if(selection_active){
@@ -249,19 +259,20 @@ void hex_editor::paintEvent(QPaintEvent *event)
 			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
 		}else{
 			int direction = end_point.y() > start_point.y() ? 
-				    hex_offset-1-end_point.x() : 
-				    columns*column_width(3)-font_width+2-end_point.x()+hex_offset;
+				        hex_offset-1-end_point.x() : 
+				        columns*column_width(3)-font_width+2-end_point.x()+hex_offset;
 			QRect ending_line(end_point.x()-1, end_point.y()-1+vertical_offset, 
 			                  direction, font_height);
 			painter.fillRect(ending_line, palette().color(QPalette::Highlight));	
 			
-			direction =  end_point.y() < start_point.y() ? 
-			             hex_offset-1-start_point.x():
-			             columns*column_width(3)-font_width+2-start_point.x()+hex_offset; 
+			direction = end_point.y() < start_point.y() ? 
+				    hex_offset-1-start_point.x():
+				    columns*column_width(3)-font_width+2-start_point.x()+hex_offset; 
 			QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
 			                    direction, font_height);
 			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-			if(qAbs(end_point.y()-start_point.y()) > column_height(1)){
+			
+			if(qAbs(end_point.y()-start_point.y()) > font_height){
 				if(end_point.y() < start_point.y()){
 					qSwap(end_point, start_point); 
 				}
@@ -271,14 +282,6 @@ void hex_editor::paintEvent(QPaintEvent *event)
 				painter.fillRect(middle_line, palette().color(QPalette::Highlight));
 			}	
 		}
-	}
-	
-	QColor text = palette().color(QPalette::WindowText);
-	painter.setPen(text);
-	painter.setFont(font);
-
-	if(cursor_state && cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset){
-		painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 1, font_height, text);
 	}
 
 	int byte_count = rows * columns + offset;
