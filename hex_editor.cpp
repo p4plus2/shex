@@ -430,6 +430,8 @@ void hex_editor::mouseMoveEvent(QMouseEvent *event)
 		}else if(event->y() < vertical_shift){
 			scroll_timer->start(20);
 			scroll_direction = false;
+		}else{
+			scroll_timer->stop();
 		}
 	}
 }
@@ -469,6 +471,7 @@ void hex_editor::font_setup()
 void hex_editor::selection_update(int x, int y)
 {
 	bool override = false;
+	int old_offset = offset;
 	if(x < column_width(11)){
 		x = column_width(11);
 	}else if(x >= column_width(10+columns*3)-font_width){
@@ -494,6 +497,9 @@ void hex_editor::selection_update(int x, int y)
 	if(!offset && y < vertical_shift){
 		selection_current.setX(column_width(11));
 		cursor_position = selection_current;
+	}
+	if(old_offset != offset){
+		selection_start.setY(selection_start.y() - (offset - old_offset));
 	}
 }
 
