@@ -74,6 +74,7 @@ class hex_editor : public QWidget
 		void font_setup();
 		void selection_update(int x, int y);
 		QString get_line(int index);
+		QPoint get_selection_point(QPoint point);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);
 		int get_buffer_position(int x, int y, bool byte_align = true);
