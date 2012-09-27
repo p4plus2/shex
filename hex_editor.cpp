@@ -240,29 +240,34 @@ void hex_editor::paintEvent(QPaintEvent *event)
 			                    selection_current.x() - selection_start.x(), font_height);
 			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
 		}else{
-			int direction =  selection_current.y() < selection_start.y() ? 
-			             hex_offset-1-selection_start.x():
-			             columns*column_width(3)-font_width+2-selection_start.x()+hex_offset; 
-			QRect starting_line(selection_start.x()-1, selection_start.y()-1+vertical_offset, 
+			QPoint starting_point = selection_start;
+			if(starting_point.y() < 0 ){
+				starting_point.setY(vertical_offset);
+				starting_point.setX(column_width(11));
+			}else if(starting_point.y() > column_height(rows)+vertical_offset){
+				starting_point.setY(column_height(rows)+vertical_offset);
+				starting_point.setX(column_width(11+columns*3)-font_width);
+			}
+			int direction =  selection_current.y() < starting_point.y() ? 
+			             hex_offset-1-starting_point.x():
+			             columns*column_width(3)-font_width+2-starting_point.x()+hex_offset; 
+			QRect starting_line(starting_point.x()-1, starting_point.y()-1+vertical_offset, 
 			                    direction, font_height);
 			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-		}
-		
-		if(selection_current.y() != selection_start.y()){
-			if(qAbs(selection_current.y()-selection_start.y()) > column_height(1)){
-				if(selection_current.y() > selection_start.y()){
-					QRect middle_line(hex_offset-1, selection_start.y()+font_height-1+vertical_offset, 
+			if(qAbs(selection_current.y()-starting_point.y()) > column_height(1)){
+				if(selection_current.y() > starting_point.y()){
+					QRect middle_line(hex_offset-1, starting_point.y()+font_height-1+vertical_offset, 
 				                          columns*column_width(3)-font_width+2, 
-					                  selection_current.y()-selection_start.y()-font_height);
+					                  selection_current.y()-starting_point.y()-font_height);
 					painter.fillRect(middle_line, palette().color(QPalette::Highlight));
 				}else{
 					QRect middle_line(hex_offset-1, selection_current.y()+font_height-1+vertical_offset, 
-				                          columns*column_width(3)-font_width+2, selection_start.y()-
+				                          columns*column_width(3)-font_width+2, starting_point.y()-
 					                  selection_current.y()-font_height);
 					painter.fillRect(middle_line, palette().color(QPalette::Highlight));			
 				}
 			}
-			int direction = selection_current.y() > selection_start.y() ? 
+			direction = selection_current.y() > starting_point.y() ? 
 				    hex_offset-1-selection_current.x() : 
 				    columns*column_width(3)-font_width+2-selection_current.x()+hex_offset;
 			QRect ending_line(selection_current.x()-1, selection_current.y()-1+vertical_offset, 
