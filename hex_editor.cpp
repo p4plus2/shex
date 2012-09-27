@@ -62,7 +62,12 @@ void hex_editor::slider_update(int position)
 {
 	if(!scroll_mode){
 		cursor_position.setY(cursor_position.y() + (offset - position * columns));
+		int old_offset = offset;
 		offset = position * columns;
+		if(selection_active){
+			selection_start.setY(selection_start.y()  - (offset - old_offset));
+			selection_current.setY(selection_current.y()  - (offset - old_offset));
+		}
 		update();
 	}else{
 		position -= height() / 2;
@@ -235,44 +240,50 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	}
 	
 	if(selection_active){
-		if(selection_current.y() == selection_start.y()){
-			QRect starting_line(selection_start.x()-1, selection_start.y()-1+vertical_offset, 
-			                    selection_current.x() - selection_start.x(), font_height);
+		QPoint start_point = selection_start;
+		QPoint end_point = selection_current;
+		if(start_point.y() < 0 ){
+			start_point.setY(vertical_offset);
+			start_point.setX(column_width(11));
+		}else if(start_point.y() > column_height(rows)+vertical_offset){
+			start_point.setY(column_height(rows)+vertical_offset);
+			start_point.setX(column_width(11+columns*3)-font_width);
+		}
+		if(end_point.y() < 0 ){
+			end_point.setY(vertical_offset);
+			end_point.setX(column_width(11));
+		}else if(start_point.y() > column_height(rows)+vertical_offset){
+			end_point.setY(column_height(rows)+vertical_offset);
+			end_point.setX(column_width(11+columns*3)-font_width);
+		}
+		
+		if(end_point.y() == start_point.y()){
+			QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
+			                    end_point.x() - start_point.x(), font_height);
 			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
 		}else{
-			QPoint starting_point = selection_start;
-			if(starting_point.y() < 0 ){
-				starting_point.setY(vertical_offset);
-				starting_point.setX(column_width(11));
-			}else if(starting_point.y() > column_height(rows)+vertical_offset){
-				starting_point.setY(column_height(rows)+vertical_offset);
-				starting_point.setX(column_width(11+columns*3)-font_width);
-			}
-			int direction =  selection_current.y() < starting_point.y() ? 
-			             hex_offset-1-starting_point.x():
-			             columns*column_width(3)-font_width+2-starting_point.x()+hex_offset; 
-			QRect starting_line(starting_point.x()-1, starting_point.y()-1+vertical_offset, 
+			int direction = end_point.y() > start_point.y() ? 
+				    hex_offset-1-end_point.x() : 
+				    columns*column_width(3)-font_width+2-end_point.x()+hex_offset;
+			QRect ending_line(end_point.x()-1, end_point.y()-1+vertical_offset, 
+			                  direction, font_height);
+			painter.fillRect(ending_line, palette().color(QPalette::Highlight));	
+			
+			direction =  end_point.y() < start_point.y() ? 
+			             hex_offset-1-start_point.x():
+			             columns*column_width(3)-font_width+2-start_point.x()+hex_offset; 
+			QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
 			                    direction, font_height);
 			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-			if(qAbs(selection_current.y()-starting_point.y()) > column_height(1)){
-				if(selection_current.y() > starting_point.y()){
-					QRect middle_line(hex_offset-1, starting_point.y()+font_height-1+vertical_offset, 
-				                          columns*column_width(3)-font_width+2, 
-					                  selection_current.y()-starting_point.y()-font_height);
-					painter.fillRect(middle_line, palette().color(QPalette::Highlight));
-				}else{
-					QRect middle_line(hex_offset-1, selection_current.y()+font_height-1+vertical_offset, 
-				                          columns*column_width(3)-font_width+2, starting_point.y()-
-					                  selection_current.y()-font_height);
-					painter.fillRect(middle_line, palette().color(QPalette::Highlight));			
+			if(qAbs(end_point.y()-start_point.y()) > column_height(1)){
+				if(end_point.y() < start_point.y()){
+					qSwap(end_point, start_point); 
 				}
-			}
-			direction = selection_current.y() > starting_point.y() ? 
-				    hex_offset-1-selection_current.x() : 
-				    columns*column_width(3)-font_width+2-selection_current.x()+hex_offset;
-			QRect ending_line(selection_current.x()-1, selection_current.y()-1+vertical_offset, 
-			                  direction, font_height);
-			painter.fillRect(ending_line, palette().color(QPalette::Highlight));		
+				QRect middle_line(hex_offset-1, start_point.y()+font_height-1+vertical_offset, 
+						  columns*column_width(3)-font_width+2, 
+						  end_point.y()-start_point.y()-font_height);
+				painter.fillRect(middle_line, palette().color(QPalette::Highlight));
+			}	
 		}
 	}
 	
@@ -376,6 +387,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 void hex_editor::wheelEvent(QWheelEvent *event)
 {
 	int steps = event->delta() / 8 / 15;
+	int old_offset = offset;
 	if(steps > 0 && offset > 0){
 		if(offset - columns * steps < 0){
 			offset = 0;
@@ -393,6 +405,10 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 			offset += columns * -steps;
 			cursor_position.setY(cursor_position.y()-(column_height(-steps)));
 		}
+	}
+	if(selection_active && old_offset != offset){
+		selection_start.setY(selection_start.y()  - (offset - old_offset));
+		selection_current.setY(selection_current.y()  - (offset - old_offset));
 	}
 	if(!scroll_mode){
 		emit update_slider(offset / columns);
@@ -568,6 +584,10 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 		y -= font_height;
 		if(offset < buffer.size() - columns * rows){
 			offset += columns;
+			if(selection_active){
+				selection_start.setY(selection_start.y() - columns);
+				selection_current.setY(selection_current.y() - columns);
+			}
 			if(!scroll_mode){
 				emit update_slider(offset / columns);
 			}
@@ -578,6 +598,10 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 	if(y < 0 && offset > 0){
 		y += font_height;
 		offset -= columns;
+		if(selection_active){
+			selection_start.setY(selection_start.y() + columns);
+			selection_current.setY(selection_current.y() + columns);
+		}
 		if(!scroll_mode){
 			emit update_slider(offset / columns);
 		}
