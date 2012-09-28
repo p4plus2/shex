@@ -201,6 +201,8 @@ void hex_editor::delete_text()
 {
 	if(!selection_active){
 		buffer.remove(get_buffer_position(cursor_position.x(), cursor_position.y()), 1);
+		emit update_range(get_max_lines());
+		update();
 		return;
 	}
 	int position1 = get_buffer_position(selection_start.x(), selection_start.y());
@@ -213,11 +215,17 @@ void hex_editor::delete_text()
 	buffer.remove(position1, position2-position1);
 	selection_active = false;
 	cursor_position = selection_start;
+	emit update_range(get_max_lines());
 	update();
 }
 
 void hex_editor::select_all()
 {
+	selection_start.setX(column_width(11));
+	selection_start.setY(vertical_offset);
+	selection_current.setX(column_width(11+columns*3)-font_width);
+	selection_current.setY(column_height(get_max_lines()+rows));
+	selection_active = true;
 }
 
 void hex_editor::disassemble()
@@ -310,6 +318,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 				select_all();
 			break;
 		}
+		emit update_range(get_max_lines());
 		update();
 		return;
 	}
@@ -529,7 +538,7 @@ QString hex_editor::get_line(int index)
 		string_stream << " " 
 		              << QString::number((unsigned char)buffer.at(i),16).rightJustified(2, '0').toUpper();
 	}
-
+	line = line.leftJustified(58);
 	string_stream << "    ";
 
 	for(int i = index; i < line_length; i++){
