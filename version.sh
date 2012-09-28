@@ -10,8 +10,11 @@ if (($(git status 2> /dev/null | wc -l) == 8)); then
 	else
 		wip_build="-WIP"
 	fi
+elif (($(git status 2> /dev/null | wc -l) != 2)); then
+	wip_build="-WIP"
+else
+	wip_build=""
 fi
-
 
 rm -f version.cpp
 
