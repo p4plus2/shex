@@ -43,6 +43,7 @@ hex_editor::hex_editor(QWidget *parent) :
 	clipboard = QApplication::clipboard();
 	
 	emit update_range(get_max_lines());
+	emit update_status_text(get_status_text());
 }
 
 QString hex_editor::get_address(int address)
@@ -202,6 +203,7 @@ void hex_editor::delete_text()
 	if(!selection_active){
 		buffer.remove(get_buffer_position(cursor_position.x(), cursor_position.y()), 1);
 		emit update_range(get_max_lines());
+		emit update_status_text(get_status_text());
 		update();
 		return;
 	}
@@ -216,6 +218,7 @@ void hex_editor::delete_text()
 	selection_active = false;
 	cursor_position = selection_start;
 	emit update_range(get_max_lines());
+	emit update_status_text(get_status_text());
 	update();
 }
 
@@ -319,6 +322,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			break;
 		}
 		emit update_range(get_max_lines());
+		emit update_status_text(get_status_text());
 		update();
 		return;
 	}
@@ -411,6 +415,7 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 	if(!scroll_mode){
 		emit update_slider(offset / columns);
 	}
+	emit update_status_text(get_status_text());
 }
 
 void hex_editor::mousePressEvent(QMouseEvent *event)
@@ -458,13 +463,14 @@ void hex_editor::mouseMoveEvent(QMouseEvent *event)
 void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 {
 	mouse_position = event->pos();
-	if(is_dragging){
-		selection_update(event->x(), event->y());
-		scroll_timer->stop();
-	}
 	is_dragging = false;
 	if(selection_current == selection_start){
 		selection_active = false;
+		return;
+	}
+	if(is_dragging){
+		selection_update(event->x(), event->y());
+		scroll_timer->stop();
 	}
 }
 
@@ -520,6 +526,7 @@ void hex_editor::selection_update(int x, int y)
 	if(old_offset != offset){
 		selection_start.setY(selection_start.y() - (offset - old_offset));
 	}
+	emit update_status_text(get_status_text());
 }
 
 QString hex_editor::get_line(int index)
@@ -550,6 +557,19 @@ QString hex_editor::get_line(int index)
 	}
 
 	return line;
+}
+
+QString hex_editor::get_status_text()
+{
+	int position = get_buffer_position(cursor_position.x(), cursor_position.y());
+	unsigned char byte = buffer.at(position);
+	QString text;
+	QTextStream string_stream(&text);
+	
+	string_stream << "Current offset: $" << get_address(position)
+	              << "    Hex: 0x" << QString::number(byte, 16).rightJustified(2, '0').toUpper()
+	              << "    Dec: " << QString::number(byte).rightJustified(3, '0');
+	return text;
 }
 
 QPoint hex_editor::get_selection_point(QPoint point)
@@ -628,6 +648,7 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 	if(do_update){
 		update();
 	}
+	emit update_status_text(get_status_text());
 }
 
 int hex_editor::get_buffer_position(int x, int y, bool byte_align)

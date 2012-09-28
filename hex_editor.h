@@ -22,6 +22,7 @@ class hex_editor : public QWidget
 		void update_slider(int position);
 		void update_range(int value);
 		void toggle_scroll_mode(bool mode);
+		void update_status_text(QString text);
 
 	public slots:
 		void update_cursor();
@@ -74,6 +75,7 @@ class hex_editor : public QWidget
 		void font_setup();
 		void selection_update(int x, int y);
 		QString get_line(int index);
+		QString get_status_text();
 		QPoint get_selection_point(QPoint point);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);
