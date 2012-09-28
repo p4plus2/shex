@@ -95,6 +95,7 @@ void hex_editor::auto_scroll_update()
 		}else{
 			selection_update(mouse_position.x(), mouse_position.y());
 		}
+		update();
 		return;
 	}
 	int scroll_factor = 1;
@@ -204,7 +205,6 @@ void hex_editor::delete_text()
 		buffer.remove(get_buffer_position(cursor_position.x(), cursor_position.y()), 1);
 		emit update_range(get_max_lines());
 		emit update_status_text(get_status_text());
-		update();
 		return;
 	}
 	int position1 = get_buffer_position(selection_start.x(), selection_start.y());
@@ -225,9 +225,9 @@ void hex_editor::delete_text()
 void hex_editor::select_all()
 {
 	selection_start.setX(column_width(11));
-	selection_start.setY(vertical_offset);
+	selection_start.setY(vertical_offset-offset);
 	selection_current.setX(column_width(11+columns*3)-font_width);
-	selection_current.setY(column_height(get_max_lines()+rows));
+	selection_current.setY(column_height(get_max_lines()+rows)-offset);
 	selection_active = true;
 }
 
@@ -464,13 +464,13 @@ void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 {
 	mouse_position = event->pos();
 	is_dragging = false;
+	scroll_timer->stop();
 	if(selection_current == selection_start){
 		selection_active = false;
 		return;
 	}
 	if(is_dragging){
 		selection_update(event->x(), event->y());
-		scroll_timer->stop();
 	}
 }
 
@@ -561,14 +561,25 @@ QString hex_editor::get_line(int index)
 
 QString hex_editor::get_status_text()
 {
-	int position = get_buffer_position(cursor_position.x(), cursor_position.y());
-	unsigned char byte = buffer.at(position);
 	QString text;
 	QTextStream string_stream(&text);
-	
-	string_stream << "Current offset: $" << get_address(position)
-	              << "    Hex: 0x" << QString::number(byte, 16).rightJustified(2, '0').toUpper()
-	              << "    Dec: " << QString::number(byte).rightJustified(3, '0');
+	if(selection_active){
+		int position1 = get_buffer_position(selection_start.x(), selection_start.y());
+		int position2 = get_buffer_position(selection_current.x(), selection_current.y());
+		if(position1 > position2){
+			qSwap(position1, position2);
+		}
+		
+		string_stream << "Selection range: $" << get_address(position1)
+			      << " to $" << get_address(position2);
+	}else{
+		int position = get_buffer_position(cursor_position.x(), cursor_position.y());
+		unsigned char byte = buffer.at(position);
+		
+		string_stream << "Current offset: $" << get_address(position)
+			      << "    Hex: 0x" << QString::number(byte, 16).rightJustified(2, '0').toUpper()
+			      << "    Dec: " << QString::number(byte).rightJustified(3, '0');
+	}
 	return text;
 }
 
