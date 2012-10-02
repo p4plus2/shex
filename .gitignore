@@ -5,3 +5,5 @@ smw.smc
 moc_*
 Makefile*
 *.user
+*.user.2.6pre1
+*.log

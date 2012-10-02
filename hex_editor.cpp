@@ -95,7 +95,6 @@ void hex_editor::auto_scroll_update()
 		}else{
 			selection_update(mouse_position.x(), mouse_position.y());
 		}
-		update();
 		return;
 	}
 	int scroll_factor = 1;
@@ -364,10 +363,18 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		break;
 
 		case Qt::Key_Up:
-			update_cursor_position(cursor_position.x(), cursor_position.y() - font_height);
+			if(selection_active){
+				update_selection_position(-columns);
+			}else{
+				update_cursor_position(cursor_position.x(), cursor_position.y() - font_height);
+			}
 		break;
 		case Qt::Key_Down:
-			update_cursor_position(cursor_position.x(), cursor_position.y() + font_height);
+			if(selection_active){
+				update_selection_position(columns);
+			}else{
+				update_cursor_position(cursor_position.x(), cursor_position.y() + font_height);
+			}
 		break;
 		case Qt::Key_Right:
 			update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
@@ -505,10 +512,13 @@ void hex_editor::selection_update(int x, int y)
 	}
 	if(y < vertical_shift && offset == 0){
 		x = column_width(11);
+	}else if(!offset && y < vertical_shift){
+		selection_current.setX(column_width(11));
+		cursor_position = selection_current;
 	}
-	update_cursor_position(x, y-vertical_shift-font_height/2);
+	update_cursor_position(x, y-vertical_shift-font_height/2, false);
 	if(cursor_position.x() % 3 != 1){
-		update_cursor_position(x+font_width, y-vertical_shift-font_height/2);
+		update_cursor_position(x+font_width, y-vertical_shift-font_height/2, false);
 	}
 	selection_current = cursor_position;
 	if(override){
@@ -519,13 +529,10 @@ void hex_editor::selection_update(int x, int y)
 		selection_current.setX(column_width(11+columns*3)-font_width);
 		cursor_position = selection_current;
 	}
-	if(!offset && y < vertical_shift){
-		selection_current.setX(column_width(11));
-		cursor_position = selection_current;
-	}
 	if(old_offset != offset){
 		selection_start.setY(selection_start.y() - (offset - old_offset));
 	}
+	update();
 	emit update_status_text(get_status_text());
 }
 
@@ -568,6 +575,9 @@ QString hex_editor::get_status_text()
 		int position2 = get_buffer_position(selection_current.x(), selection_current.y());
 		if(position1 > position2){
 			qSwap(position1, position2);
+		}
+		if(position1 < 0){
+			position1 += offset;
 		}
 		
 		string_stream << "Selection range: $" << get_address(position1)
@@ -625,10 +635,6 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 		y -= font_height;
 		if(offset < buffer.size() - columns * rows){
 			offset += columns;
-			if(selection_active){
-				selection_start.setY(selection_start.y() - columns);
-				selection_current.setY(selection_current.y() - columns);
-			}
 			if(!scroll_mode){
 				emit update_slider(offset / columns);
 			}
@@ -639,10 +645,6 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 	if(y < 0 && offset > 0){
 		y += font_height;
 		offset -= columns;
-		if(selection_active){
-			selection_start.setY(selection_start.y() + columns);
-			selection_current.setY(selection_current.y() + columns);
-		}
 		if(!scroll_mode){
 			emit update_slider(offset / columns);
 		}
@@ -660,6 +662,17 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 		update();
 	}
 	emit update_status_text(get_status_text());
+}
+
+void hex_editor::update_selection_position(int amount)
+{
+	int new_offset = offset + amount;
+	if(new_offset > 0 && new_offset < buffer.size()){
+		offset = new_offset;
+		selection_start.setY(selection_start.y() - amount);
+		selection_current.setY(selection_current.y() - amount);
+	}
+	update();
 }
 
 int hex_editor::get_buffer_position(int x, int y, bool byte_align)
