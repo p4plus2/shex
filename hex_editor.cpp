@@ -91,9 +91,9 @@ void hex_editor::auto_scroll_update()
 {
 	if(is_dragging){
 		if(!scroll_direction){
-			selection_update(mouse_position.x(), mouse_position.y());
+			update_selection(mouse_position.x(), mouse_position.y());
 		}else{
-			selection_update(mouse_position.x(), mouse_position.y());
+			update_selection(mouse_position.x(), mouse_position.y());
 		}
 		return;
 	}
@@ -260,38 +260,7 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	}
 	
 	if(selection_active){
-		QPoint start_point = get_selection_point(selection_start);
-		QPoint end_point = get_selection_point(selection_current);
-		
-		if(end_point.y() == start_point.y()){
-			QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
-			                    end_point.x() - start_point.x(), font_height);
-			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-		}else{
-			int direction = end_point.y() > start_point.y() ? 
-				        hex_offset-1-end_point.x() : 
-				        columns*column_width(3)-font_width+2-end_point.x()+hex_offset;
-			QRect ending_line(end_point.x()-1, end_point.y()-1+vertical_offset, 
-			                  direction, font_height);
-			painter.fillRect(ending_line, palette().color(QPalette::Highlight));	
-			
-			direction = end_point.y() < start_point.y() ? 
-				    hex_offset-1-start_point.x():
-				    columns*column_width(3)-font_width+2-start_point.x()+hex_offset; 
-			QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
-			                    direction, font_height);
-			painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-			
-			if(qAbs(end_point.y()-start_point.y()) > font_height){
-				if(end_point.y() < start_point.y()){
-					qSwap(end_point, start_point); 
-				}
-				QRect middle_line(hex_offset-1, start_point.y()+font_height-1+vertical_offset, 
-						  columns*column_width(3)-font_width+2, 
-						  end_point.y()-start_point.y()-font_height);
-				painter.fillRect(middle_line, palette().color(QPalette::Highlight));
-			}	
-		}
+		paint_selection(painter);
 	}
 
 	int byte_count = rows * columns + offset;
@@ -300,6 +269,43 @@ void hex_editor::paintEvent(QPaintEvent *event)
 		painter.drawText(0, column_height((i-offset)/columns)+font_height+vertical_offset, line);
 	}
 
+}
+
+void hex_editor::paint_selection(QPainter &painter)
+{
+	QPoint start_point = get_selection_point(selection_start);
+	QPoint end_point = get_selection_point(selection_current);
+	int hex_offset = column_width(11);
+	
+	if(end_point.y() == start_point.y()){
+		QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
+		                    end_point.x() - start_point.x(), font_height);
+		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
+	}else{
+		int direction = end_point.y() > start_point.y() ? 
+			        hex_offset-1-end_point.x() : 
+			        columns*column_width(3)-font_width+2-end_point.x()+hex_offset;
+		QRect ending_line(end_point.x()-1, end_point.y()-1+vertical_offset, 
+		                  direction, font_height);
+		painter.fillRect(ending_line, palette().color(QPalette::Highlight));	
+		
+		direction = end_point.y() < start_point.y() ? 
+			    hex_offset-1-start_point.x():
+			    columns*column_width(3)-font_width+2-start_point.x()+hex_offset; 
+		QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
+		                    direction, font_height);
+		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
+		
+		if(qAbs(end_point.y()-start_point.y()) > font_height){
+			if(end_point.y() < start_point.y()){
+				qSwap(end_point, start_point); 
+			}
+			QRect middle_line(hex_offset-1, start_point.y()+font_height-1+vertical_offset, 
+					  columns*column_width(3)-font_width+2, 
+					  end_point.y()-start_point.y()-font_height);
+			painter.fillRect(middle_line, palette().color(QPalette::Highlight));
+		}	
+	}	
 }
 
 void hex_editor::keyPressEvent(QKeyEvent *event)
@@ -454,7 +460,7 @@ void hex_editor::mouseMoveEvent(QMouseEvent *event)
 	mouse_position = event->pos();
 	if(is_dragging){
 		selection_active = true;
-		selection_update(event->x(), event->y());
+		update_selection(event->x(), event->y());
 		if(event->y() > column_height(rows)){
 			scroll_timer->start(20);
 			scroll_direction = true;
@@ -477,7 +483,7 @@ void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 		return;
 	}
 	if(is_dragging){
-		selection_update(event->x(), event->y());
+		update_selection(event->x(), event->y());
 	}
 }
 
@@ -498,42 +504,6 @@ void hex_editor::font_setup()
 	QFontMetrics font_info(font);
 	font_width = font_info.averageCharWidth();
 	font_height = font_info.height();
-}
-
-void hex_editor::selection_update(int x, int y)
-{
-	bool override = false;
-	int old_offset = offset;
-	if(x < column_width(11)){
-		x = column_width(11);
-	}else if(x >= column_width(10+columns*3)-font_width){
-		x = column_width(8+columns*3)-font_width;
-		override = true;
-	}
-	if(y < vertical_shift && offset == 0){
-		x = column_width(11);
-	}else if(!offset && y < vertical_shift){
-		selection_current.setX(column_width(11));
-		cursor_position = selection_current;
-	}
-	update_cursor_position(x, y-vertical_shift-font_height/2, false);
-	if(cursor_position.x() % 3 != 1){
-		update_cursor_position(x+font_width, y-vertical_shift-font_height/2, false);
-	}
-	selection_current = cursor_position;
-	if(override){
-		selection_current.setX(selection_current.x()+column_width(2));
-		cursor_position = selection_current;
-	}
-	if(offset == buffer.size() - columns * rows && y > column_height(rows)){
-		selection_current.setX(column_width(11+columns*3)-font_width);
-		cursor_position = selection_current;
-	}
-	if(old_offset != offset){
-		selection_start.setY(selection_start.y() - (offset - old_offset));
-	}
-	update();
-	emit update_status_text(get_status_text());
 }
 
 QString hex_editor::get_line(int index)
@@ -603,6 +573,15 @@ QPoint hex_editor::get_selection_point(QPoint point)
 		point.setX(column_width(11+columns*3)-font_width);
 	}
 	return point;
+}
+
+int hex_editor::get_buffer_position(int x, int y, bool byte_align)
+{
+	int position = (x - column_width(11)) / font_width;
+	position -= position / 3;
+	position = ((y-vertical_offset)/font_height)*columns*2+position+offset*2;
+	return byte_align ? position/2 : position;
+
 }
 
 void hex_editor::update_nibble(char byte)
@@ -675,11 +654,38 @@ void hex_editor::update_selection_position(int amount)
 	update();
 }
 
-int hex_editor::get_buffer_position(int x, int y, bool byte_align)
+void hex_editor::update_selection(int x, int y)
 {
-	int position = (x - column_width(11)) / font_width;
-	position -= position / 3;
-	position = ((y-vertical_offset)/font_height)*columns*2+position+offset*2;
-	return byte_align ? position/2 : position;
-
+	bool override = false;
+	int old_offset = offset;
+	if(x < column_width(11)){
+		x = column_width(11);
+	}else if(x >= column_width(10+columns*3)-font_width){
+		x = column_width(8+columns*3)-font_width;
+		override = true;
+	}
+	if(y < vertical_shift && offset == 0){
+		x = column_width(11);
+	}else if(!offset && y < vertical_shift){
+		selection_current.setX(column_width(11));
+		cursor_position = selection_current;
+	}
+	update_cursor_position(x, y-vertical_shift-font_height/2, false);
+	if(cursor_position.x() % 3 != 1){
+		update_cursor_position(x+font_width, y-vertical_shift-font_height/2, false);
+	}
+	selection_current = cursor_position;
+	if(override){
+		selection_current.setX(selection_current.x()+column_width(2));
+		cursor_position = selection_current;
+	}
+	if(offset == buffer.size() - columns * rows && y > column_height(rows)){
+		selection_current.setX(column_width(11+columns*3)-font_width);
+		cursor_position = selection_current;
+	}
+	if(old_offset != offset){
+		selection_start.setY(selection_start.y() - (offset - old_offset));
+	}
+	update();
+	emit update_status_text(get_status_text());
 }

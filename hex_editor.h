@@ -39,6 +39,7 @@ class hex_editor : public QWidget
 
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
+		virtual void paint_selection(QPainter &painter);
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void wheelEvent(QWheelEvent *event);
 		virtual void mousePressEvent(QMouseEvent *event);
@@ -73,14 +74,14 @@ class hex_editor : public QWidget
 		QPoint mouse_position;
 		
 		void font_setup();
-		void selection_update(int x, int y);
 		QString get_line(int index);
 		QString get_status_text();
 		QPoint get_selection_point(QPoint point);
+		int get_buffer_position(int x, int y, bool byte_align = true);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);
 		void update_selection_position(int amount);
-		int get_buffer_position(int x, int y, bool byte_align = true);
+		void update_selection(int x, int y);
 		
 		inline int column_width(int size){ return size * font_width; }
 		inline int column_height(int size){ return size * font_height; }
