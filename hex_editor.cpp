@@ -322,7 +322,8 @@ void hex_editor::paint_selection(QPainter &painter)
 			
 			middle_line.setLeft(to_ascii_column(hex_offset));
 			middle_line.setWidth(column_width(columns));
-			painter.fillRect(middle_line, palette().color(QPalette::Highlight));		}	
+			painter.fillRect(middle_line, palette().color(QPalette::Highlight));
+		}	
 	}	
 }
 
