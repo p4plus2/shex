@@ -284,6 +284,10 @@ void hex_editor::paint_selection(QPainter &painter)
 		QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
 		                    end_point.x() - start_point.x(), font_height);
 		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
+		
+		starting_line.setLeft(to_ascii_column(start_point.x()));
+		starting_line.setWidth((end_point.x() - start_point.x())/3);
+		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
 	}else{
 		int direction = end_point.y() > start_point.y() ? 
 			        hex_offset-1-end_point.x() : 
@@ -292,6 +296,10 @@ void hex_editor::paint_selection(QPainter &painter)
 		                  direction, font_height);
 		painter.fillRect(ending_line, palette().color(QPalette::Highlight));	
 		
+		ending_line.setLeft(to_ascii_column(end_point.x()+font_width));
+		ending_line.setWidth(direction/3);
+		painter.fillRect(ending_line, palette().color(QPalette::Highlight));
+		
 		direction = end_point.y() < start_point.y() ? 
 			    hex_offset-1-start_point.x():
 			    columns*column_width(3)-font_width+2-start_point.x()+hex_offset; 
@@ -299,15 +307,22 @@ void hex_editor::paint_selection(QPainter &painter)
 		                    direction, font_height);
 		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
 		
+		starting_line.setLeft(to_ascii_column(start_point.x()));
+		starting_line.setWidth(direction/3);
+		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
+		
 		if(qAbs(end_point.y()-start_point.y()) > font_height){
 			if(end_point.y() < start_point.y()){
 				qSwap(end_point, start_point); 
 			}
 			QRect middle_line(hex_offset-1, start_point.y()+font_height-1+vertical_offset, 
-					  columns*column_width(3)-font_width+2, 
+					  column_width(columns*3)-font_width+2, 
 					  end_point.y()-start_point.y()-font_height);
 			painter.fillRect(middle_line, palette().color(QPalette::Highlight));
-		}	
+			
+			middle_line.setLeft(to_ascii_column(hex_offset));
+			middle_line.setWidth(column_width(columns));
+			painter.fillRect(middle_line, palette().color(QPalette::Highlight));		}	
 	}	
 }
 
