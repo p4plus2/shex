@@ -59,6 +59,7 @@ class hex_editor : public QWidget
 		bool cursor_state;
 		bool is_dragging;
 		bool selection_active;
+		bool click_side;
 		QFont font;
 		int font_width;
 		int font_height;
@@ -85,6 +86,8 @@ class hex_editor : public QWidget
 		
 		inline int column_width(int size){ return size * font_width; }
 		inline int column_height(int size){ return size * font_height; }
+		inline int to_ascii_column(int x){ return column_width(14+columns*3+(x-font_width*11)/font_width/3); }
+		inline int to_hex_column(int x){ return column_width(11+(x-font_width*(14+columns*3))/font_width*3); }
 		inline int get_max_lines(){ return buffer.size() / columns - rows; }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 };

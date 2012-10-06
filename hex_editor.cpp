@@ -255,7 +255,10 @@ void hex_editor::paintEvent(QPaintEvent *event)
 		                  columns*column_width(3)-font_width+2, font_height);
 		painter.fillRect(active_line, palette().color(QPalette::Highlight));
 		if(cursor_state){
-			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 1, font_height, text);
+			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 
+			                 1, font_height, text);
+			painter.fillRect(to_ascii_column(cursor_position.x()), cursor_position.y()-1+vertical_offset, 
+			                 1, font_height, text);
 		}
 	}
 	
