@@ -455,14 +455,23 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 	if(event->button() == Qt::RightButton){
 		return;
 	}
+	
+	int x = event->x();
+	
+	if((event->x() > column_width(3*columns+15) && event->x() < column_width(4*columns+15))){
+		x = to_hex_column(x);
+		click_side = true;
+	}else{
+		click_side = false;
+	}
 		
 	selection_active = false;
 	if(event->y() < vertical_offset+vertical_shift){
 		event->ignore();
 		return;
 	}
-	if(event->x() > column_width(11) && event->x() < column_width(11+columns*3)-font_width){
-		update_cursor_position(event->x(), event->y()-vertical_shift-font_height/2);
+	if(x > column_width(11) && x < column_width(11+columns*3)-font_width){
+		update_cursor_position(x, event->y()-vertical_shift-font_height/2);
 		if(!is_dragging){
 			is_dragging = true;
 			selection_start = cursor_position;
@@ -477,9 +486,13 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 void hex_editor::mouseMoveEvent(QMouseEvent *event)
 {
 	mouse_position = event->pos();
+	if(click_side){
+		mouse_position.setX(to_hex_column(event->x()));
+	}
+	
 	if(is_dragging){
 		selection_active = true;
-		update_selection(event->x(), event->y());
+		update_selection(mouse_position.x(), event->y());
 		if(event->y() > column_height(rows)){
 			scroll_timer->start(20);
 			scroll_direction = true;
@@ -495,6 +508,10 @@ void hex_editor::mouseMoveEvent(QMouseEvent *event)
 void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 {
 	mouse_position = event->pos();
+	if(click_side){
+		mouse_position.setX(to_hex_column(event->x()));
+	}
+	
 	is_dragging = false;
 	scroll_timer->stop();
 	if(selection_current == selection_start){
@@ -502,7 +519,7 @@ void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 		return;
 	}
 	if(is_dragging){
-		update_selection(event->x(), event->y());
+		update_selection(mouse_position.x(), event->y());
 	}
 }
 
@@ -624,6 +641,7 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 		y -= font_height;
 	}
 
+	
 	if(x_column > (columns - 1) * column_width(4) - column_width(3)){
 		x_column = column_width(11);
 		y += font_height;
