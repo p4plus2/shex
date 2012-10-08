@@ -354,7 +354,13 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			update_cursor_position(cursor_position.x()-column_width(3), cursor_position.y(), false);
 			delete_text();
 		break;
-
+			
+		case Qt::Key_Home:
+			update_cursor_position(column_width(11), cursor_position.y());
+		break;
+		case Qt::Key_End:
+			update_cursor_position(column_width(8+columns*3), cursor_position.y());
+		break;
 		case Qt::Key_Up:
 			if(selection_active){
 				update_selection_position(-columns);
