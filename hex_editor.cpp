@@ -35,8 +35,7 @@ hex_editor::hex_editor(QWidget *parent) :
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 	    this, SLOT(context_menu(const QPoint&)));
 	
-	emit update_range(get_max_lines());
-	emit update_status_text(get_status_text());
+	QTimer::singleShot(0, this, SLOT(initial_signals()));
 }
 
 QSize hex_editor::minimumSizeHint() const
@@ -126,6 +125,11 @@ void hex_editor::context_menu(const QPoint& position)
 	menu.addAction("Disassemble", this, SLOT(disassemble()))->setDisabled(!selection_active);
 	
 	menu.exec(mapToGlobal(position));
+}
+void hex_editor::initial_signals()
+{
+	emit update_range(get_max_lines());
+	emit update_status_text(get_status_text());
 }
 
 void hex_editor::cut()

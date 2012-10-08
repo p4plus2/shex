@@ -24,6 +24,7 @@ class hex_editor : public QWidget
 		void update_status_text(QString text);
 
 	public slots:
+		void initial_signals();
 		void update_cursor();
 		void slider_update(int position);
 		void auto_scroll_update();
