@@ -1,6 +1,7 @@
 #include "rom_buffer.h"
 
 #include <QTextStream>
+#include "QDebug"
 
 ROM_buffer::ROM_buffer()
 {
@@ -8,17 +9,84 @@ ROM_buffer::ROM_buffer()
 	ROM.open(QFile::ReadWrite);
 	buffer = ROM.readAll();
 	clipboard = QApplication::clipboard();
+	paste_type = C_SOURCE;
 }
 
 void ROM_buffer::cut(int start, int end)
 {
-	clipboard->setText(buffer.mid(start, end-start).toHex());
+	copy(start, end);
 	buffer.remove(start, end-start);
 }
 
 void ROM_buffer::copy(int start, int end)
 {	
-	clipboard->setText(buffer.mid(start, end-start).toHex());
+	QByteArray hex_data = buffer.mid(start, end-start).toHex().toUpper();
+	QString copy_data;
+	QTextStream stream(&copy_data);
+	int nibble_count = hex_data.length();
+	
+	switch(paste_type){
+		case NO_SPACES:
+			clipboard->setText(copy_data);
+		break;
+		case SPACES:
+			for(int i = 0; i < nibble_count; i+=2){
+				stream << hex_data[i] << hex_data[i+1] << ' ';
+			}
+			copy_data.truncate(copy_data.length()-1);
+			clipboard->setText(copy_data);
+		break;
+		case HEX_FORMAT:
+			for(int i = 0; i < nibble_count; i+=2){
+				stream << '$' << hex_data[i] << hex_data[i+1] << ", ";
+			}
+			copy_data.truncate(copy_data.length()-2);
+			clipboard->setText(copy_data);
+		break;
+		case ASM_BYTE_TABLE:
+			for(int i = 0; i < nibble_count;){
+				stream << "db ";
+				for(int j = 0; j < 16 && i < nibble_count; j+=2, i+=2){
+					stream << '$' << hex_data[i] << hex_data[i+1] << ',';
+				}
+				copy_data.truncate(copy_data.length()-1);
+				stream << '\n';
+			}
+			copy_data.truncate(copy_data.length()-1);
+			clipboard->setText(copy_data);
+		break;
+		case ASM_WORD_TABLE:
+			for(int i = 0; i < nibble_count; i+=4){
+				stream << "dw $" << hex_data[i] << hex_data[i+1] 
+				       << hex_data[i+2] << hex_data[i+3] << '\n';
+			}
+			copy_data.truncate(copy_data.length()-1);
+			clipboard->setText(copy_data);
+		break;
+		case ASM_LONG_TABLE:
+			for(int i = 0; i < nibble_count; i+=6){
+				stream << "dl $" << hex_data[i] << hex_data[i+1] 
+				       << hex_data[i+2] << hex_data[i+3]
+				       << hex_data[i+4] << hex_data[i+5] << '\n';
+			}
+			copy_data.truncate(copy_data.length()-1);
+			clipboard->setText(copy_data);
+		break;
+		case C_SOURCE:
+			stream << "const unsigned char hex_data[] = {\n";
+			for(int i = 0; i < nibble_count;){
+				stream << '\t';
+				for(int j = 0; j < 24 && i < nibble_count; j+=2, i+=2){
+					stream << "0x" << hex_data[i] << hex_data[i+1] << ",";
+				}
+				copy_data.truncate(copy_data.length()-1);
+				stream << ",\n";
+			}
+			copy_data.truncate(copy_data.length()-2);
+			stream << "\n};";
+			clipboard->setText(copy_data);
+		break;
+	}
 }
 
 void ROM_buffer::paste(int start, int end)

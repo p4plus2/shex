@@ -21,10 +21,21 @@ class ROM_buffer
 		inline int size(){ return buffer.size(); }
 		inline char at(int index){ return buffer.at(index); }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
+		
+		enum paste_style{
+			NO_SPACES,
+			SPACES,
+			HEX_FORMAT,
+			ASM_BYTE_TABLE,
+			ASM_WORD_TABLE,
+			ASM_LONG_TABLE,
+			C_SOURCE
+		};
 	private:
 		QFile ROM;
 		QByteArray buffer;
 		QClipboard *clipboard;
+		paste_style paste_type;
 };
 
 #endif // ROM_BUFFER_H
