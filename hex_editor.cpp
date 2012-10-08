@@ -210,7 +210,7 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	
 	for(int i = hex_offset; i < columns * column_width(3) + hex_offset; i += column_width(6)){
 		painter.fillRect(i-1, vertical_offset-font_height, column_width(2)+2, 
-		                 column_height(rows)+6, palette().color(QPalette::AlternateBase));
+		                 column_height(rows+1)+6, palette().color(QPalette::AlternateBase));
 	}
 
 	if(cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset && !selection_active){
