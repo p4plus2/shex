@@ -40,7 +40,7 @@ hex_editor::hex_editor(QWidget *parent) :
 
 QSize hex_editor::minimumSizeHint() const
 {
-	return QSize(buffer->get_line(0, columns).length()*font_width,
+	return QSize((14 + columns * 4)*font_width,
 	             rows*font_height+font_height+vertical_offset+vertical_shift);
 }
 
@@ -209,7 +209,7 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	painter.setFont(font);
 	
 	for(int i = hex_offset; i < columns * column_width(3) + hex_offset; i += column_width(6)){
-		painter.fillRect(i-1, vertical_offset, column_width(2)+2, 
+		painter.fillRect(i-1, vertical_offset-font_height, column_width(2)+2, 
 		                 column_height(rows)+6, palette().color(QPalette::AlternateBase));
 	}
 
@@ -229,6 +229,7 @@ void hex_editor::paintEvent(QPaintEvent *event)
 		paint_selection(painter);
 	}
 
+	painter.drawText(0, 0, offset_header);
 	int byte_count = rows * columns + offset;
 	for(int i = offset; i < byte_count; i += columns){
 		QString line = buffer->get_line(i, columns);
@@ -428,10 +429,16 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 	if((event->x() > column_width(3*columns+15) && event->x() < column_width(4*columns+15))){
 		x = to_hex_column(x);
 		click_side = true;
+		if(get_buffer_position(to_hex_column(event->x()), event->y()) > buffer->size()){
+			return;
+		}
 	}else{
 		click_side = false;
-	}
-		
+		if(get_buffer_position(event->x(), event->y()) > buffer->size()){
+			return;
+		}
+	};
+	
 	selection_active = false;
 	if(event->y() < vertical_offset+vertical_shift){
 		event->ignore();
@@ -570,12 +577,17 @@ int hex_editor::get_buffer_position(int x, int y, bool byte_align)
 
 void hex_editor::update_cursor_position(int x, int y, bool do_update)
 {
+	if(get_buffer_position(x, y) > buffer->size()){
+		return;
+	}
 	int x_column = x - (x % font_width);
 	if(x < column_width(11)-font_width){
 		if(y < vertical_offset){
 			x_column = column_width(11);
-		}else{
+		}else if(offset != 0 || y > vertical_offset){
 			x_column = (columns - 1) * column_width(4) - column_width(3);
+		}else{
+			return;
 		}
 		y -= font_height;
 	}
@@ -632,6 +644,9 @@ void hex_editor::update_selection_position(int amount)
 
 void hex_editor::update_selection(int x, int y)
 {
+	if(get_buffer_position(x, y) > buffer->size() + columns - 1){
+		return;
+	}
 	bool override = false;
 	int old_offset = offset;
 	if(x < column_width(11)){
@@ -665,3 +680,5 @@ void hex_editor::update_selection(int x, int y)
 	update();
 	emit update_status_text(get_status_text());
 }
+
+const QString hex_editor::offset_header = "Offset     00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F";

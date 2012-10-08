@@ -86,6 +86,8 @@ class hex_editor : public QWidget
 		inline int to_ascii_column(int x){ return column_width(14+columns*3+(x-font_width*11)/font_width/3); }
 		inline int to_hex_column(int x){ return column_width(11+(x-font_width*(14+columns*3))/font_width*3); }
 		inline int get_max_lines(){ return buffer->size() / columns - rows; }
+		
+		static const QString offset_header;
 };
 
 #endif // HEX_EDITOR_H

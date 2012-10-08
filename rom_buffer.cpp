@@ -66,7 +66,7 @@ QString ROM_buffer::get_line(int index, int length)
 		string_stream << " " 
 		              << QString::number((unsigned char)buffer.at(i),16).rightJustified(2, '0').toUpper();
 	}
-	line = line.leftJustified(58);
+	line = line.leftJustified(10 + length * 3);
 	string_stream << "    ";
 
 	for(int i = index; i < line_length; i++){
@@ -76,7 +76,7 @@ QString ROM_buffer::get_line(int index, int length)
 			string_stream << ".";
 		}
 	}
-
+	line = line.leftJustified(14 + length * 4);
 	return line;
 }
 
