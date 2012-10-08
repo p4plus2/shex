@@ -13,12 +13,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         main_window.cpp \
     hex_editor.cpp \
-    dynamic_scrollbar.cpp
+    dynamic_scrollbar.cpp \
+    rom_buffer.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
     dynamic_scrollbar.h \
-    version.h
+    version.h \
+    rom_buffer.h
 
 OTHER_FILES += \
     version.sh

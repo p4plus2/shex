@@ -2,20 +2,19 @@
 #define HEX_EDITOR_H
 
 #include <QWidget>
-#include <QFile>
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QFont>
-#include <QClipboard>
 #include <QTimer>
+
+#include "rom_buffer.h"
 
 class hex_editor : public QWidget
 {
 	Q_OBJECT
 	public:
 		explicit hex_editor(QWidget *parent = 0);
-		static QString get_address(int address);
 		virtual QSize minimumSizeHint() const;
 
 	signals:
@@ -48,8 +47,7 @@ class hex_editor : public QWidget
 		virtual void resizeEvent(QResizeEvent *event);
 
 	private:
-		QFile ROM;
-		QByteArray buffer;
+		ROM_buffer *buffer;
 		int columns;
 		int rows;
 		int offset;
@@ -63,10 +61,8 @@ class hex_editor : public QWidget
 		QFont font;
 		int font_width;
 		int font_height;
-		int total_width;
 		int vertical_offset;
 		int vertical_shift;
-		QClipboard *clipboard;
 		bool scroll_mode;
 		bool auto_scrolling;
 		QTimer *scroll_timer;
@@ -75,9 +71,9 @@ class hex_editor : public QWidget
 		QPoint mouse_position;
 		
 		void font_setup();
-		QString get_line(int index);
 		QString get_status_text();
 		QPoint get_selection_point(QPoint point);
+		bool get_selection_range(int position[2]);
 		int get_buffer_position(int x, int y, bool byte_align = true);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);
@@ -88,8 +84,7 @@ class hex_editor : public QWidget
 		inline int column_height(int size){ return size * font_height; }
 		inline int to_ascii_column(int x){ return column_width(14+columns*3+(x-font_width*11)/font_width/3); }
 		inline int to_hex_column(int x){ return column_width(11+(x-font_width*(14+columns*3))/font_width*3); }
-		inline int get_max_lines(){ return buffer.size() / columns - rows; }
-		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
+		inline int get_max_lines(){ return buffer->size() / columns - rows; }
 };
 
 #endif // HEX_EDITOR_H
