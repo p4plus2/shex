@@ -12,7 +12,7 @@ class ROM_buffer
 		ROM_buffer();
 		void cut(int start, int end);
 		void copy(int start, int end);
-		void paste(int start, int end = 0);
+		void paste(int start, int end = 0, bool raw = false);
 		void delete_text(int start, int end = 0);
 		void update_nibble(char byte, int position);
 		QString get_line(int index, int length);

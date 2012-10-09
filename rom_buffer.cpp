@@ -1,6 +1,7 @@
 #include "rom_buffer.h"
 
 #include <QTextStream>
+#include <QRegExp>
 #include "QDebug"
 
 ROM_buffer::ROM_buffer()
@@ -33,14 +34,14 @@ void ROM_buffer::copy(int start, int end)
 			for(int i = 0; i < nibble_count; i+=2){
 				stream << hex_data[i] << hex_data[i+1] << ' ';
 			}
-			copy_data.truncate(copy_data.length()-1);
+			copy_data.chop(1);
 			clipboard->setText(copy_data);
 		break;
 		case HEX_FORMAT:
 			for(int i = 0; i < nibble_count; i+=2){
 				stream << '$' << hex_data[i] << hex_data[i+1] << ", ";
 			}
-			copy_data.truncate(copy_data.length()-2);
+			copy_data.chop(2);
 			clipboard->setText(copy_data);
 		break;
 		case ASM_BYTE_TABLE:
@@ -49,10 +50,10 @@ void ROM_buffer::copy(int start, int end)
 				for(int j = 0; j < 16 && i < nibble_count; j+=2, i+=2){
 					stream << '$' << hex_data[i] << hex_data[i+1] << ',';
 				}
-				copy_data.truncate(copy_data.length()-1);
+				copy_data.chop(1);
 				stream << '\n';
 			}
-			copy_data.truncate(copy_data.length()-1);
+			copy_data.chop(1);
 			clipboard->setText(copy_data);
 		break;
 		case ASM_WORD_TABLE:
@@ -60,7 +61,7 @@ void ROM_buffer::copy(int start, int end)
 				stream << "dw $" << hex_data[i] << hex_data[i+1] 
 				       << hex_data[i+2] << hex_data[i+3] << '\n';
 			}
-			copy_data.truncate(copy_data.length()-1);
+			copy_data.chop(1);
 			clipboard->setText(copy_data);
 		break;
 		case ASM_LONG_TABLE:
@@ -69,7 +70,7 @@ void ROM_buffer::copy(int start, int end)
 				       << hex_data[i+2] << hex_data[i+3]
 				       << hex_data[i+4] << hex_data[i+5] << '\n';
 			}
-			copy_data.truncate(copy_data.length()-1);
+			copy_data.chop(1);
 			clipboard->setText(copy_data);
 		break;
 		case C_SOURCE:
@@ -79,26 +80,41 @@ void ROM_buffer::copy(int start, int end)
 				for(int j = 0; j < 24 && i < nibble_count; j+=2, i+=2){
 					stream << "0x" << hex_data[i] << hex_data[i+1] << ",";
 				}
-				copy_data.truncate(copy_data.length()-1);
+				copy_data.chop(1);
 				stream << ",\n";
 			}
-			copy_data.truncate(copy_data.length()-2);
+			copy_data.chop(2);
 			stream << "\n};";
 			clipboard->setText(copy_data);
 		break;
 	}
 }
 
-void ROM_buffer::paste(int start, int end)
+void ROM_buffer::paste(int start, int end, bool raw)
 {
 	if(check_paste_data()){
 		return;
 	}
+	QString copy_data = clipboard->text().toUtf8().trimmed();
+	if(!raw){
+		
+		if(copy_data.indexOf("const unsigned char") != -1){
+			copy_data.remove(0, copy_data.indexOf('{'));
+		}else if(copy_data.indexOf("db $") == 0){
+			copy_data.remove(0, 3);
+		}
+	
+		copy_data.remove(' ');
+		copy_data.remove('\t');
+		copy_data.remove(QRegExp("([\\n\\r]db|dw|dl|[^0-9A-Fa-f])"));
+	}
+	
+	QByteArray hex_data;
 	if(end){
-		buffer.replace(start, end-start, QByteArray::fromHex(clipboard->text().toUtf8()));
+		buffer.replace(start, end-start, hex_data.fromHex(copy_data.toUtf8()));
 		return;
 	}
-	buffer.insert(start, QByteArray::fromHex(clipboard->text().toUtf8()));
+	buffer.insert(start, hex_data.fromHex(copy_data.toUtf8()));
 }
 
 void ROM_buffer::delete_text(int start, int end)

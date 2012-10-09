@@ -154,18 +154,18 @@ void hex_editor::copy()
 	buffer->copy(position[0], position[1]);
 }
 
-void hex_editor::paste()
+void hex_editor::paste(bool raw)
 {
 	int position[2];
 	if(get_selection_range(position)){
-		buffer->paste(position[0], position[1]);
+		buffer->paste(position[0], position[1], raw);
 		return;
 	}
 	if(cursor_position.x() % 3 != 1){
 		update_cursor_position(cursor_position.x()+font_width, 
 		                       cursor_position.y()-vertical_shift-font_height/2);
 	}
-	buffer->paste(get_buffer_position(cursor_position.x(), cursor_position.y()));
+	buffer->paste(get_buffer_position(cursor_position.x(), cursor_position.y()), 0, raw);
 	selection_active = false;
 }
 
@@ -313,6 +313,13 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		emit update_status_text(get_status_text());
 		update();
 		return;
+	}
+	
+	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
+		if(event->key() == Qt::Key_V){
+			paste(true);
+			update();
+		}
 	}
 	
 	if(event->modifiers() == Qt::AltModifier){

@@ -32,7 +32,7 @@ class hex_editor : public QWidget
 		void context_menu(const QPoint& position);
 		void cut();
 		void copy();
-		void paste();
+		void paste(bool raw = false);
 		void delete_text();
 		void select_all();
 		void disassemble();
