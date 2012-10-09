@@ -98,7 +98,7 @@ void ROM_buffer::paste(int start, int end, bool raw)
 			copy_data.remove(0, 3);
 		}
 	
-		copy_data.remove(QRegExp("[\\t ]"));
+		copy_data.remove(QRegExp("(0x|[\\t ])"));
 		copy_data.remove(QRegExp("([\\n\\r]db|dw|dl|[^0-9A-Fa-f])"));
 	}
 	
