@@ -28,21 +28,19 @@ void ROM_buffer::copy(int start, int end)
 	
 	switch(paste_type){
 		case NO_SPACES:
-			clipboard->setText(copy_data);
+			copy_data = hex_data;
 		break;
 		case SPACES:
 			for(int i = 0; i < nibble_count; i+=2){
 				stream << hex_data[i] << hex_data[i+1] << ' ';
 			}
 			copy_data.chop(1);
-			clipboard->setText(copy_data);
 		break;
 		case HEX_FORMAT:
 			for(int i = 0; i < nibble_count; i+=2){
 				stream << '$' << hex_data[i] << hex_data[i+1] << ", ";
 			}
 			copy_data.chop(2);
-			clipboard->setText(copy_data);
 		break;
 		case ASM_BYTE_TABLE:
 			for(int i = 0; i < nibble_count;){
@@ -54,7 +52,6 @@ void ROM_buffer::copy(int start, int end)
 				stream << '\n';
 			}
 			copy_data.chop(1);
-			clipboard->setText(copy_data);
 		break;
 		case ASM_WORD_TABLE:
 			for(int i = 0; i < nibble_count; i+=4){
@@ -62,7 +59,6 @@ void ROM_buffer::copy(int start, int end)
 				       << hex_data[i+2] << hex_data[i+3] << '\n';
 			}
 			copy_data.chop(1);
-			clipboard->setText(copy_data);
 		break;
 		case ASM_LONG_TABLE:
 			for(int i = 0; i < nibble_count; i+=6){
@@ -71,7 +67,6 @@ void ROM_buffer::copy(int start, int end)
 				       << hex_data[i+4] << hex_data[i+5] << '\n';
 			}
 			copy_data.chop(1);
-			clipboard->setText(copy_data);
 		break;
 		case C_SOURCE:
 			stream << "const unsigned char hex_data[] = {\n";
@@ -85,9 +80,9 @@ void ROM_buffer::copy(int start, int end)
 			}
 			copy_data.chop(2);
 			stream << "\n};";
-			clipboard->setText(copy_data);
 		break;
 	}
+	clipboard->setText(copy_data);
 }
 
 void ROM_buffer::paste(int start, int end, bool raw)
@@ -97,15 +92,13 @@ void ROM_buffer::paste(int start, int end, bool raw)
 	}
 	QString copy_data = clipboard->text().toUtf8().trimmed();
 	if(!raw){
-		
 		if(copy_data.indexOf("const unsigned char") != -1){
 			copy_data.remove(0, copy_data.indexOf('{'));
 		}else if(copy_data.indexOf("db $") == 0){
 			copy_data.remove(0, 3);
 		}
 	
-		copy_data.remove(' ');
-		copy_data.remove('\t');
+		copy_data.remove(QRegExp("[\\t ]"));
 		copy_data.remove(QRegExp("([\\n\\r]db|dw|dl|[^0-9A-Fa-f])"));
 	}
 	
