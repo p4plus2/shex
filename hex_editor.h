@@ -17,6 +17,7 @@ class hex_editor : public QWidget
 		explicit hex_editor(QWidget *parent = 0, QString file_name = "");
 		virtual QSize minimumSizeHint() const;
 		QString get_file_name();
+		void set_focus();
 
 	signals:
 		void update_slider(int position);

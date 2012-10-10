@@ -61,6 +61,7 @@ void main_window::changed_tab(int i)
 	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
 	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
 	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
+	editor->set_focus();
 }
 
 void main_window::file_save_state(bool clean)
@@ -171,6 +172,8 @@ void main_window::create_new_tab(QString name, bool new_file)
 	widget->setLayout(hex_layout);
 	tab_widget->addTab(widget, name);
 	
+	tab_widget->setCurrentWidget(widget);
+	editor->set_focus();
 	setMinimumSize(tab_widget->minimumSize());
 }
 

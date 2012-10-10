@@ -30,6 +30,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name) :
 	cursor_position.setY(vertical_offset);
 	cursor_position.setX(column_width(11));
 	is_dragging = false;
+	selection_active = false;
 	
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
@@ -46,6 +47,12 @@ QSize hex_editor::minimumSizeHint() const
 QString hex_editor::get_file_name()
 {
 	return buffer->get_file_name();
+}
+
+void hex_editor::set_focus()
+{
+	emit update_status_text(get_status_text());
+	setFocus();
 }
 
 void hex_editor::slider_update(int position)

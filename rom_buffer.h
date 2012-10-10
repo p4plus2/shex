@@ -20,7 +20,7 @@ class ROM_buffer
 		QString get_address(int address);
 		
 		inline int size(){ return buffer.size(); }
-		inline char at(int index){ return index >= size() ? 0 : buffer.at(index); }
+		inline char at(int index){ return index == size() ? 0 : buffer.at(index); }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 		
 		enum paste_style{
