@@ -24,12 +24,13 @@ class hex_editor : public QWidget
 		void update_status_text(QString text);
 
 	public slots:
-		void initial_signals();
 		void update_cursor();
 		void slider_update(int position);
 		void auto_scroll_update();
 		void control_auto_scroll(bool enabled);
 		void context_menu(const QPoint& position);
+		void undo();
+		void redo();
 		void cut();
 		void copy();
 		void paste(bool raw = false);
@@ -80,6 +81,7 @@ class hex_editor : public QWidget
 		void update_cursor_position(int x, int y, bool do_update = true);
 		void update_selection_position(int amount);
 		void update_selection(int x, int y);
+		void update_window();
 		
 		inline int column_width(int size){ return size * font_width; }
 		inline int column_height(int size){ return size * font_height; }

@@ -33,9 +33,7 @@ hex_editor::hex_editor(QWidget *parent) :
 	
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
-	    this, SLOT(context_menu(const QPoint&)));
-	
-	QTimer::singleShot(0, this, SLOT(initial_signals()));
+		this, SLOT(context_menu(const QPoint&)));
 }
 
 QSize hex_editor::minimumSizeHint() const
@@ -126,10 +124,15 @@ void hex_editor::context_menu(const QPoint& position)
 	
 	menu.exec(mapToGlobal(position));
 }
-void hex_editor::initial_signals()
+
+void hex_editor::undo()
 {
-	emit update_range(get_max_lines());
-	emit update_status_text(get_status_text());
+	update_window();
+}
+
+void hex_editor::redo()
+{
+	update_window();
 }
 
 void hex_editor::cut()
@@ -142,6 +145,7 @@ void hex_editor::cut()
 	buffer->cut(position[0], position[1]);
 	cursor_position = selection_start;
 	selection_active = false;
+	update_window();
 }
 
 void hex_editor::copy()
@@ -152,6 +156,7 @@ void hex_editor::copy()
 	}
 	
 	buffer->copy(position[0], position[1]);
+	update_window();
 }
 
 void hex_editor::paste(bool raw)
@@ -159,14 +164,15 @@ void hex_editor::paste(bool raw)
 	int position[2];
 	if(get_selection_range(position)){
 		buffer->paste(position[0], position[1], raw);
-		return;
+	}else{
+		if(cursor_position.x() % 3 != 1){
+			update_cursor_position(cursor_position.x()+font_width, 
+					       cursor_position.y()-vertical_shift-font_height/2);
+		}
+		buffer->paste(get_buffer_position(cursor_position.x(), cursor_position.y()), 0, raw);
+		selection_active = false;
 	}
-	if(cursor_position.x() % 3 != 1){
-		update_cursor_position(cursor_position.x()+font_width, 
-		                       cursor_position.y()-vertical_shift-font_height/2);
-	}
-	buffer->paste(get_buffer_position(cursor_position.x(), cursor_position.y()), 0, raw);
-	selection_active = false;
+	update_window();
 }
 
 void hex_editor::delete_text()
@@ -179,9 +185,7 @@ void hex_editor::delete_text()
 		selection_active = false;
 		cursor_position = selection_start;
 	}
-	emit update_range(get_max_lines());
-	emit update_status_text(get_status_text());
-	update();
+	update_window();
 }
 
 void hex_editor::select_all()
@@ -191,6 +195,8 @@ void hex_editor::select_all()
 	selection_current.setX(column_width(11+columns*3)-font_width);
 	selection_current.setY(column_height(get_max_lines()+rows)-offset);
 	selection_active = true;
+	emit update_status_text(get_status_text());
+	update();
 }
 
 void hex_editor::disassemble()
@@ -296,22 +302,10 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	
 	if(event->modifiers() == Qt::ControlModifier){
 		switch(event->key()){
-			case Qt::Key_X:
-				cut();
-			break;
-			case Qt::Key_C:
-				copy();
-			break;
-			case Qt::Key_V:
-				paste();
-			break;
 			case Qt::Key_A:
 				select_all();
 			break;
 		}
-		emit update_range(get_max_lines());
-		emit update_status_text(get_status_text());
-		update();
 		return;
 	}
 	
@@ -514,7 +508,7 @@ void hex_editor::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
 	rows = (size().height() - vertical_shift - font_height)/ font_height;
-	emit update_range(get_max_lines());
+	update_window();
 }
 
 void hex_editor::font_setup()
@@ -690,8 +684,14 @@ void hex_editor::update_selection(int x, int y)
 	if(old_offset != offset){
 		selection_start.setY(selection_start.y() - (offset - old_offset));
 	}
-	update();
+	update_window();
+}
+
+void hex_editor::update_window()
+{
+	emit update_range(get_max_lines());
 	emit update_status_text(get_status_text());
+	update();
 }
 
 const QString hex_editor::offset_header = "Offset     00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F";
