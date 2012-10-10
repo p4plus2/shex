@@ -7,10 +7,10 @@
 #include <cctype>
 #include "QDebug"
 
-hex_editor::hex_editor(QWidget *parent) :
+hex_editor::hex_editor(QWidget *parent, QString file_name) :
     QWidget(parent)
 {
-	buffer = new ROM_buffer;
+	buffer = new ROM_buffer(file_name);
 	columns = 16;
 	rows = 32;
 	offset = 0;
@@ -41,6 +41,11 @@ QSize hex_editor::minimumSizeHint() const
 {
 	return QSize((14 + columns * 4)*font_width,
 	             rows*font_height+font_height+vertical_offset+vertical_shift);
+}
+
+QString hex_editor::get_file_name()
+{
+	return buffer->get_file_name();
 }
 
 void hex_editor::slider_update(int position)

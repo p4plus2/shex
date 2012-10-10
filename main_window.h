@@ -17,6 +17,7 @@ class main_window : public QMainWindow
 	public slots:
 		void close_tab(int i);
 		void changed_tab(int i);
+		void file_save_state(bool clean);
 		void new_file();
 		void open();
 		void save();
@@ -24,6 +25,7 @@ class main_window : public QMainWindow
 	private:
 		QStatusBar *statusbar;
 		QTabWidget *tab_widget;
+		int new_counter;
 		
 		
 		QMenu *file_menu;
@@ -44,7 +46,8 @@ class main_window : public QMainWindow
 		void create_menu();
 		void create_actions();
 		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar);
-		void create_new_tab(QString name);
+		void create_new_tab(QString name, bool new_file = false);
+		hex_editor *get_editor(int i);
 		
 };
 

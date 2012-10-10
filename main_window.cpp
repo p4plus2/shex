@@ -17,6 +17,7 @@ main_window::main_window(QWidget *parent)
 {
 	statusbar = statusBar();
 	create_menu();
+	new_counter = 0;
 	
 	QWidget* widget = new QWidget(this);
 	tab_widget = new QTabWidget(this);
@@ -54,7 +55,7 @@ void main_window::changed_tab(int i)
 		return;
 	}
 	
-	hex_editor *editor = dynamic_cast<hex_editor *>(tab_widget->widget(i)->layout()->itemAt(0)->widget());
+	hex_editor *editor = get_editor(i);
 	connect(undo_action, SIGNAL(triggered()), editor, SLOT(undo()));
 	connect(redo_action, SIGNAL(triggered()), editor, SLOT(redo()));
 	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
@@ -62,9 +63,20 @@ void main_window::changed_tab(int i)
 	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
 }
 
+void main_window::file_save_state(bool clean)
+{
+	hex_editor *editor = get_editor(tab_widget->currentIndex());
+	if(clean){
+		tab_widget->setTabText(tab_widget->currentIndex(), editor->get_file_name());
+	}else{
+		tab_widget->setTabText(tab_widget->currentIndex(), "* "+editor->get_file_name());
+	}
+}
+
 void main_window::new_file()
 {
-	qDebug() << ("Invoked <b>File|New</b>");
+	new_counter++;
+	create_new_tab("* Untitled_"+QString::number(new_counter), true);
 }
 
 void main_window::open()
@@ -146,9 +158,9 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(showMessage(QString)));
 }
 
-void main_window::create_new_tab(QString name)
+void main_window::create_new_tab(QString name, bool new_file)
 {
-	hex_editor *editor = new hex_editor(this);
+	hex_editor *editor = new hex_editor(this, new_file ? "" : name);
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	init_connections(editor, scrollbar);
 	
@@ -160,6 +172,11 @@ void main_window::create_new_tab(QString name)
 	tab_widget->addTab(widget, name);
 	
 	setMinimumSize(tab_widget->minimumSize());
+}
+
+hex_editor *main_window::get_editor(int i)
+{
+	return dynamic_cast<hex_editor *>(tab_widget->widget(i)->layout()->itemAt(0)->widget());
 }
 
 main_window::~main_window()

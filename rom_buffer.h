@@ -9,7 +9,8 @@
 class ROM_buffer
 {
 	public:
-		ROM_buffer();
+		ROM_buffer(QString file_name);
+		QString get_file_name();
 		void cut(int start, int end);
 		void copy(int start, int end);
 		void paste(int start, int end = 0, bool raw = false);
@@ -19,7 +20,7 @@ class ROM_buffer
 		QString get_address(int address);
 		
 		inline int size(){ return buffer.size(); }
-		inline char at(int index){ return buffer.at(index); }
+		inline char at(int index){ return index >= size() ? 0 : buffer.at(index); }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 		
 		enum paste_style{

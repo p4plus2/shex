@@ -4,13 +4,22 @@
 #include <QRegExp>
 #include "QDebug"
 
-ROM_buffer::ROM_buffer()
+ROM_buffer::ROM_buffer(QString file_name)
 {
-	ROM.setFileName("smw.smc");
-	ROM.open(QFile::ReadWrite);
-	buffer = ROM.readAll();
+	if(file_name != ""){
+		ROM.setFileName(file_name);
+		ROM.open(QFile::ReadWrite);
+		buffer = ROM.readAll();
+	}else{
+		buffer[0] = 0;
+	}
 	clipboard = QApplication::clipboard();
 	paste_type = C_SOURCE;
+}
+
+QString ROM_buffer::get_file_name()
+{
+	return ROM.fileName();
 }
 
 void ROM_buffer::cut(int start, int end)
@@ -122,6 +131,9 @@ void ROM_buffer::delete_text(int start, int end)
 
 void ROM_buffer::update_nibble(char byte, int position)
 {
+	if(position/2 == buffer.size()){
+		buffer[position/2] = 0;
+	}
 	buffer[position/2] = (buffer.at(position/2) &
 			     ((0x0F >> ((position & 1) << 2)) | (0x0F << ((position & 1) << 2)))) |
 			     (byte << (((position & 1)^1) << 2));
