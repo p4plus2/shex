@@ -34,6 +34,7 @@ hex_editor::hex_editor(QWidget *parent) :
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 		this, SLOT(context_menu(const QPoint&)));
+	setMinimumSize(minimumSizeHint());
 }
 
 QSize hex_editor::minimumSizeHint() const

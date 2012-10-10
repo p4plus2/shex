@@ -6,6 +6,11 @@
 #include <QHBoxLayout>
 #include <QTabWidget>
 #include <QMenuBar>
+#include <QFileDialog>
+
+#if 0
+	#define USE_DEFAULT_ROM
+#endif
 
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
@@ -21,12 +26,13 @@ main_window::main_window(QWidget *parent)
 	setCentralWidget(widget);
 	tab_widget->setTabsClosable(true);
 	tab_widget->setMovable(true);
-	setMinimumSize(600, 700);
+	setMinimumSize(600, 650);
 	connect(tab_widget, SIGNAL(tabCloseRequested(int)), this, SLOT(close_tab(int)));
 	connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(changed_tab(int)));
-	
-	create_new_tab("testing.smc");
-	create_new_tab("something.smc");
+
+#ifdef USE_DEFAULT_ROM
+	create_new_tab(smw.smc);
+#endif
 }
 
 void main_window::close_tab(int i)
@@ -44,6 +50,10 @@ void main_window::changed_tab(int i)
 	copy_action->disconnect();
 	paste_action->disconnect();
 	
+	if(i == -1){
+		return;
+	}
+	
 	hex_editor *editor = dynamic_cast<hex_editor *>(tab_widget->widget(i)->layout()->itemAt(0)->widget());
 	connect(undo_action, SIGNAL(triggered()), editor, SLOT(undo()));
 	connect(redo_action, SIGNAL(triggered()), editor, SLOT(redo()));
@@ -59,7 +69,12 @@ void main_window::new_file()
 
 void main_window::open()
 {
-	qDebug() << ("Invoked <b>File|Open</b>");
+	QStringList file_list = QFileDialog::getOpenFileNames(this, "Open file(s)", QDir::homePath(),
+	                                                      "ROM files (*.smc *.sfc);;All files(*.*)");
+	QString file_name;
+	foreach(file_name, file_list){
+		create_new_tab(file_name);
+	}
 }
 
 void main_window::save()
@@ -143,6 +158,8 @@ void main_window::create_new_tab(QString name)
 	hex_layout->addWidget(scrollbar);
 	widget->setLayout(hex_layout);
 	tab_widget->addTab(widget, name);
+	
+	setMinimumSize(tab_widget->minimumSize());
 }
 
 main_window::~main_window()
