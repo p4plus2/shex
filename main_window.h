@@ -2,9 +2,9 @@
 #define MAIN_WINDOW_H
 
 #include <QMainWindow>
-#include <QStatusBar>
-#include "hex_editor.h"
-#include "dynamic_scrollbar.h"
+
+class hex_editor;
+class dynamic_scrollbar;
 
 class main_window : public QMainWindow
 {
@@ -14,12 +14,15 @@ class main_window : public QMainWindow
 		main_window(QWidget *parent = 0);
 		~main_window();
 		
-	private:
-		hex_editor *editor;
-		dynamic_scrollbar *scrollbar;
-		QStatusBar *statusbar;
+	public slots:
+		void close_tab(int i);
 		
-		void init_connections();
+	private:
+		QStatusBar *statusbar;
+		QTabWidget *tab_widget;
+		
+		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar);
+		void create_new_tab(QString name);
 		
 };
 
