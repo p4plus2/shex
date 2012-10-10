@@ -422,7 +422,11 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 	if(steps < 0 && offset < buffer->size()){
 		if((offset + columns * -steps) > buffer->size() - columns * rows){
 			offset = buffer->size() - columns * rows;
-			cursor_position.setY(column_height(rows-1)+vertical_offset);
+			if(offset < 0){
+				offset = 0;
+			}else{
+				cursor_position.setY(column_height(rows-1)+vertical_offset);
+			}
 		}else{
 			offset += columns * -steps;
 			cursor_position.setY(cursor_position.y()-(column_height(-steps)));
