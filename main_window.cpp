@@ -170,7 +170,7 @@ void main_window::create_new_tab(QString name, bool new_file)
 	hex_layout->addWidget(editor);
 	hex_layout->addWidget(scrollbar);
 	widget->setLayout(hex_layout);
-	tab_widget->addTab(widget, name);
+	tab_widget->addTab(widget, QFileInfo(name).fileName());
 	
 	tab_widget->setCurrentWidget(widget);
 	editor->set_focus();

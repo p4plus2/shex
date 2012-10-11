@@ -373,7 +373,11 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			update_cursor_position(column_width(11), cursor_position.y());
 		break;
 		case Qt::Key_End:
-			update_cursor_position(column_width(8+columns*3), cursor_position.y());
+			if(get_buffer_position(column_width(8+columns*3), cursor_position.y()) < buffer->size()){
+				update_cursor_position(column_width(8+columns*3), cursor_position.y());
+			}else{
+				update_cursor_position(column_width(buffer->size()%columns*3+11), cursor_position.y());
+			}
 		break;
 		case Qt::Key_Up:
 			if(selection_active){
@@ -410,22 +414,31 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 {
 	int steps = event->delta() / 8 / 15;
 	int old_offset = offset;
-	if(steps > 0 && offset > 0){
+	int current_rows = (buffer->size() / columns);
+	current_rows = current_rows > rows ? rows : current_rows;
+	if(steps > 0){
 		if(offset - columns * steps < 0){
 			offset = 0;
-			cursor_position.setY(vertical_offset);
+			cursor_position.setY(cursor_position.y()-(column_height(steps)));
+			if(cursor_position.y() < vertical_offset){
+				cursor_position.setY(vertical_offset);
+			}
 		}else{
 			offset -= columns * steps;
 			cursor_position.setY(cursor_position.y()+(column_height(steps)));
 		}
 	}
+
 	if(steps < 0 && offset < buffer->size()){
-		if((offset + columns * -steps) > buffer->size() - columns * rows){
-			offset = buffer->size() - columns * rows;
-			if(offset < 0){
-				offset = 0;
-			}else{
-				cursor_position.setY(column_height(rows-1)+vertical_offset);
+		if((offset + columns * -steps) > buffer->size() - columns * current_rows){
+			if(current_rows == rows){
+				current_rows--;
+			}
+			cursor_position.setY(cursor_position.y()+(column_height(-steps)));
+			if(cursor_position.y() > column_height(current_rows)){
+				cursor_position.setY(column_height(current_rows) + vertical_offset);
+				int column_offset = buffer->size()%columns*3+11;
+				cursor_position.setX(column_width(column_offset != 11 ? column_offset : columns*3+10));
 			}
 		}else{
 			offset += columns * -steps;
@@ -440,6 +453,7 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 		emit update_slider(offset / columns);
 	}
 	emit update_status_text(get_status_text());
+	update();
 }
 
 void hex_editor::mousePressEvent(QMouseEvent *event)
@@ -449,27 +463,25 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 	}
 	
 	int x = event->x();
+	int y = (event->y()- vertical_shift) - (event->y() % font_height) - font_height/2 + vertical_offset;
 	
 	if((event->x() > column_width(3*columns+15) && event->x() < column_width(4*columns+15))){
 		x = to_hex_column(x);
 		click_side = true;
-		if(get_buffer_position(to_hex_column(event->x()), event->y()) > buffer->size()){
-			return;
-		}
 	}else{
 		click_side = false;
-		if(get_buffer_position(event->x(), event->y()) > buffer->size()){
-			return;
-		}
-	};
-	
+	}
+	if(get_buffer_position(x, y) > buffer->size()){
+		return;
+	}
+
 	selection_active = false;
 	if(event->y() < vertical_offset+vertical_shift){
 		event->ignore();
 		return;
 	}
 	if(x > column_width(11) && x < column_width(11+columns*3)-font_width){
-		update_cursor_position(x, event->y()-vertical_shift-font_height/2);
+		update_cursor_position(x, y);
 		if(!is_dragging){
 			is_dragging = true;
 			selection_start = cursor_position;
@@ -669,6 +681,13 @@ void hex_editor::update_selection_position(int amount)
 void hex_editor::update_selection(int x, int y)
 {
 	if(get_buffer_position(x, y) > buffer->size() + columns - 1){
+		int current_rows = (buffer->size() / columns);
+		current_rows = current_rows > rows ? rows : current_rows;
+		selection_current.setY(column_height(current_rows)+vertical_offset);
+		
+		int column_offset = buffer->size()%columns*3+11;
+		selection_current.setX(column_width(column_offset != 11 ? column_offset : columns*3+10));
+		update_window();
 		return;
 	}
 	bool override = false;
