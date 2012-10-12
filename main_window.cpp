@@ -1,12 +1,14 @@
 #include "main_window.h"
 #include "hex_editor.h"
 #include "dynamic_scrollbar.h"
+#include "version.h"
 
 #include <QStatusBar>
 #include <QHBoxLayout>
 #include <QTabWidget>
 #include <QMenuBar>
 #include <QFileDialog>
+#include <QLabel>
 
 #if 0
 	#define USE_DEFAULT_ROM
@@ -15,7 +17,8 @@
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
 {
-	statusbar = statusBar();
+	statusbar = new QLabel(this);
+	statusBar()->addWidget(statusbar);
 	create_menu();
 	new_counter = 0;
 	
@@ -95,6 +98,11 @@ void main_window::save()
 	qDebug() << ("Invoked <b>File|Save</b>");
 }
 
+void main_window::version()
+{
+	display_version_dialog();
+}
+
 void main_window::create_menu()
 {
 	create_actions();
@@ -113,6 +121,11 @@ void main_window::create_menu()
 	edit_menu->addAction(copy_action);
 	edit_menu->addAction(paste_action);
 	edit_menu->addSeparator();
+	
+	options_menu = menuBar()->addMenu("&Options");
+	
+	help_menu = menuBar()->addMenu("&Help");
+	help_menu->addAction(version_action);
 }
 
 void main_window::create_actions()
@@ -147,6 +160,10 @@ void main_window::create_actions()
 	
 	paste_action = new QAction("&Paste", this);
 	paste_action->setShortcuts(QKeySequence::Paste);
+	
+	version_action = new QAction("&Version", this);
+	version_action->setShortcut(QKeySequence("Alt+v"));
+	connect(version_action, SIGNAL(triggered()), this, SLOT(version()));
 }
 
 void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar)
@@ -156,7 +173,7 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(editor, SIGNAL(update_range(int)), scrollbar, SLOT(set_range(int)));
 	connect(editor, SIGNAL(toggle_scroll_mode(bool)), scrollbar, SLOT(toggle_mode(bool)));
 	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
-	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(showMessage(QString)));
+	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(setText(QString)));
 }
 
 void main_window::create_new_tab(QString name, bool new_file)

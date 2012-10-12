@@ -5,6 +5,7 @@
 
 class hex_editor;
 class dynamic_scrollbar;
+class QLabel;
 
 class main_window : public QMainWindow
 {
@@ -21,9 +22,10 @@ class main_window : public QMainWindow
 		void new_file();
 		void open();
 		void save();
+		void version();
 		
 	private:
-		QStatusBar *statusbar;
+		QLabel *statusbar;
 		QTabWidget *tab_widget;
 		int new_counter;
 		
@@ -31,6 +33,7 @@ class main_window : public QMainWindow
 		QMenu *file_menu;
 		QMenu *edit_menu;
 		QMenu *options_menu;
+		QMenu *help_menu;
 		
 		QAction *new_file_action;
 		QAction *open_action;
@@ -42,6 +45,8 @@ class main_window : public QMainWindow
 		QAction *cut_action;
 		QAction *copy_action;
 		QAction *paste_action;
+		
+		QAction *version_action;
 		
 		void create_menu();
 		void create_actions();
