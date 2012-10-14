@@ -2,6 +2,7 @@
 #define MAIN_WINDOW_H
 
 #include <QMainWindow>
+#include <QUndoGroup>
 
 class hex_editor;
 class dynamic_scrollbar;
@@ -23,10 +24,12 @@ class main_window : public QMainWindow
 		void open();
 		void save();
 		void version();
+		void update_hex_editor();
 		
 	private:
 		QLabel *statusbar;
 		QTabWidget *tab_widget;
+		QUndoGroup *undo_group;
 		int new_counter;
 		
 		

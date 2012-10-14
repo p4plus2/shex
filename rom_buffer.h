@@ -5,23 +5,28 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QMimeData>
+#include <QUndoGroup>
+#include <QUndoStack>
 
 class ROM_buffer
 {
 	public:
 		ROM_buffer(QString file_name);
-		QString get_file_name();
+		void initialize_undo(QUndoGroup *undo_group);
 		void cut(int start, int end);
 		void copy(int start, int end);
 		void paste(int start, int end = 0, bool raw = false);
 		void delete_text(int start, int end = 0);
 		void update_nibble(char byte, int position);
+		void update_byte(char byte, int position);
 		QString get_line(int index, int length);
 		QString get_address(int address);
 		
+		inline QString get_file_name(){ return ROM.fileName(); }
 		inline int size(){ return buffer.size(); }
 		inline char at(int index){ return index == size() ? 0 : buffer.at(index); }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
+		inline void set_active(){ undo_stack->setActive(); }
 		
 		enum paste_style{
 			NO_SPACES,
@@ -36,6 +41,7 @@ class ROM_buffer
 		QFile ROM;
 		QByteArray buffer;
 		QClipboard *clipboard;
+		QUndoStack *undo_stack;
 		paste_style paste_type;
 };
 

@@ -14,7 +14,8 @@ class hex_editor : public QWidget
 {
 	Q_OBJECT
 	public:
-		explicit hex_editor(QWidget *parent = 0, QString file_name = "");
+		explicit hex_editor(QWidget *parent = 0, QString file_name = "", QUndoGroup *undo_group = 0);
+		~hex_editor();
 		virtual QSize minimumSizeHint() const;
 		QString get_file_name();
 		void set_focus();
@@ -31,8 +32,6 @@ class hex_editor : public QWidget
 		void auto_scroll_update();
 		void control_auto_scroll(bool enabled);
 		void context_menu(const QPoint& position);
-		void undo();
-		void redo();
 		void cut();
 		void copy();
 		void paste(bool raw = false);

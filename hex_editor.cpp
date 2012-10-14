@@ -6,10 +6,11 @@
 #include <cctype>
 #include "QDebug"
 
-hex_editor::hex_editor(QWidget *parent, QString file_name) :
+hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group) :
     QWidget(parent)
 {
 	buffer = new ROM_buffer(file_name);
+	buffer->initialize_undo(undo_group);
 	columns = 16;
 	rows = 32;
 	offset = 0;
@@ -53,6 +54,7 @@ void hex_editor::set_focus()
 {
 	emit update_status_text(get_status_text());
 	setFocus();
+	buffer->set_active();
 }
 
 void hex_editor::slider_update(int position)
@@ -132,16 +134,6 @@ void hex_editor::context_menu(const QPoint& position)
 	menu.addAction("Disassemble", this, SLOT(disassemble()))->setDisabled(!selection_active);
 	
 	menu.exec(mapToGlobal(position));
-}
-
-void hex_editor::undo()
-{
-	update_window();
-}
-
-void hex_editor::redo()
-{
-	update_window();
 }
 
 void hex_editor::cut()
@@ -720,6 +712,11 @@ void hex_editor::update_window()
 	emit update_range(get_max_lines());
 	emit update_status_text(get_status_text());
 	update();
+}
+
+hex_editor::~hex_editor()
+{
+	delete buffer;
 }
 
 const QString hex_editor::offset_header = "Offset     00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F";

@@ -19,6 +19,7 @@ main_window::main_window(QWidget *parent)
 {
 	statusbar = new QLabel(this);
 	statusBar()->addWidget(statusbar);
+	undo_group = new QUndoGroup(this);
 	create_menu();
 	new_counter = 0;
 	
@@ -48,8 +49,6 @@ void main_window::close_tab(int i)
 
 void main_window::changed_tab(int i)
 {
-	undo_action->disconnect();
-	redo_action->disconnect();
 	cut_action->disconnect();
 	copy_action->disconnect();
 	paste_action->disconnect();
@@ -59,8 +58,6 @@ void main_window::changed_tab(int i)
 	}
 	
 	hex_editor *editor = get_editor(i);
-	connect(undo_action, SIGNAL(triggered()), editor, SLOT(undo()));
-	connect(redo_action, SIGNAL(triggered()), editor, SLOT(redo()));
 	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
 	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
 	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
@@ -101,6 +98,11 @@ void main_window::save()
 void main_window::version()
 {
 	display_version_dialog();
+}
+
+void main_window::update_hex_editor()
+{
+	get_editor(tab_widget->currentIndex())->update();
 }
 
 void main_window::create_menu()
@@ -146,11 +148,13 @@ void main_window::create_actions()
 	exit_action->setShortcuts(QKeySequence::Quit);
 	connect(exit_action, SIGNAL(triggered()), this, SLOT(close()));
 	
-	undo_action = new QAction("&Undo", this);
+	undo_action = undo_group->createUndoAction(this);
 	undo_action->setShortcuts(QKeySequence::Undo);
+	connect(undo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
 	
-	redo_action = new QAction("&Redo", this);
+	redo_action = undo_group->createRedoAction(this);
 	redo_action->setShortcuts(QKeySequence::Redo);
+	connect(redo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
 	
 	cut_action = new QAction("Cu&t", this);
 	cut_action->setShortcuts(QKeySequence::Cut);
@@ -178,7 +182,7 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 
 void main_window::create_new_tab(QString name, bool new_file)
 {
-	hex_editor *editor = new hex_editor(this, new_file ? "" : name);
+	hex_editor *editor = new hex_editor(this, new_file ? "" : name, undo_group);
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	init_connections(editor, scrollbar);
 	

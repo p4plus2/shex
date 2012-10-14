@@ -1,4 +1,5 @@
 #include "rom_buffer.h"
+#include "undo_commands.h"
 
 #include <QTextStream>
 #include <QRegExp>
@@ -17,15 +18,18 @@ ROM_buffer::ROM_buffer(QString file_name)
 	paste_type = C_SOURCE;
 }
 
-QString ROM_buffer::get_file_name()
+void ROM_buffer::initialize_undo(QUndoGroup *undo_group)
 {
-	return ROM.fileName();
+	undo_stack = new QUndoStack(undo_group);
+	undo_stack->setActive();
 }
 
 void ROM_buffer::cut(int start, int end)
 {
+	undo_stack->beginMacro("Cut");
 	copy(start, end);
-	buffer.remove(start, end-start);
+	delete_text(start, end);
+	undo_stack->endMacro();
 }
 
 void ROM_buffer::copy(int start, int end)
@@ -112,20 +116,25 @@ void ROM_buffer::paste(int start, int end, bool raw)
 	}
 	
 	QByteArray hex_data;
+	undo_stack->beginMacro("Paste");
 	if(end){
-		buffer.replace(start, end-start, hex_data.fromHex(copy_data.toUtf8()));
-		return;
+		delete_text(start, end);
 	}
 	buffer.insert(start, hex_data.fromHex(copy_data.toUtf8()));
+	undo_stack->push(new undo_paste_command(&buffer, start, 
+						new QByteArray(hex_data.fromHex(copy_data.toUtf8()))));
+	undo_stack->endMacro();
 }
 
 void ROM_buffer::delete_text(int start, int end)
 {
 	if(!end){
-		buffer.remove(start, 1);
-		return;
+		end = start + 1;
 	}
-	
+	undo_stack->beginMacro("Delete");
+	QByteArray data(buffer.mid(start, end-start));
+	undo_stack->push(new undo_delete_command(&buffer, start, new QByteArray(data)));
+	undo_stack->endMacro();
 	buffer.remove(start, end-start);
 }
 
@@ -134,9 +143,22 @@ void ROM_buffer::update_nibble(char byte, int position)
 	if(position/2 == buffer.size()){
 		buffer[position/2] = 0;
 	}
+	unsigned char data[2] = {buffer[position/2], 0};
 	buffer[position/2] = (buffer.at(position/2) &
 			     ((0x0F >> ((position & 1) << 2)) | (0x0F << ((position & 1) << 2)))) |
 			     (byte << (((position & 1)^1) << 2));
+	data[1] = buffer[position/2];
+	undo_stack->push(new undo_nibble_command(&buffer, position/2, data));
+}
+
+void ROM_buffer::update_byte(char byte, int position)
+{
+	if(position == buffer.size()){
+		buffer[position] = 0;
+	}
+	unsigned char data[2] = {buffer[position],byte};
+	undo_stack->push(new undo_byte_command(&buffer, position, data));
+	buffer[position] = byte;
 }
 
 QString ROM_buffer::get_line(int index, int length)
