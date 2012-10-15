@@ -102,7 +102,7 @@ void main_window::version()
 
 void main_window::update_hex_editor()
 {
-	get_editor(tab_widget->currentIndex())->update();
+	get_editor(tab_widget->currentIndex())->update_undo_action();
 }
 
 void main_window::create_menu()

@@ -140,24 +140,28 @@ void ROM_buffer::delete_text(int start, int end)
 
 void ROM_buffer::update_nibble(char byte, int position)
 {
+	bool remove = false;
 	if(position/2 == buffer.size()){
 		buffer[position/2] = 0;
+		remove = true;
 	}
 	unsigned char data[2] = {buffer[position/2], 0};
 	buffer[position/2] = (buffer.at(position/2) &
 			     ((0x0F >> ((position & 1) << 2)) | (0x0F << ((position & 1) << 2)))) |
 			     (byte << (((position & 1)^1) << 2));
 	data[1] = buffer[position/2];
-	undo_stack->push(new undo_nibble_command(&buffer, position/2, data));
+	undo_stack->push(new undo_nibble_command(&buffer, position/2, data, remove));
 }
 
 void ROM_buffer::update_byte(char byte, int position)
 {
+	bool remove = false;
 	if(position == buffer.size()){
 		buffer[position] = 0;
+		remove = true;
 	}
 	unsigned char data[2] = {buffer[position],byte};
-	undo_stack->push(new undo_byte_command(&buffer, position, data));
+	undo_stack->push(new undo_byte_command(&buffer, position, data, remove));
 	buffer[position] = byte;
 }
 

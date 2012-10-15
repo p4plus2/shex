@@ -18,11 +18,12 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	QTimer *cursor_timer = new QTimer(this);
 	cursor_timer->start(1000);
 	scroll_timer = new QTimer(this);
-	connect(cursor_timer, SIGNAL(timeout()), this, SLOT(update_cursor()));
+	connect(cursor_timer, SIGNAL(timeout()), this, SLOT(update_cursor_state()));
 	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(auto_scroll_update()));
 	
 	scroll_mode = false;
 	cursor_state = false;
+	click_side = false;
 	font_setup();
 
 	vertical_offset = 6;
@@ -115,9 +116,24 @@ void hex_editor::control_auto_scroll(bool enabled)
 	}
 }
 
-void hex_editor::update_cursor()
+void hex_editor::update_cursor_state()
 {
 	cursor_state = !cursor_state;
+	update();
+}
+
+void hex_editor::update_undo_action()
+{
+	if(get_buffer_position(cursor_position.x(), cursor_position.y())){
+		int current_rows = (buffer->size() / columns);
+		current_rows = current_rows > rows ? rows : current_rows;
+		cursor_position.setY(column_height(current_rows)+vertical_offset);
+		
+		int column_offset = buffer->size()%columns*3+11;
+		cursor_position.setX(column_width(column_offset != 11 ? column_offset : columns*3+10));
+	}
+	selection_active = false;
+	is_dragging = false;
 	update();
 }
 
@@ -298,6 +314,15 @@ void hex_editor::paint_selection(QPainter &painter)
 	}	
 }
 
+bool hex_editor::event(QEvent *e)
+{
+	if(e->type() == QEvent::KeyPress && static_cast<QKeyEvent *>(e)->key() == Qt::Key_Tab){
+		click_side = !click_side;
+		return true;
+	}
+	return QWidget::event(e);
+}
+
 void hex_editor::keyPressEvent(QKeyEvent *event)
 {
 	
@@ -328,21 +353,33 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		update();
 		return;
 	}
-	
-	if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
-		if(selection_active){
-			delete_text();
+	if(click_side){
+		if(event->key() >= Qt::Key_Space && event->key() <= Qt::Key_AsciiTilde){
+			if(selection_active){
+				delete_text();
+			}
+			char key = event->modifiers() != Qt::ShiftModifier &&
+			           event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z ? event->key() + 32
+			                                                                : event->key();
+			buffer->update_byte(key, get_buffer_position(cursor_position.x(), cursor_position.y()));
+			update_cursor_position(cursor_position.x()+font_width*2, cursor_position.y());
 		}
-		buffer->update_nibble(event->key() - Qt::Key_0, 
-		                      get_buffer_position(cursor_position.x(), cursor_position.y(), false));
-		update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
-	}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
-		if(selection_active){
-			delete_text();
+	}else{
+		if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
+			if(selection_active){
+				delete_text();
+			}
+			buffer->update_nibble(event->key() - Qt::Key_0, 
+					      get_buffer_position(cursor_position.x(), cursor_position.y(), false));
+			update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
+		}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
+			if(selection_active){
+				delete_text();
+			}
+			buffer->update_nibble(event->key() - Qt::Key_A + 10, 
+					      get_buffer_position(cursor_position.x(), cursor_position.y(), false));
+			update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
 		}
-		buffer->update_nibble(event->key() - Qt::Key_A + 10, 
-		                      get_buffer_position(cursor_position.x(), cursor_position.y(), false));
-		update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
 	}
 
 	switch(event->key()){

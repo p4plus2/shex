@@ -1,19 +1,24 @@
 #include "undo_commands.h"
 #include <QDebug>
 
-undo_nibble_command::undo_nibble_command(QByteArray *b, int l, unsigned char d[2])
+undo_nibble_command::undo_nibble_command(QByteArray *b, int l, unsigned char d[2], bool r)
 {
 	buffer = b;
 	location = l;
 	data[0] = d[0];
 	data[1] = d[1];
 	run_redo = false;
+	remove = r;
 	setText("Typing");
 }
 
 void undo_nibble_command::undo()
 {
-	(*buffer)[location] = data[0];
+	if(remove){
+		buffer->remove(location, 1);
+	}else{
+		(*buffer)[location] = data[0];
+	}
 }
 
 void undo_nibble_command::redo()

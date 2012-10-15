@@ -7,7 +7,7 @@
 class undo_nibble_command : public QUndoCommand
 {
 	public:
-		undo_nibble_command(QByteArray *b, int l, unsigned char d[2]);
+		undo_nibble_command(QByteArray *b, int l, unsigned char d[2], bool r);
 		void undo();
 		void redo();
 		
@@ -16,6 +16,7 @@ class undo_nibble_command : public QUndoCommand
 		int location;
 		unsigned char data[2];
 		bool run_redo;
+		bool remove;
 };
 
 typedef undo_nibble_command undo_byte_command;

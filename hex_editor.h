@@ -27,7 +27,8 @@ class hex_editor : public QWidget
 		void update_status_text(QString text);
 
 	public slots:
-		void update_cursor();
+		void update_cursor_state();
+		void update_undo_action();
 		void slider_update(int position);
 		void auto_scroll_update();
 		void control_auto_scroll(bool enabled);
@@ -42,6 +43,7 @@ class hex_editor : public QWidget
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
 		virtual void paint_selection(QPainter &painter);
+		virtual bool event(QEvent *e);
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void wheelEvent(QWheelEvent *event);
 		virtual void mousePressEvent(QMouseEvent *event);
