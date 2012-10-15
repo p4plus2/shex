@@ -36,7 +36,10 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 		this, SLOT(context_menu(const QPoint&)));
-	setMinimumSize(minimumSizeHint());
+	
+	QSize minimum = minimumSizeHint();
+	minimum.setHeight(rows/2*font_height+vertical_offset+vertical_shift);
+	setMinimumSize(minimum);
 	setFocusPolicy(Qt::WheelFocus);
 }
 
