@@ -8,7 +8,9 @@
 #include <QTabWidget>
 #include <QMenuBar>
 #include <QFileDialog>
+#include <QDesktopWidget>
 #include <QLabel>
+#include <QDebug>
 
 #if 1
 	#define USE_DEFAULT_ROM
@@ -31,7 +33,7 @@ main_window::main_window(QWidget *parent)
 	setCentralWidget(widget);
 	tab_widget->setTabsClosable(true);
 	tab_widget->setMovable(true);
-	setMinimumSize(600, 660);
+	setMinimumSize(600, QApplication::desktop()->height() < 650 ? 330 : 660);
 	connect(tab_widget, SIGNAL(tabCloseRequested(int)), this, SLOT(close_tab(int)));
 	connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(changed_tab(int)));
 
