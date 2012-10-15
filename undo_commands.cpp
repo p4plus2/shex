@@ -9,7 +9,6 @@ undo_nibble_command::undo_nibble_command(QByteArray *b, int l, unsigned char d[2
 	data[1] = d[1];
 	run_redo = false;
 	remove = r;
-	setText("Typing");
 }
 
 void undo_nibble_command::undo()

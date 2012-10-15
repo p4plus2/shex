@@ -138,31 +138,43 @@ void ROM_buffer::delete_text(int start, int end)
 	buffer.remove(start, end-start);
 }
 
-void ROM_buffer::update_nibble(char byte, int position)
+void ROM_buffer::update_nibble(char byte, int position, int delete_start, int delete_end)
 {
 	bool remove = false;
 	if(position/2 == buffer.size()){
 		buffer[position/2] = 0;
 		remove = true;
 	}
+	undo_stack->beginMacro("Typing");
+	qDebug() << byte << position;
+	if(delete_end){
+		delete_text(delete_start, delete_end);
+	}
+	
 	unsigned char data[2] = {buffer[position/2], 0};
 	buffer[position/2] = (buffer.at(position/2) &
 			     ((0x0F >> ((position & 1) << 2)) | (0x0F << ((position & 1) << 2)))) |
 			     (byte << (((position & 1)^1) << 2));
 	data[1] = buffer[position/2];
 	undo_stack->push(new undo_nibble_command(&buffer, position/2, data, remove));
+	undo_stack->endMacro();
 }
 
-void ROM_buffer::update_byte(char byte, int position)
+void ROM_buffer::update_byte(char byte, int position, int delete_start, int delete_end)
 {
 	bool remove = false;
 	if(position == buffer.size()){
 		buffer[position] = 0;
 		remove = true;
 	}
+	undo_stack->beginMacro("Typing");
+	if(delete_end){
+		delete_text(delete_start, delete_end);
+	}
 	unsigned char data[2] = {buffer[position],byte};
 	undo_stack->push(new undo_byte_command(&buffer, position, data, remove));
 	buffer[position] = byte;
+	undo_stack->endMacro();
 }
 
 QString ROM_buffer::get_line(int index, int length)

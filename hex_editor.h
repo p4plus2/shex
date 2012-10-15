@@ -46,6 +46,7 @@ class hex_editor : public QWidget
 		virtual void paint_selection(QPainter &painter);
 		virtual bool event(QEvent *e);
 		virtual void keyPressEvent(QKeyEvent *event);
+		virtual void handle_typed_character(unsigned char key, bool update_byte = false);
 		virtual void wheelEvent(QWheelEvent *event);
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);

@@ -17,8 +17,8 @@ class ROM_buffer
 		void copy(int start, int end);
 		void paste(int start, int end = 0, bool raw = false);
 		void delete_text(int start, int end = 0);
-		void update_nibble(char byte, int position);
-		void update_byte(char byte, int position);
+		void update_nibble(char byte, int position, int delete_start = 0, int delete_end = 0);
+		void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0);
 		QString get_line(int index, int length);
 		QString get_address(int address);
 		

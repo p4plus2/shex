@@ -354,30 +354,16 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	
 	if(click_side){
 		if(event->key() >= Qt::Key_Space && event->key() <= Qt::Key_AsciiTilde){
-			if(selection_active){
-				delete_text();
-			}
 			char key = event->modifiers() != Qt::ShiftModifier &&
-			           event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z ? event->key() + 32
-			                                                                : event->key();
-			buffer->update_byte(key, get_buffer_position(cursor_position.x(), cursor_position.y()));
-			update_cursor_position(cursor_position.x()+font_width*2, cursor_position.y());
+			           event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z ? 
+			                        event->key() + 32 : event->key();
+			handle_typed_character(key, true);
 		}
 	}else{
 		if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
-			if(selection_active){
-				delete_text();
-			}
-			buffer->update_nibble(event->key() - Qt::Key_0, 
-					      get_buffer_position(cursor_position.x(), cursor_position.y(), false));
-			update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
+			handle_typed_character(event->key() - Qt::Key_0);
 		}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
-			if(selection_active){
-				delete_text();
-			}
-			buffer->update_nibble(event->key() - Qt::Key_A + 10, 
-					      get_buffer_position(cursor_position.x(), cursor_position.y(), false));
-			update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
+			handle_typed_character(event->key() - Qt::Key_A + 10);
 		}
 	}
 
@@ -429,6 +415,26 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		default:
 		break;
 	}
+}
+
+void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
+{
+	int position[2];
+	if(get_selection_range(position)){
+		selection_active = false;
+		cursor_position = selection_start;
+	}else{
+		position[1] = 0;
+	}
+	if(update_byte){
+		buffer->update_byte(key, get_buffer_position(cursor_position.x(), cursor_position.y()), 
+	                    position[0], position[1]);
+	}else{
+		buffer->update_nibble(key, get_buffer_position(cursor_position.x(), cursor_position.y(), false),
+	                    position[0], position[1]);
+	}
+	update_cursor_position(cursor_position.x()+font_width*(2 * update_byte ? 2 : 1), cursor_position.y(), false);
+	update_window();
 }
 
 void hex_editor::wheelEvent(QWheelEvent *event)
