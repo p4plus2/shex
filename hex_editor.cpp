@@ -86,6 +86,13 @@ void hex_editor::slider_update(int position)
 	}
 }
 
+void hex_editor::scroll_mode_changed()
+{
+	scroll_mode = !scroll_mode;
+	update_window();
+	emit toggle_scroll_mode(scroll_mode);
+}
+
 void hex_editor::auto_scroll_update()
 {
 	if(is_dragging){
@@ -134,7 +141,7 @@ void hex_editor::update_undo_action()
 	}
 	selection_active = false;
 	is_dragging = false;
-	update();
+	update_window();
 }
 
 void hex_editor::context_menu(const QPoint& position)
@@ -342,17 +349,6 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		}
 	}
 	
-	if(event->modifiers() == Qt::AltModifier){
-		switch(event->key()){
-			case Qt::Key_S:
-				scroll_mode = !scroll_mode;
-				emit update_range(get_max_lines());
-				emit toggle_scroll_mode(scroll_mode);
-			break;
-		}
-		update();
-		return;
-	}
 	if(click_side){
 		if(event->key() >= Qt::Key_Space && event->key() <= Qt::Key_AsciiTilde){
 			if(selection_active){
@@ -638,6 +634,7 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 	if(get_buffer_position(x, y) > buffer->size()){
 		return;
 	}
+	
 	int x_column = x - (x % font_width);
 	if(x < column_width(11)-font_width){
 		if(y < vertical_offset){
@@ -681,6 +678,15 @@ void hex_editor::update_cursor_position(int x, int y, bool do_update)
 	}else{
 		cursor_position.setX(x_column + font_width);
 	}
+	
+	if((get_buffer_position(cursor_position.x(), cursor_position.y()) == buffer->size()-1 && 
+	                       cursor_position.y() == column_height(rows-1) + vertical_offset &&
+			       cursor_position.x() == column_width(9+columns*3) && column_width(10+columns*3) == x) ||
+			       column_width(11+columns*3) == x
+	                ){
+		cursor_position.setX(cursor_position.x() + font_width);
+	}
+	
 	cursor_state = true;
 	if(do_update){
 		update();

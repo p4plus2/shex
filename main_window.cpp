@@ -52,6 +52,7 @@ void main_window::changed_tab(int i)
 	cut_action->disconnect();
 	copy_action->disconnect();
 	paste_action->disconnect();
+	scrollbar_toggle_action->disconnect();
 	
 	if(i == -1){
 		return;
@@ -61,6 +62,7 @@ void main_window::changed_tab(int i)
 	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
 	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
 	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
+	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
 	editor->set_focus();
 }
 
@@ -125,6 +127,7 @@ void main_window::create_menu()
 	edit_menu->addSeparator();
 	
 	options_menu = menuBar()->addMenu("&Options");
+	options_menu->addAction(scrollbar_toggle_action);
 	
 	help_menu = menuBar()->addMenu("&Help");
 	help_menu->addAction(version_action);
@@ -164,6 +167,9 @@ void main_window::create_actions()
 	
 	paste_action = new QAction("&Paste", this);
 	paste_action->setShortcuts(QKeySequence::Paste);
+	
+	scrollbar_toggle_action = new QAction("&Scrollbar toggle", this);
+	scrollbar_toggle_action->setShortcut(QKeySequence("Alt+s"));
 	
 	version_action = new QAction("&Version", this);
 	version_action->setShortcut(QKeySequence("Alt+v"));

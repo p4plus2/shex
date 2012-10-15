@@ -23,13 +23,14 @@ class hex_editor : public QWidget
 	signals:
 		void update_slider(int position);
 		void update_range(int value);
-		void toggle_scroll_mode(bool mode);
 		void update_status_text(QString text);
+		void toggle_scroll_mode(bool mode);
 
 	public slots:
 		void update_cursor_state();
 		void update_undo_action();
 		void slider_update(int position);
+		void scroll_mode_changed();
 		void auto_scroll_update();
 		void control_auto_scroll(bool enabled);
 		void context_menu(const QPoint& position);

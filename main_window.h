@@ -49,6 +49,8 @@ class main_window : public QMainWindow
 		QAction *copy_action;
 		QAction *paste_action;
 		
+		QAction *scrollbar_toggle_action;
+		
 		QAction *version_action;
 		
 		void create_menu();
