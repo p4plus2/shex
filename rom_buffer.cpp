@@ -146,7 +146,6 @@ void ROM_buffer::update_nibble(char byte, int position, int delete_start, int de
 		remove = true;
 	}
 	undo_stack->beginMacro("Typing");
-	qDebug() << byte << position;
 	if(delete_end){
 		delete_text(delete_start, delete_end);
 	}

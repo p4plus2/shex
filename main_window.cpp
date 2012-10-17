@@ -24,6 +24,7 @@ main_window::main_window(QWidget *parent)
 	undo_group = new QUndoGroup(this);
 	create_menu();
 	new_counter = 0;
+	goto_window = new goto_dialog(this);;
 	
 	QWidget* widget = new QWidget(this);
 	tab_widget = new QTabWidget(this);
@@ -55,6 +56,7 @@ void main_window::changed_tab(int i)
 	copy_action->disconnect();
 	paste_action->disconnect();
 	scrollbar_toggle_action->disconnect();
+	goto_window->disconnect();
 	
 	if(i == -1){
 		return;
@@ -65,6 +67,7 @@ void main_window::changed_tab(int i)
 	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
 	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
 	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
+	connect(goto_window, SIGNAL(triggered(int,bool)), editor, SLOT(goto_offset(int, bool)));
 	editor->set_focus();
 }
 
@@ -99,6 +102,13 @@ void main_window::save()
 	qDebug() << ("Invoked <b>File|Save</b>");
 }
 
+void main_window::show_goto_dialog()
+{
+	goto_window->show();
+	goto_window->raise();
+	goto_window->activateWindow();
+}
+
 void main_window::version()
 {
 	display_version_dialog();
@@ -127,6 +137,9 @@ void main_window::create_menu()
 	edit_menu->addAction(copy_action);
 	edit_menu->addAction(paste_action);
 	edit_menu->addSeparator();
+	
+	navigation_menu = menuBar()->addMenu("&Navigation");
+	navigation_menu->addAction(goto_action);
 	
 	options_menu = menuBar()->addMenu("&Options");
 	options_menu->addAction(scrollbar_toggle_action);
@@ -169,6 +182,10 @@ void main_window::create_actions()
 	
 	paste_action = new QAction("&Paste", this);
 	paste_action->setShortcuts(QKeySequence::Paste);
+	
+	goto_action = new QAction("&Goto offset", this);
+	goto_action->setShortcut(QKeySequence("Ctrl+g"));
+	connect(goto_action, SIGNAL(triggered()), this, SLOT(show_goto_dialog()));
 	
 	scrollbar_toggle_action = new QAction("&Scrollbar toggle", this);
 	scrollbar_toggle_action->setShortcut(QKeySequence("Alt+s"));

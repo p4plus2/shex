@@ -16,14 +16,16 @@ SOURCES += main.cpp\
     hex_editor.cpp \
     dynamic_scrollbar.cpp \
     rom_buffer.cpp \
-    undo_commands.cpp
+    undo_commands.cpp \
+    goto_dialog.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
     dynamic_scrollbar.h \
     version.h \
     rom_buffer.h \
-    undo_commands.h
+    undo_commands.h \
+    goto_dialog.h
 
 OTHER_FILES += \
     version.sh

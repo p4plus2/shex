@@ -1,6 +1,7 @@
 #include "hex_editor.h"
 #include <QPainter>
 #include <QFontMetrics>
+#include <QMessageBox>
 #include <QAction>
 #include <QMenu>
 #include <cctype>
@@ -144,6 +145,30 @@ void hex_editor::update_undo_action()
 	}
 	selection_active = false;
 	is_dragging = false;
+	update_window();
+}
+
+void hex_editor::goto_offset(int address, bool mode)
+{
+	if(mode){
+		address = ((address & 0x7f0000) >> 1) + (address & 0x7fff);
+	}else{
+		address = get_buffer_position(cursor_position.x(), cursor_position.y()) + address;
+	}
+	
+	if(address > buffer->size() - 1){
+		QMessageBox::warning(this, "Address error", "The address you specificed is larger than the file."
+		                     "  Please check your input and try again.");
+		return;
+	}
+	offset = address - (rows / 2) * columns;
+	offset -= offset % columns;
+	if(offset < 0){
+		offset = 0;
+	}else if(offset > buffer->size() - rows * columns){
+		offset = buffer->size() - rows * columns;
+	}
+	cursor_position = get_byte_position(address);
 	update_window();
 }
 
@@ -636,6 +661,13 @@ int hex_editor::get_buffer_position(int x, int y, bool byte_align)
 	position = ((y-vertical_offset)/font_height)*columns*2+position+offset*2;
 	return byte_align ? position/2 : position;
 
+}
+
+QPoint hex_editor::get_byte_position(int address)
+{
+	int screen_relative = address - offset;
+	return QPoint(column_width((screen_relative % columns)*3+11) , 
+	              column_height(screen_relative / columns) + vertical_offset);
 }
 
 void hex_editor::update_cursor_position(int x, int y, bool do_update)

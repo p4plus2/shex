@@ -29,6 +29,7 @@ class hex_editor : public QWidget
 	public slots:
 		void update_cursor_state();
 		void update_undo_action();
+		void goto_offset(int address, bool mode);
 		void slider_update(int position);
 		void scroll_mode_changed();
 		void auto_scroll_update();
@@ -82,6 +83,7 @@ class hex_editor : public QWidget
 		QPoint get_selection_point(QPoint point);
 		bool get_selection_range(int position[2]);
 		int get_buffer_position(int x, int y, bool byte_align = true);
+		QPoint get_byte_position(int address);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);
 		void update_selection_position(int amount);

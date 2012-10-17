@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QUndoGroup>
 
+#include "goto_dialog.h"
+
 class hex_editor;
 class dynamic_scrollbar;
 class QLabel;
@@ -23,6 +25,7 @@ class main_window : public QMainWindow
 		void new_file();
 		void open();
 		void save();
+		void show_goto_dialog();
 		void version();
 		void update_hex_editor();
 		
@@ -32,9 +35,11 @@ class main_window : public QMainWindow
 		QUndoGroup *undo_group;
 		int new_counter;
 		
+		goto_dialog *goto_window;
 		
 		QMenu *file_menu;
 		QMenu *edit_menu;
+		QMenu *navigation_menu;
 		QMenu *options_menu;
 		QMenu *help_menu;
 		
@@ -42,6 +47,8 @@ class main_window : public QMainWindow
 		QAction *open_action;
 		QAction *save_action;
 		QAction *exit_action;
+		
+		QAction *goto_action;
 		
 		QAction *undo_action;
 		QAction *redo_action;
