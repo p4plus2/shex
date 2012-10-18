@@ -83,7 +83,8 @@ class hex_editor : public QWidget
 		QPoint get_selection_point(QPoint point);
 		bool get_selection_range(int position[2]);
 		int get_buffer_position(int x, int y, bool byte_align = true);
-		QPoint get_byte_position(int address);
+		int get_buffer_position(QPoint &point, bool byte_align = true);
+		QPoint get_byte_position(int address, bool byte_align = true);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);
 		void update_selection_position(int amount);

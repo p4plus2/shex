@@ -15,7 +15,7 @@ class ROM_buffer
 		void initialize_undo(QUndoGroup *undo_group);
 		void cut(int start, int end);
 		void copy(int start, int end);
-		void paste(int start, int end = 0, bool raw = false);
+		int paste(int start, int end = 0, bool raw = false);
 		void delete_text(int start, int end = 0);
 		void update_nibble(char byte, int position, int delete_start = 0, int delete_end = 0);
 		void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0);
