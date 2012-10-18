@@ -55,6 +55,8 @@ void main_window::changed_tab(int i)
 	cut_action->disconnect();
 	copy_action->disconnect();
 	paste_action->disconnect();
+	delete_action->disconnect();
+	select_all_action->disconnect();
 	scrollbar_toggle_action->disconnect();
 	goto_window->disconnect();
 	
@@ -66,6 +68,8 @@ void main_window::changed_tab(int i)
 	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
 	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
 	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
+	connect(delete_action, SIGNAL(triggered()), editor, SLOT(delete_text()));
+	connect(select_all_action, SIGNAL(triggered()), editor, SLOT(select_all()));
 	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
 	connect(goto_window, SIGNAL(triggered(int,bool)), editor, SLOT(goto_offset(int, bool)));
 	editor->set_focus();
@@ -136,7 +140,9 @@ void main_window::create_menu()
 	edit_menu->addAction(cut_action);
 	edit_menu->addAction(copy_action);
 	edit_menu->addAction(paste_action);
+	edit_menu->addAction(delete_action);
 	edit_menu->addSeparator();
+	edit_menu->addAction(select_all_action);
 	
 	navigation_menu = menuBar()->addMenu("&Navigation");
 	navigation_menu->addAction(goto_action);
@@ -182,6 +188,12 @@ void main_window::create_actions()
 	
 	paste_action = new QAction("&Paste", this);
 	paste_action->setShortcuts(QKeySequence::Paste);
+	
+	delete_action = new QAction("&Delete", this);
+	delete_action->setShortcut(QKeySequence::Delete);
+	
+	select_all_action = new QAction("&Select all", this);
+	select_all_action->setShortcut(QKeySequence::SelectAll);
 	
 	goto_action = new QAction("&Goto offset", this);
 	goto_action->setShortcut(QKeySequence("Ctrl+g"));

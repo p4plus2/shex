@@ -47,6 +47,8 @@ class main_window : public QMainWindow
 		QAction *open_action;
 		QAction *save_action;
 		QAction *exit_action;
+		QAction *delete_action;
+		QAction *select_all_action;
 		
 		QAction *goto_action;
 		

@@ -350,15 +350,6 @@ bool hex_editor::event(QEvent *e)
 void hex_editor::keyPressEvent(QKeyEvent *event)
 {
 	
-	if(event->modifiers() == Qt::ControlModifier){
-		switch(event->key()){
-			case Qt::Key_A:
-				select_all();
-			break;
-		}
-		return;
-	}
-	
 	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
 		if(event->key() == Qt::Key_V){
 			paste(true);
@@ -382,9 +373,6 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	}
 	
 	switch(event->key()){
-		case Qt::Key_Delete:
-			delete_text();
-		break;
 		case Qt::Key_Backspace:
 			update_cursor_position(cursor_position.x()-column_width(3), cursor_position.y(), false);
 			delete_text();
