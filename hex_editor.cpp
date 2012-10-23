@@ -166,6 +166,35 @@ void hex_editor::goto_offset(int address, bool mode)
 	update_window();
 }
 
+void hex_editor::select_range(int start, int end, bool mode)
+{
+	if(mode){
+		start = ((start & 0x7f0000) >> 1) + (start & 0x7fff);
+		end = ((end & 0x7f0000) >> 1) + (end & 0x7fff);
+	}else{
+		start = get_buffer_position(cursor_position) + start;
+		end = get_buffer_position(cursor_position) + end;
+	}
+	
+	if(start > buffer->size() - 1 || end > buffer->size() - 1){
+		QMessageBox::warning(this, "Address error", "One or more addresses are larger than the file."
+		                     "  Please check your input and try again.");
+		return;
+	}
+	end++;
+	offset = start - (rows / 2) * columns;
+	offset -= offset % columns;
+	if(offset < 0){
+		offset = 0;
+	}else if(offset > buffer->size() - rows * columns){
+		offset = buffer->size() - rows * columns;
+	}
+	selection_start = get_byte_position(start);
+	selection_current = get_byte_position(end);
+	selection_active = true;
+	update_window();
+}
+
 void hex_editor::context_menu(const QPoint& position)
 {	
 	QMenu menu;

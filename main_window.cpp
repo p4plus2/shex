@@ -24,7 +24,9 @@ main_window::main_window(QWidget *parent)
 	undo_group = new QUndoGroup(this);
 	create_menu();
 	new_counter = 0;
-	goto_window = new goto_dialog(this);;
+	
+	goto_window = new goto_dialog(this);
+	select_range_window = new select_range_dialog(this);
 	
 	QWidget* widget = new QWidget(this);
 	tab_widget = new QTabWidget(this);
@@ -59,6 +61,7 @@ void main_window::changed_tab(int i)
 	select_all_action->disconnect();
 	scrollbar_toggle_action->disconnect();
 	goto_window->disconnect();
+	select_range_window->disconnect();
 	
 	if(i == -1){
 		return;
@@ -72,6 +75,7 @@ void main_window::changed_tab(int i)
 	connect(select_all_action, SIGNAL(triggered()), editor, SLOT(select_all()));
 	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
 	connect(goto_window, SIGNAL(triggered(int,bool)), editor, SLOT(goto_offset(int, bool)));
+	connect(select_range_window, SIGNAL(triggered(int,int,bool)), editor, SLOT(select_range(int,int,bool)));
 	editor->set_focus();
 }
 
@@ -106,13 +110,6 @@ void main_window::save()
 	qDebug() << ("Invoked <b>File|Save</b>");
 }
 
-void main_window::show_goto_dialog()
-{
-	goto_window->show();
-	goto_window->raise();
-	goto_window->activateWindow();
-}
-
 void main_window::version()
 {
 	display_version_dialog();
@@ -143,6 +140,7 @@ void main_window::create_menu()
 	edit_menu->addAction(delete_action);
 	edit_menu->addSeparator();
 	edit_menu->addAction(select_all_action);
+	edit_menu->addAction(select_range_action);
 	
 	navigation_menu = menuBar()->addMenu("&Navigation");
 	navigation_menu->addAction(goto_action);
@@ -195,6 +193,10 @@ void main_window::create_actions()
 	select_all_action = new QAction("&Select all", this);
 	select_all_action->setShortcut(QKeySequence::SelectAll);
 	
+	select_range_action = new QAction("&Select Range", this);
+	select_range_action->setShortcut(QKeySequence("Ctrl+r"));
+	connect(select_range_action, SIGNAL(triggered()), this, SLOT(show_select_range_dialog()));
+	
 	goto_action = new QAction("&Goto offset", this);
 	goto_action->setShortcut(QKeySequence("Ctrl+g"));
 	connect(goto_action, SIGNAL(triggered()), this, SLOT(show_goto_dialog()));
@@ -238,6 +240,13 @@ void main_window::create_new_tab(QString name, bool new_file)
 hex_editor *main_window::get_editor(int i)
 {
 	return dynamic_cast<hex_editor *>(tab_widget->widget(i)->layout()->itemAt(0)->widget());
+}
+
+void main_window::raise_dialog(QDialog *dialog)
+{
+	dialog->show();
+	dialog->raise();
+	dialog->activateWindow();
 }
 
 main_window::~main_window()

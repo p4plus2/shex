@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include <QUndoGroup>
 
-#include "goto_dialog.h"
+#include "dialogs/goto_dialog.h"
+#include "dialogs/select_range_dialog.h"
 
 class hex_editor;
 class dynamic_scrollbar;
@@ -25,9 +26,11 @@ class main_window : public QMainWindow
 		void new_file();
 		void open();
 		void save();
-		void show_goto_dialog();
 		void version();
 		void update_hex_editor();
+		
+		inline void show_goto_dialog() { raise_dialog(goto_window); }
+		inline void show_select_range_dialog() { raise_dialog(select_range_window); }
 		
 	private:
 		QLabel *statusbar;
@@ -36,6 +39,7 @@ class main_window : public QMainWindow
 		int new_counter;
 		
 		goto_dialog *goto_window;
+		select_range_dialog *select_range_window;
 		
 		QMenu *file_menu;
 		QMenu *edit_menu;
@@ -51,6 +55,7 @@ class main_window : public QMainWindow
 		QAction *select_all_action;
 		
 		QAction *goto_action;
+		QAction *select_range_action;
 		
 		QAction *undo_action;
 		QAction *redo_action;
@@ -67,6 +72,7 @@ class main_window : public QMainWindow
 		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar);
 		void create_new_tab(QString name, bool new_file = false);
 		hex_editor *get_editor(int i);
+		void raise_dialog(QDialog *dialog);
 		
 };
 

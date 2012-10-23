@@ -30,6 +30,7 @@ class hex_editor : public QWidget
 		void update_cursor_state();
 		void update_undo_action();
 		void goto_offset(int address, bool mode);
+		void select_range(int start, int end, bool mode);
 		void slider_update(int position);
 		void scroll_mode_changed();
 		void auto_scroll_update();

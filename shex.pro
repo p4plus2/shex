@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     dynamic_scrollbar.cpp \
     rom_buffer.cpp \
     undo_commands.cpp \
-    goto_dialog.cpp
+    dialogs/select_range_dialog.cpp \
+    dialogs/goto_dialog.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -25,7 +26,8 @@ HEADERS  += main_window.h \
     version.h \
     rom_buffer.h \
     undo_commands.h \
-    goto_dialog.h
+    dialogs/select_range_dialog.h \
+    dialogs/goto_dialog.h
 
 OTHER_FILES += \
     version.sh

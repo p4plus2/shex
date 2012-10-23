@@ -170,7 +170,7 @@ void ROM_buffer::update_byte(char byte, int position, int delete_start, int dele
 	if(delete_end){
 		delete_text(delete_start, delete_end);
 	}
-	unsigned char data[2] = {buffer[position],byte};
+	unsigned char data[2] = {buffer[position],(unsigned char)byte};
 	undo_stack->push(new undo_byte_command(&buffer, position, data, remove));
 	buffer[position] = byte;
 	undo_stack->endMacro();
