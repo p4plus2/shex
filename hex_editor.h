@@ -57,24 +57,24 @@ class hex_editor : public QWidget
 
 	private:
 		ROM_buffer *buffer;
-		int columns;
-		int rows;
-		int offset;
+		int columns = 16;
+		int rows = 32;
+		int offset = 0;
 		QPoint cursor_position;
 		QPoint selection_start;
 		QPoint selection_current;
-		bool cursor_state;
-		bool is_dragging;
-		bool selection_active;
-		bool click_side;
+		bool cursor_state = false;
+		bool is_dragging = false;
+		bool selection_active = false;
+		bool click_side = false;
 		QFont font;
 		int font_width;
 		int font_height;
-		int vertical_offset;
+		int vertical_offset = 6;
 		int vertical_shift;
-		bool scroll_mode;
+		bool scroll_mode = false;
 		bool auto_scrolling;
-		QTimer *scroll_timer;
+		QTimer *scroll_timer = new QTimer(this);
 		int scroll_speed;
 		bool scroll_direction;
 		QPoint mouse_position;

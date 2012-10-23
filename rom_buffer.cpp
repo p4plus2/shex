@@ -14,8 +14,6 @@ ROM_buffer::ROM_buffer(QString file_name)
 	}else{
 		buffer[0] = 0;
 	}
-	clipboard = QApplication::clipboard();
-	paste_type = C_SOURCE;
 }
 
 void ROM_buffer::initialize_undo(QUndoGroup *undo_group)

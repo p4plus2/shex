@@ -19,17 +19,10 @@
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
 {
-	statusbar = new QLabel(this);
 	statusBar()->addWidget(statusbar);
-	undo_group = new QUndoGroup(this);
 	create_menu();
-	new_counter = 0;
-	
-	goto_window = new goto_dialog(this);
-	select_range_window = new select_range_dialog(this);
 	
 	QWidget* widget = new QWidget(this);
-	tab_widget = new QTabWidget(this);
 	QHBoxLayout *tab_layout = new QHBoxLayout(widget);
 	tab_layout->addWidget(tab_widget);
 	widget->setLayout(tab_layout);
@@ -122,7 +115,7 @@ void main_window::update_hex_editor()
 
 void main_window::create_menu()
 {
-	create_actions();
+	init_actions();
 	file_menu = menuBar()->addMenu("&File");
 	file_menu->addAction(new_file_action);
 	file_menu->addAction(open_action);
@@ -152,59 +145,44 @@ void main_window::create_menu()
 	help_menu->addAction(version_action);
 }
 
-void main_window::create_actions()
+void main_window::init_actions()
 {
-	new_file_action = new QAction("&New", this);
 	new_file_action->setShortcuts(QKeySequence::New);
 	connect(new_file_action, SIGNAL(triggered()), this, SLOT(new_file()));
 	
-	open_action = new QAction("&Open...", this);
 	open_action->setShortcuts(QKeySequence::Open);
 	connect(open_action, SIGNAL(triggered()), this, SLOT(open()));
 	
-	save_action = new QAction("&Save", this);
 	save_action->setShortcuts(QKeySequence::Save);
 	connect(save_action, SIGNAL(triggered()), this, SLOT(save()));
 	
-	exit_action = new QAction("E&xit", this);
 	exit_action->setShortcuts(QKeySequence::Quit);
 	connect(exit_action, SIGNAL(triggered()), this, SLOT(close()));
 	
-	undo_action = undo_group->createUndoAction(this);
 	undo_action->setShortcuts(QKeySequence::Undo);
 	connect(undo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
 	
-	redo_action = undo_group->createRedoAction(this);
 	redo_action->setShortcuts(QKeySequence::Redo);
 	connect(redo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
 	
-	cut_action = new QAction("Cu&t", this);
 	cut_action->setShortcuts(QKeySequence::Cut);
 	
-	copy_action = new QAction("&Copy", this);
 	copy_action->setShortcuts(QKeySequence::Copy);
 	
-	paste_action = new QAction("&Paste", this);
 	paste_action->setShortcuts(QKeySequence::Paste);
 	
-	delete_action = new QAction("&Delete", this);
 	delete_action->setShortcut(QKeySequence::Delete);
 	
-	select_all_action = new QAction("&Select all", this);
 	select_all_action->setShortcut(QKeySequence::SelectAll);
 	
-	select_range_action = new QAction("&Select Range", this);
 	select_range_action->setShortcut(QKeySequence("Ctrl+r"));
 	connect(select_range_action, SIGNAL(triggered()), this, SLOT(show_select_range_dialog()));
 	
-	goto_action = new QAction("&Goto offset", this);
 	goto_action->setShortcut(QKeySequence("Ctrl+g"));
 	connect(goto_action, SIGNAL(triggered()), this, SLOT(show_goto_dialog()));
 	
-	scrollbar_toggle_action = new QAction("&Scrollbar toggle", this);
 	scrollbar_toggle_action->setShortcut(QKeySequence("Alt+s"));
 	
-	version_action = new QAction("&Version", this);
 	version_action->setShortcut(QKeySequence("Alt+v"));
 	connect(version_action, SIGNAL(triggered()), this, SLOT(version()));
 }

@@ -2,11 +2,10 @@
 #define select_range_DIALOG_H
 
 #include <QDialog>
-
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QRadioButton;
+#include <QLabel>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QLineEdit>
 
 class select_range_dialog : public QDialog
 {
@@ -21,15 +20,15 @@ class select_range_dialog : public QDialog
 		void range_entered();
 		
 	private:
-		QLabel *start_label;
-		QLabel *end_label;
-		QLineEdit *start_input;
-		QLineEdit *end_input;
-		QRadioButton *absolute;
-		QRadioButton *relative;
+		QLabel *start_label = new QLabel("&Starting SNES offset: ", this);
+		QLineEdit *start_input = new QLineEdit(this);
+		QLabel *end_label = new QLabel("&Ending SNES offset: ", this);
+		QLineEdit *end_input = new QLineEdit(this);
+		QRadioButton *absolute = new QRadioButton("Absolute offsets", this);
+		QRadioButton *relative = new QRadioButton("Relative offsets", this);
 		
-		QPushButton *select_range;
-		QPushButton *close;
+		QPushButton *select_range = new QPushButton("Select range", this);
+		QPushButton *close = new QPushButton("Close", this);
 		
 		int parse_input(QString input);
 };

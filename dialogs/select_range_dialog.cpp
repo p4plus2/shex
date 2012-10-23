@@ -1,25 +1,12 @@
 #include "select_range_dialog.h"
 
 #include <QGridLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QDebug>
 
 select_range_dialog::select_range_dialog(QWidget *parent) :
         QDialog(parent)
-{
-	start_label = new QLabel("&Starting SNES offset: ", this);
-	start_input = new QLineEdit(this);
-	end_label = new QLabel("&Ending SNES offset: ", this);
-	end_input = new QLineEdit(this);
-	absolute = new QRadioButton("Absolute offsets", this);
-	relative = new QRadioButton("Relative offsets", this);
-	select_range = new QPushButton("Select range");
-	close = new QPushButton("Close");
-	
+{	
 	connect(close, SIGNAL(clicked()), this, SLOT(close()));
 	connect(select_range, SIGNAL(clicked()), this, SLOT(range_entered()));
 	

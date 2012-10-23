@@ -6,8 +6,6 @@
 dynamic_scrollbar::dynamic_scrollbar(QWidget *parent) :
         QScrollBar(parent)
 {
-	original_pagestep = pageStep();
-	scroll_style = new scrollbar_style();
 	setStyle(scroll_style);
 	toggle_mode(false);
 	connect(this, SIGNAL(sliderReleased()), this, SLOT(reset_slider()));

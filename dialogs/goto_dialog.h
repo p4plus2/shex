@@ -2,11 +2,10 @@
 #define GOTO_DIALOG_H
 
 #include <QDialog>
-
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QRadioButton;
+#include <QLabel>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QLineEdit>
 
 class goto_dialog : public QDialog
 {
@@ -21,13 +20,13 @@ class goto_dialog : public QDialog
 		void address_entered();
 		
 	private:
-		QLabel *label;
-		QLineEdit *offset_input;
-		QRadioButton *absolute;
-		QRadioButton *relative;
+		QLabel *label = new QLabel("&Goto SNES offset: ", this);
+		QLineEdit *offset_input = new QLineEdit(this);
+		QRadioButton *absolute = new QRadioButton("Absolute offset", this);
+		QRadioButton *relative = new QRadioButton("Relative offset", this);
 		
-		QPushButton *goto_offset;
-		QPushButton *close;
+		QPushButton *goto_offset = new QPushButton("Goto offset", this);
+		QPushButton *close = new QPushButton("Close", this);
 };
 
 #endif // GOTO_DIALOG_H

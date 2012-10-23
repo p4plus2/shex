@@ -5,7 +5,20 @@
 #include <QProxyStyle>
 #include "qdebug.h"
 
-class scrollbar_style;
+class scrollbar_style : public QProxyStyle
+{
+	public:
+		virtual int pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
+		{
+			if(metric == PM_ScrollBarSliderMin && mode){
+				return 100;
+			}
+			return QCommonStyle::pixelMetric(metric, option, widget);
+		}
+		void toggle(bool m){ mode = m; }
+	private:
+		bool mode;
+};
 
 class dynamic_scrollbar : public QScrollBar
 {
@@ -24,24 +37,9 @@ class dynamic_scrollbar : public QScrollBar
 		
 	private:
 		bool mode;
-		int original_pagestep;
-		scrollbar_style *scroll_style;
+		int original_pagestep = pageStep();
+		scrollbar_style *scroll_style = new scrollbar_style();
 		
-};
-
-class scrollbar_style : public QProxyStyle
-{
-	public:
-		virtual int pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
-		{
-			if(metric == PM_ScrollBarSliderMin && mode){
-				return 100;
-			}
-			return QCommonStyle::pixelMetric(metric, option, widget);
-		}
-		void toggle(bool m){ mode = m; }
-	private:
-		bool mode;
 };
 
 #endif // DYNAMIC_SCROLLBAR_H

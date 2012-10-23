@@ -40,9 +40,9 @@ class ROM_buffer
 	private:
 		QFile ROM;
 		QByteArray buffer;
-		QClipboard *clipboard;
+		QClipboard *clipboard = QApplication::clipboard();
 		QUndoStack *undo_stack;
-		paste_style paste_type;
+		paste_style paste_type = C_SOURCE;
 };
 
 #endif // ROM_BUFFER_H

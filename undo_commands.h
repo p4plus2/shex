@@ -15,7 +15,7 @@ class undo_nibble_command : public QUndoCommand
 		QByteArray *buffer;
 		int location;
 		unsigned char data[2];
-		bool run_redo;
+		bool run_redo = false;
 		bool remove;
 };
 
@@ -34,7 +34,7 @@ class undo_action_command : public QUndoCommand
 		bool check_run_redo();
 	
 	private:
-		bool run_redo;
+		bool run_redo = false;
 };
 
 class undo_paste_command : public undo_action_command

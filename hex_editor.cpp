@@ -12,26 +12,16 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 {
 	buffer = new ROM_buffer(file_name);
 	buffer->initialize_undo(undo_group);
-	columns = 16;
-	rows = 32;
-	offset = 0;
 	
 	QTimer *cursor_timer = new QTimer(this);
 	cursor_timer->start(1000);
-	scroll_timer = new QTimer(this);
 	connect(cursor_timer, SIGNAL(timeout()), this, SLOT(update_cursor_state()));
 	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(auto_scroll_update()));
 	
-	scroll_mode = false;
-	cursor_state = false;
-	click_side = false;
 	font_setup();
 	
-	vertical_offset = 6;
 	vertical_shift = column_height(1);
 	cursor_position = get_byte_position(0);
-	is_dragging = false;
-	selection_active = false;
 	
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),

@@ -7,7 +7,6 @@ undo_nibble_command::undo_nibble_command(QByteArray *b, int l, unsigned char d[2
 	location = l;
 	data[0] = d[0];
 	data[1] = d[1];
-	run_redo = false;
 	remove = r;
 }
 
@@ -34,7 +33,6 @@ undo_action_command::undo_action_command(QByteArray *b, int l, QByteArray *d)
 	buffer = b;
 	location = l;
 	data = d;
-	run_redo = false;
 }
 
 undo_action_command::~undo_action_command()

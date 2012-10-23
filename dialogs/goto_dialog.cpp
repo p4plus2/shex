@@ -1,23 +1,12 @@
 #include "goto_dialog.h"
 
 #include <QGridLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QDebug>
 
 goto_dialog::goto_dialog(QWidget *parent) :
         QDialog(parent)
 {
-	label = new QLabel("&Goto SNES offset: ", this);
-	offset_input = new QLineEdit(this);
-	absolute = new QRadioButton("Absolute offset", this);
-	relative = new QRadioButton("Relative offset", this);
-	goto_offset = new QPushButton("Goto offset");
-	close = new QPushButton("Close");
-	
 	connect(close, SIGNAL(clicked()), this, SLOT(close()));
 	connect(goto_offset, SIGNAL(clicked()), this, SLOT(address_entered()));
 	
