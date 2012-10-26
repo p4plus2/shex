@@ -536,7 +536,8 @@ QString hex_editor::get_status_text()
 		
 		string_stream << "Current offset: $" << buffer->get_address(position)
 		              << "    Hex: 0x" << QString::number(byte, 16).rightJustified(2, '0').toUpper()
-		              << "    Dec: " << QString::number(byte).rightJustified(3, '0');
+		              << "    Dec: " << QString::number(byte).rightJustified(3, '0')
+		              << "    Bin: %" << QString::number(byte, 2).rightJustified(8, '0');
 	}
 	return text;
 }
@@ -667,8 +668,10 @@ void hex_editor::update_window()
 {
 	if(!scroll_mode){
 		emit update_slider(offset / columns);
+		emit update_range(get_max_lines());
+	}else{
+		emit update_range(height());
 	}
-	emit update_range(get_max_lines());
 	emit update_status_text(get_status_text());
 	cursor_state = true;
 	update();
