@@ -268,7 +268,6 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	Q_UNUSED(event);
 	QPainter painter(this);
 	painter.translate(0, vertical_shift);
-	int hex_offset = column_width(11);
 	
 	QColor text = palette().color(QPalette::WindowText);
 	painter.setPen(text);
@@ -294,7 +293,7 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	if(selection_active){
 		paint_selection(painter);
 	}
-	
+
 	painter.drawText(0, 0, offset_header);
 	int byte_count = rows * columns + offset;
 	for(int i = offset; i < byte_count; i += columns){
@@ -305,56 +304,23 @@ void hex_editor::paintEvent(QPaintEvent *event)
 }
 
 void hex_editor::paint_selection(QPainter &painter)
-{
-	QPoint start_point = get_selection_point(selection_start);
-	QPoint end_point = get_selection_point(selection_current);
-	int hex_offset = column_width(11);
+{		
+	int start = get_selection_point(selection_start);
+	int end = get_selection_point(selection_current);
+	if(start > end){
+		qSwap(start, end);
+	}
 	
-	if(end_point.y() == start_point.y()){
-		QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
-		                    end_point.x() - start_point.x(), font_height);
-		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-		
-		starting_line.setLeft(to_ascii_column(start_point.x()));
-		starting_line.setWidth((end_point.x() - start_point.x())/3);
-		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-	}else{
-		int direction = end_point.y() > start_point.y() ? 
-		                        hex_offset-1-end_point.x() : 
-		                        columns*column_width(3)-font_width+2-end_point.x()+hex_offset;
-		QRect ending_line(end_point.x()-1, end_point.y()-1+vertical_offset, 
-		                  direction, font_height);
-		painter.fillRect(ending_line, palette().color(QPalette::Highlight));	
-		
-		ending_line.setLeft(to_ascii_column(end_point.x()+font_width));
-		ending_line.setWidth(direction/3);
-		painter.fillRect(ending_line, palette().color(QPalette::Highlight));
-		
-		direction = end_point.y() < start_point.y() ? 
-		                        hex_offset-1-start_point.x():
-		                        columns*column_width(3)-font_width+2-start_point.x()+hex_offset; 
-		QRect starting_line(start_point.x()-1, start_point.y()-1+vertical_offset, 
-		                    direction, font_height);
-		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-		
-		starting_line.setLeft(to_ascii_column(start_point.x()));
-		starting_line.setWidth(direction/3);
-		painter.fillRect(starting_line, palette().color(QPalette::Highlight));
-		
-		if(qAbs(end_point.y()-start_point.y()) > font_height){
-			if(end_point.y() < start_point.y()){
-				qSwap(end_point, start_point); 
-			}
-			QRect middle_line(hex_offset-1, start_point.y()+font_height-1+vertical_offset, 
-			                  column_width(columns*3)-font_width+2, 
-			                  end_point.y()-start_point.y()-font_height);
-			painter.fillRect(middle_line, palette().color(QPalette::Highlight));
-			
-			middle_line.setLeft(to_ascii_column(hex_offset));
-			middle_line.setWidth(column_width(columns));
-			painter.fillRect(middle_line, palette().color(QPalette::Highlight));
-		}	
-	}	
+	for(; start < end+1; start++){
+		QPoint position = get_byte_position(start);
+		painter.fillRect(position.x()-1, position.y(), font_width*3, font_height+4, 
+		                 palette().color(QPalette::Active, QPalette::Highlight));
+		painter.fillRect(to_ascii_column(position.x()), position.y(), font_width, font_height+4, 
+		                 palette().color(QPalette::Active, QPalette::Highlight));
+	}
+	
+	painter.fillRect(column_width(10+columns*3)+1, 0, font_width, column_height(rows+1), 
+	                 palette().color(QPalette::Background));
 }
 
 bool hex_editor::event(QEvent *e)
@@ -469,7 +435,7 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 	}
 	
 	int x = event->x();
-	int y = (event->y()- vertical_shift) - (event->y() % font_height) - font_height/2 + vertical_offset;
+	int y = event->y() - vertical_shift;
 	
 	if((event->x() > column_width(3*columns+15) && event->x() < column_width(4*columns+15))){
 		x = to_hex_column(x);
@@ -521,10 +487,7 @@ void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 	
 	is_dragging = false;
 	scroll_timer->stop();
-	if(selection_current == selection_start){
-		selection_active = false;
-		return;
-	}
+
 	if(is_dragging){
 		update_selection(mouse_position.x(), event->y());
 	}
@@ -547,6 +510,8 @@ void hex_editor::font_setup()
 	QFontMetrics font_info(font);
 	font_width = font_info.averageCharWidth();
 	font_height = font_info.height();
+	hex_offset = column_width(11);
+	ascii_offset = column_width(15+columns*3);
 }
 
 QString hex_editor::get_status_text()
@@ -576,7 +541,7 @@ QString hex_editor::get_status_text()
 	return text;
 }
 
-QPoint hex_editor::get_selection_point(QPoint point)
+int hex_editor::get_selection_point(QPoint point)
 {
 	if(point.y() < 0){
 		point.setY(vertical_offset);
@@ -585,7 +550,7 @@ QPoint hex_editor::get_selection_point(QPoint point)
 		point.setY(column_height(rows)+vertical_offset -font_height);
 		point.setX(column_width(11+columns*3)-font_width);
 	}
-	return point;
+	return get_buffer_position(point);
 }
 
 bool hex_editor::get_selection_range(int position[2])
@@ -596,6 +561,7 @@ bool hex_editor::get_selection_range(int position[2])
 		qSwap(position[0], position[1]);
 		qSwap(selection_start, selection_current);
 	}
+	position[1]++;
 	return selection_active;
 }
 
@@ -671,11 +637,15 @@ void hex_editor::update_selection_position(int amount)
 void hex_editor::update_selection(int x, int y)
 {
 	int old_offset = offset;
+	QPoint last_byte = get_byte_position(buffer->size()-1);
 	if(x < column_width(11)){
 		x = column_width(11);
 	}else if(x >= column_width(10+columns*3)-font_width){
-		x = column_width(10+columns*3)-font_width;
+		x = column_width(10+columns*3)-font_width*2;
+	}else if(x >= last_byte.x()-font_width && y-font_height >= last_byte.y()){
+		x = last_byte.x()-font_width*2;
 	}
+	x -= font_width;
 	
 	if(y < vertical_offset && !offset){
 		y = vertical_offset;
@@ -683,11 +653,9 @@ void hex_editor::update_selection(int x, int y)
 		y = vertical_offset + column_height(rows);
 	}
 	
-	update_cursor_position(x, y-vertical_offset, false);
+	QPoint position = get_byte_position(get_buffer_position(x+font_width, y-vertical_shift));
+	update_cursor_position(position.x(), position.y(), false);
 	
-	if(x >= column_width(10+columns*3)-font_width){
-		cursor_position.setX(cursor_position.x()+font_width);
-	}
 	if(old_offset != offset){
 		selection_start.setY(selection_start.y() - (offset - old_offset));
 	}

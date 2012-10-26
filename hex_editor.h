@@ -75,13 +75,15 @@ class hex_editor : public QWidget
 		bool scroll_mode = false;
 		bool auto_scrolling;
 		QTimer *scroll_timer = new QTimer(this);
+		int hex_offset;
+		int ascii_offset;
 		int scroll_speed;
 		bool scroll_direction;
 		QPoint mouse_position;
 		
 		void font_setup();
 		QString get_status_text();
-		QPoint get_selection_point(QPoint point);
+		int get_selection_point(QPoint point);
 		bool get_selection_range(int position[2]);
 		int get_buffer_position(int x, int y, bool byte_align = true);
 		int get_buffer_position(QPoint &point, bool byte_align = true);
