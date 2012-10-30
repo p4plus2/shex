@@ -21,6 +21,8 @@ class ROM_buffer
 		void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0);
 		QString get_line(int index, int length);
 		QString get_address(int address);
+		int snes_to_pc(int address);
+		int pc_to_snes(int address);
 		
 		inline QString get_file_name(){ return ROM.fileName(); }
 		inline int size(){ return buffer.size(); }
@@ -37,12 +39,19 @@ class ROM_buffer
 			ASM_LONG_TABLE,
 			C_SOURCE
 		};
+		
+		enum ROM_mapping{
+			LOROM,
+			HIROM,
+		};
+
 	private:
 		QFile ROM;
 		QByteArray buffer;
 		QClipboard *clipboard = QApplication::clipboard();
 		QUndoStack *undo_stack;
 		paste_style paste_type = C_SOURCE;
+		ROM_mapping mapping = LOROM;
 };
 
 #endif // ROM_BUFFER_H

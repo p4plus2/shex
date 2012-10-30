@@ -135,12 +135,12 @@ void hex_editor::update_undo_action()
 void hex_editor::goto_offset(int address, bool mode)
 {
 	if(mode){
-		address = ((address & 0x7f0000) >> 1) + (address & 0x7fff);
+		address = buffer->snes_to_pc(address);
 	}else{
 		address = get_buffer_position(cursor_position) + address;
 	}
 	
-	if(address > buffer->size() - 1){
+	if(address < 0){
 		QMessageBox::warning(this, "Address error", "The address you specificed is larger than the file."
 		                     "  Please check your input and try again.");
 		return;
@@ -159,14 +159,14 @@ void hex_editor::goto_offset(int address, bool mode)
 void hex_editor::select_range(int start, int end, bool mode)
 {
 	if(mode){
-		start = ((start & 0x7f0000) >> 1) + (start & 0x7fff);
-		end = ((end & 0x7f0000) >> 1) + (end & 0x7fff);
+		start = buffer->snes_to_pc(start);
+		end = buffer->snes_to_pc(end);
 	}else{
 		start = get_buffer_position(cursor_position) + start;
 		end = get_buffer_position(cursor_position) + end;
 	}
 	
-	if(start > buffer->size() - 1 || end > buffer->size() - 1){
+	if(start < 0 || end < 0){
 		QMessageBox::warning(this, "Address error", "One or more addresses are larger than the file."
 		                     "  Please check your input and try again.");
 		return;
@@ -668,7 +668,7 @@ void hex_editor::update_window()
 {
 	if(!scroll_mode){
 		emit update_slider(offset / columns);
-		emit update_range(get_max_lines());
+		emit update_range(get_max_lines()+1);
 	}else{
 		emit update_range(height());
 	}
