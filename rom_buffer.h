@@ -1,6 +1,8 @@
 #ifndef ROM_BUFFER_H
 #define ROM_BUFFER_H
 
+#include "rom_metadata.h"
+
 #include <QFile>
 #include <QClipboard>
 #include <QApplication>
@@ -8,7 +10,7 @@
 #include <QUndoGroup>
 #include <QUndoStack>
 
-class ROM_buffer
+class ROM_buffer : public ROM_metadata
 {
 	public:
 		ROM_buffer(QString file_name);
@@ -20,13 +22,11 @@ class ROM_buffer
 		void update_nibble(char byte, int position, int delete_start = 0, int delete_end = 0);
 		void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0);
 		QString get_line(int index, int length);
-		QString get_address(int address);
-		int snes_to_pc(int address);
-		int pc_to_snes(int address);
+		QString get_formatted_address(int address);
 		
 		inline QString get_file_name(){ return ROM.fileName(); }
 		inline int size(){ return buffer.size(); }
-		inline char at(int index){ return index == size() ? 0 : buffer.at(index); }
+		inline char at(int index){ return index == size() ? 0 : buffer.at(index + header_size()); }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 		inline void set_active(){ undo_stack->setActive(); }
 		
@@ -39,11 +39,6 @@ class ROM_buffer
 			ASM_LONG_TABLE,
 			C_SOURCE
 		};
-		
-		enum ROM_mapping{
-			LOROM,
-			HIROM,
-		};
 
 	private:
 		QFile ROM;
@@ -51,7 +46,6 @@ class ROM_buffer
 		QClipboard *clipboard = QApplication::clipboard();
 		QUndoStack *undo_stack;
 		paste_style paste_type = C_SOURCE;
-		ROM_mapping mapping = LOROM;
 };
 
 #endif // ROM_BUFFER_H

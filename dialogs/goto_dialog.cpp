@@ -1,8 +1,8 @@
 #include "goto_dialog.h"
+#include "debug.h"
 
 #include <QGridLayout>
 #include <QMessageBox>
-#include <QDebug>
 
 goto_dialog::goto_dialog(QWidget *parent) :
         QDialog(parent)

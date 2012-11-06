@@ -1,8 +1,8 @@
 #include "select_range_dialog.h"
+#include "debug.h"
 
 #include <QGridLayout>
 #include <QMessageBox>
-#include <QDebug>
 
 select_range_dialog::select_range_dialog(QWidget *parent) :
         QDialog(parent)

@@ -1,9 +1,9 @@
 #include "rom_buffer.h"
 #include "undo_commands.h"
+#include "debug.h"
 
 #include <QTextStream>
 #include <QRegExp>
-#include "QDebug"
 
 ROM_buffer::ROM_buffer(QString file_name)
 {
@@ -11,9 +11,12 @@ ROM_buffer::ROM_buffer(QString file_name)
 		ROM.setFileName(file_name);
 		ROM.open(QFile::ReadWrite);
 		buffer = ROM.readAll();
+		analyze((unsigned char*)buffer.data(), buffer.size());
 	}else{
 		buffer[0] = 0;
+		
 	}
+	qDebug() << ENUM_STRING(memory_mapper, get_mapper());
 }
 
 void ROM_buffer::initialize_undo(QUndoGroup *undo_group)
@@ -181,8 +184,10 @@ QString ROM_buffer::get_line(int index, int length)
 		return line;
 	}
 	QTextStream string_stream(&line);
-	string_stream << "$" << get_address(index) << ": ";
+	string_stream << "$" << get_formatted_address(index) << ": ";
 
+	index += header_size();
+	
 	int line_length = index+length;
 
 	if(line_length > buffer.size()){
@@ -207,7 +212,7 @@ QString ROM_buffer::get_line(int index, int length)
 	return line;
 }
 
-QString ROM_buffer::get_address(int address)
+QString ROM_buffer::get_formatted_address(int address)
 {
 	address = pc_to_snes(address);
 	int bank = address >> 16;
@@ -216,47 +221,5 @@ QString ROM_buffer::get_address(int address)
 		return QString("NOT:ROM");
 	}
 	return QString::number(bank, 16).rightJustified(2, '0').toUpper() +
-			":" + QString::number(word,16).toUpper();
-}
-
-int ROM_buffer::snes_to_pc(int address)
-{
-	switch(mapping){
-		case LOROM:
-			if((address&0xF00000) == 0xF00000){
-				address -= 0x800000;
-			}else if((address&0xF00000) == 0x700000 || !(address&0x408000)){
-				return -1;
-			}
-		return ((address&0x7F0000)>>1|(address&0x7FFF));
-		case HIROM:
-			if((address&0xFE0000) == 0x7E0000 || !(address&0x408000)){
-				return -1;
-			}
-		return address&0x3FFFFF;
-		default:
-		return -1;
-	}
-}
-
-int ROM_buffer::pc_to_snes(int address)
-{
-	switch(mapping){
-		case LOROM:
-			if (address>=0x400000 || address > size()-1){
-				return -1;
-			}
-			address = ((address<<1)&0x7F0000)|(address&0x7FFF)|0x8000;
-			if((address&0xF00000)==0x700000){
-				address |= 0x800000;
-			}
-		return address;
-		case HIROM:
-			if(address>=0x400000 || address > size()-1){
-				return -1;
-			}
-		return address|0xC00000;
-		default:
-		return -1;
-	}
+			":" + QString::number(word,16).rightJustified(4, '0').toUpper();
 }

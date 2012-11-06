@@ -1,13 +1,10 @@
 #include <QtGui/QApplication>
 #include <QtDebug>
+#include "main_window.h"
+#include "debug.h"
+
 #include <QFile>
 #include <QTextStream>
-#include "main_window.h"
-
-#if 0
-	#define LOG_TO_FILE
-#endif
-
 
 void message_handler(QtMsgType type, const char *message)
 {

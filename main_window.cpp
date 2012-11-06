@@ -2,6 +2,7 @@
 #include "hex_editor.h"
 #include "dynamic_scrollbar.h"
 #include "version.h"
+#include "debug.h"
 
 #include <QStatusBar>
 #include <QHBoxLayout>
@@ -10,11 +11,6 @@
 #include <QFileDialog>
 #include <QDesktopWidget>
 #include <QLabel>
-#include <QDebug>
-
-#if 1
-	#define USE_DEFAULT_ROM
-#endif
 
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)

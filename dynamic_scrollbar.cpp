@@ -1,7 +1,8 @@
 #include "dynamic_scrollbar.h"
+#include "debug.h"
+
 #include <QStyle>
 #include <QStyleOptionSlider>
-#include "qdebug.h"
 
 dynamic_scrollbar::dynamic_scrollbar(QWidget *parent) :
         QScrollBar(parent)

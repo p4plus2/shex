@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     rom_buffer.cpp \
     undo_commands.cpp \
     dialogs/select_range_dialog.cpp \
-    dialogs/goto_dialog.cpp
+    dialogs/goto_dialog.cpp \
+    rom_metadata.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -27,7 +28,9 @@ HEADERS  += main_window.h \
     rom_buffer.h \
     undo_commands.h \
     dialogs/select_range_dialog.h \
-    dialogs/goto_dialog.h
+    dialogs/goto_dialog.h \
+    rom_metadata.h \
+    debug.h
 
 OTHER_FILES += \
     version.sh

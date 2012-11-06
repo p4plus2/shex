@@ -1,11 +1,11 @@
 #include "hex_editor.h"
+#include "debug.h"
+
 #include <QPainter>
 #include <QFontMetrics>
 #include <QMessageBox>
 #include <QAction>
 #include <QMenu>
-#include <cctype>
-#include "QDebug"
 
 hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group) :
         QWidget(parent)
@@ -528,13 +528,13 @@ QString hex_editor::get_status_text()
 			position1 += offset;
 		}
 		
-		string_stream << "Selection range: $" << buffer->get_address(position1)
-		              << " to $" << buffer->get_address(position2);
+		string_stream << "Selection range: $" << buffer->get_formatted_address(position1)
+		              << " to $" << buffer->get_formatted_address(position2);
 	}else{
 		int position = get_buffer_position(cursor_position);
 		unsigned char byte = buffer->at(position);
 		
-		string_stream << "Current offset: $" << buffer->get_address(position)
+		string_stream << "Current offset: $" << buffer->get_formatted_address(position)
 		              << "    Hex: 0x" << QString::number(byte, 16).rightJustified(2, '0').toUpper()
 		              << "    Dec: " << QString::number(byte).rightJustified(3, '0')
 		              << "    Bin: %" << QString::number(byte, 2).rightJustified(8, '0');
@@ -556,8 +556,8 @@ int hex_editor::get_selection_point(QPoint point)
 
 bool hex_editor::get_selection_range(int position[2])
 {
-	position[0] = get_buffer_position(selection_start);
-	position[1] = get_buffer_position(selection_current);
+	position[0] = get_buffer_position(selection_start) + buffer->header_size();
+	position[1] = get_buffer_position(selection_current) + buffer->header_size();
 	if(position[0] > position[1]){
 		qSwap(position[0], position[1]);
 		qSwap(selection_start, selection_current);

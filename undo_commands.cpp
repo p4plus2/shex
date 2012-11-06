@@ -1,5 +1,5 @@
 #include "undo_commands.h"
-#include <QDebug>
+#include "debug.h"
 
 undo_nibble_command::undo_nibble_command(QByteArray *b, int l, unsigned char d[2], bool r)
 {

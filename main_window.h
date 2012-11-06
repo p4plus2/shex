@@ -1,12 +1,12 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#include "dialogs/goto_dialog.h"
+#include "dialogs/select_range_dialog.h"
+
 #include <QMainWindow>
 #include <QUndoGroup>
 #include <QAction>
-
-#include "dialogs/goto_dialog.h"
-#include "dialogs/select_range_dialog.h"
 
 class hex_editor;
 class dynamic_scrollbar;

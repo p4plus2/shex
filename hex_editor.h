@@ -1,14 +1,14 @@
 #ifndef HEX_EDITOR_H
 #define HEX_EDITOR_H
 
+#include "rom_buffer.h"
+
 #include <QWidget>
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QFont>
 #include <QTimer>
-
-#include "rom_buffer.h"
 
 class hex_editor : public QWidget
 {

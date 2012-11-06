@@ -3,7 +3,6 @@
 
 #include <QScrollBar>
 #include <QProxyStyle>
-#include "qdebug.h"
 
 class scrollbar_style : public QProxyStyle
 {
