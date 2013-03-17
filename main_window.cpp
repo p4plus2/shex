@@ -169,7 +169,7 @@ void main_window::init_actions()
 	connect(expand_action, SIGNAL(triggered()), dialog_controller, SLOT(show_expand_dialog()));
 	
 	metadata_editor_action->setShortcut(QKeySequence("Ctrl+m"));
-	connect(expand_action, SIGNAL(triggered()), dialog_controller, SLOT(show_metadata_editor_dialog()));
+	connect(metadata_editor_action, SIGNAL(triggered()), dialog_controller, SLOT(show_metadata_editor_dialog()));
 	
 	
 	scrollbar_toggle_action->setShortcut(QKeySequence("Alt+s"));

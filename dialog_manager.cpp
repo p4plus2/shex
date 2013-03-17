@@ -23,4 +23,6 @@ dialog_manager::~dialog_manager()
 {
 	delete goto_window;
 	delete select_range_window;
+	delete expand_ROM_window;
+	delete metadata_editor_window;
 }

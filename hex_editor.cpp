@@ -335,7 +335,7 @@ void hex_editor::paint_selection(QPainter &painter)
 	}
 	
 	painter.fillRect(column_width(10+columns*3)+1, 0, font_width, column_height(rows+1), 
-	                 palette().color(QPalette::Background));
+	                 palette().color(QPalette::Base));
 }
 
 bool hex_editor::event(QEvent *e)

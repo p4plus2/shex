@@ -6,6 +6,8 @@
 #include "dialogs/expand_rom_dialog.h"
 #include "dialogs/metadata_editor_dialog.h"
 
+#include "debug.h"
+
 #include <QObject>
 
 class hex_editor;
@@ -24,8 +26,8 @@ class dialog_manager : public QObject
 	public slots:
 		inline void show_goto_dialog() { raise_dialog(goto_window); }
 		inline void show_select_range_dialog() { raise_dialog(select_range_window); }
-		inline void show_expand_dialog(){ raise_dialog(select_range_window); }
-		inline void show_metadata_editor_dialog(){ raise_dialog(select_range_window); }
+		inline void show_expand_dialog(){ raise_dialog(expand_ROM_window); }
+		inline void show_metadata_editor_dialog(){ raise_dialog(metadata_editor_window); qDebug() << "test";}
 		
 	private:
 		goto_dialog *goto_window = new goto_dialog();
