@@ -19,7 +19,10 @@ SOURCES += main.cpp\
     undo_commands.cpp \
     dialogs/select_range_dialog.cpp \
     dialogs/goto_dialog.cpp \
-    rom_metadata.cpp
+    rom_metadata.cpp \
+    dialogs/metadata_editor_dialog.cpp \
+    dialog_manager.cpp \
+    dialogs/expand_rom_dialog.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -30,7 +33,10 @@ HEADERS  += main_window.h \
     dialogs/select_range_dialog.h \
     dialogs/goto_dialog.h \
     rom_metadata.h \
-    debug.h
+    debug.h \
+    dialogs/metadata_editor_dialog.h \
+    dialog_manager.h \
+    dialogs/expand_rom_dialog.h
 
 OTHER_FILES += \
     version.sh

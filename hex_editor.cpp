@@ -134,6 +134,9 @@ void hex_editor::update_undo_action()
 
 void hex_editor::goto_offset(int address, bool mode)
 {
+	if(!hasFocus()){
+		return;
+	}
 	if(mode){
 		address = buffer->snes_to_pc(address);
 	}else{
@@ -158,6 +161,9 @@ void hex_editor::goto_offset(int address, bool mode)
 
 void hex_editor::select_range(int start, int end, bool mode)
 {
+	if(!hasFocus()){
+		return;
+	}
 	if(mode){
 		start = buffer->snes_to_pc(start);
 		end = buffer->snes_to_pc(end);
@@ -203,7 +209,7 @@ void hex_editor::context_menu(const QPoint& position)
 void hex_editor::cut()
 {
 	int position[2];
-	if(!get_selection_range(position)){
+	if(!hasFocus() || !get_selection_range(position)){
 		return;
 	}
 	
@@ -216,7 +222,7 @@ void hex_editor::cut()
 void hex_editor::copy()
 {
 	int position[2];
-	if(!get_selection_range(position)){
+	if(!hasFocus() || !get_selection_range(position)){
 		return;
 	}
 	
@@ -226,6 +232,9 @@ void hex_editor::copy()
 
 void hex_editor::paste(bool raw)
 {
+	if(!hasFocus()){
+		return;
+	}
 	int position[2];
 	if(get_selection_range(position)){
 		buffer->paste(position[0], position[1], raw);
@@ -239,6 +248,9 @@ void hex_editor::paste(bool raw)
 
 void hex_editor::delete_text()
 {
+	if(!hasFocus()){
+		return;
+	}
 	int position[2];
 	if(!get_selection_range(position)){
 		buffer->delete_text(get_buffer_position(cursor_position));
@@ -252,6 +264,9 @@ void hex_editor::delete_text()
 
 void hex_editor::select_all()
 {
+	if(!hasFocus()){
+		return;
+	}
 	selection_start = get_byte_position(0);
 	selection_current = get_byte_position(buffer->size());
 	selection_active = true;

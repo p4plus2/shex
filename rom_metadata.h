@@ -65,19 +65,26 @@ class ROM_metadata {
 			ST010,
 			ST011,
 			ST018,
-			TOTAL_CHIPS
+			TOTAL_CHIPS,
+			NO_CHIPS
 		};
 		
-		void analyze(const unsigned char *d, int s);
+		virtual ~ROM_metadata(){}
+		void analyze();
 		int header_size();
 		bool has_chip(cart_chips chip);
 		region get_cart_region();
 		memory_mapper get_mapper();
 		DSP1_memory_mapper get_dsp1_mapper();
 		unsigned short get_header_field(header_field field, bool word = false);
+		void update_header_field(header_field field, unsigned short data, bool word = false);
+		void set_enabled_chip(cart_chips chip);
 		int snes_to_pc(int address);
 		int pc_to_snes(int address);
 		
+		virtual int size() = 0;
+		virtual char at(int index) = 0;
+		virtual void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0) = 0;
 	private:
 		void read_header();
 		unsigned int find_header();
@@ -85,8 +92,6 @@ class ROM_metadata {
 		void find_chips();
 		void find_mapper();
 		
-		const unsigned char *data;
-		int size;
 		bool has_header = false;
 
 		unsigned int header_index;

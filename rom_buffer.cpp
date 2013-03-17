@@ -11,7 +11,7 @@ ROM_buffer::ROM_buffer(QString file_name)
 		ROM.setFileName(file_name);
 		ROM.open(QFile::ReadWrite);
 		buffer = ROM.readAll();
-		analyze((unsigned char*)buffer.data(), buffer.size());
+		analyze();
 	}else{
 		buffer[0] = 0;
 		
@@ -142,6 +142,7 @@ void ROM_buffer::delete_text(int start, int end)
 void ROM_buffer::update_nibble(char byte, int position, int delete_start, int delete_end)
 {
 	bool remove = false;
+	position += header_size()*2;
 	if(position/2 == buffer.size()){
 		buffer[position/2] = 0;
 		remove = true;
@@ -162,6 +163,7 @@ void ROM_buffer::update_nibble(char byte, int position, int delete_start, int de
 
 void ROM_buffer::update_byte(char byte, int position, int delete_start, int delete_end)
 {
+	position += header_size();
 	bool remove = false;
 	if(position == buffer.size()){
 		buffer[position] = 0;

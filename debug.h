@@ -1,7 +1,9 @@
 #ifndef DEBUG_OPTIONS_H
 #define DEBUG_OPTIONS_H
 
-#include <QDebug>
+#if 1
+	#include <QDebug>
+#endif
 
 #if 0
 	#define LOG_TO_FILE

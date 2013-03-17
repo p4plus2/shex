@@ -3,20 +3,17 @@
 
 //Used super-famicom.hpp of nall by byuu as a reference
 
-void ROM_metadata::analyze(const unsigned char *d, int s) 
+void ROM_metadata::analyze() 
 {
-	if((s & 0x7fff) == 512){
-		d += 512;
-		s -= 512;
+	if((size() & 0x7fff) == 512){
 		has_header = true;
 	}else{
 		has_header = false;
 	}
-	if(s < 0x8000){
+	if(size() < 0x8000){
 		return;
 	}
-	data = d;
-	size = s;
+
 	for(bool &chip : chips){
 	    chip = false;
 	}
@@ -46,7 +43,7 @@ ROM_metadata::memory_mapper ROM_metadata::get_mapper()
 ROM_metadata::DSP1_memory_mapper ROM_metadata::get_dsp1_mapper()
 {
 	if(has_chip(DSP1)){
-		if((mapper_id & 0x2f) == 0x20 && size <= 0x100000){
+		if((mapper_id & 0x2f) == 0x20 && size() <= 0x100000){
 			return DSP1_LOROM_1MB;
 		}else if((mapper_id & 0x2f) == 0x20){
 			return DSP1_LOROM_2MB;
@@ -59,9 +56,9 @@ ROM_metadata::DSP1_memory_mapper ROM_metadata::get_dsp1_mapper()
 
 unsigned short ROM_metadata::get_header_field(header_field field, bool word)
 {
-	unsigned short entry = data[header_index + field];
+	unsigned short entry = at(header_index + field);
 	if(word){
-		entry |= (data[header_index + field + 1] << 8);
+		entry |= at(header_index + field + 1) << 8;
 	}
 	return entry;
 }
@@ -106,7 +103,7 @@ int ROM_metadata::pc_to_snes(int address)
 {
 	switch(mapper){
 		case LOROM:
-			if (address>=0x400000 || address >= size){
+			if (address>=0x400000 || address > size()){
 				return -1;
 			}
 			address = ((address<<1)&0x7F0000)|(address&0x7FFF)|0x8000;
@@ -115,7 +112,7 @@ int ROM_metadata::pc_to_snes(int address)
 			}
 		return address;
 		case HIROM:
-			if(address>=0x400000 || address >= size){
+			if(address>=0x400000 || address > size()){
 				return -1;
 			}
 		return address|0xC00000;
@@ -150,7 +147,7 @@ void ROM_metadata::read_header()
 	find_mapper();
 	
 	if(has_chip(SUPERFX)){
-		ram_size = 1024 << (data[header_index - 3] & 7);
+		ram_size = 1024 << (at(header_index - 3) & 7);
 	}else{
 		ram_size = 1024 << (get_header_field(RAM_SIZE) & 7);
 	}
@@ -176,17 +173,18 @@ unsigned ROM_metadata::find_header()
 
 unsigned ROM_metadata::score_header(int address)
 {
-	if(size < address + 64){
+	if(size() < address + 64){
 		return 0;
 	}
 	int score = 0;
+	header_index = address;
 	
-	unsigned short reset_vector = data[address + RESET_VECTOR] | (data[address + RESET_VECTOR + 1] << 8);
-	unsigned short checksum = data[address + CHECKSUM] | (data[address + CHECKSUM + 1] << 8);
-	unsigned short complement = data[address + COMPLEMENT] | (data[address + COMPLEMENT + 1] << 8);
+	unsigned short reset_vector = get_header_field(RESET_VECTOR, true);
+	unsigned short checksum = get_header_field(CHECKSUM, true);
+	unsigned short complement = get_header_field(COMPLEMENT, true);
 	
-	unsigned char resetop = data[(address & ~0x7fff) | (reset_vector & 0x7fff)];
-	unsigned char guessed_mapper = data[address + MAPPER] & ~0x10;
+	unsigned char resetop = at((address & ~0x7fff) | (reset_vector & 0x7fff));
+	unsigned char guessed_mapper = get_header_field(MAPPER) & ~0x10;
 
 	if(reset_vector < 0x8000){
 		return 0;
@@ -226,18 +224,18 @@ unsigned ROM_metadata::score_header(int address)
 		score += 2;
 	}
 	
-	if(data[address + COMPANY] == 0x33){
+	if(get_header_field(COMPANY) == 0x33){
 		score += 2;
 	}
-	if(data[address + RAM_SIZE] < 0x08){
+	if(get_header_field(RAM_SIZE) < 0x08){
 		score++;
 	}
-	if(data[address + CART_REGION] < 14){
+	if(get_header_field(CART_REGION) < 14){
 		score++;
 	}
-	if(data[address + ROM_TYPE] < 0x08){
+	if(get_header_field(ROM_TYPE) < 0x08){
 		score++;
-	}else if(data[address + ROM_SIZE] < 0x10){
+	}else if(get_header_field(ROM_SIZE) < 0x10){
 		score++;
 	}
 
@@ -309,7 +307,7 @@ void ROM_metadata::find_mapper()
 		mapper = SDD1ROM;
 	}else if(header_index == 0x40ffc0){
 		mapper = EXHIROM;
-	}else if(header_index == 0x7fc0 && (size >= 0x401000 || mapper_id == 0x32)){
+	}else if(header_index == 0x7fc0 && (size() >= 0x401000 || mapper_id == 0x32)){
 		mapper = EXLOROM;
 	}else if(header_index == 0xffc0){
 		mapper = HIROM;

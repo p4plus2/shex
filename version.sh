@@ -17,8 +17,6 @@ else
 	wip_build=""
 fi
 
-rm -f version.cpp
-
 echo "#include <QMessageBox>
 #include <QSysInfo>
 

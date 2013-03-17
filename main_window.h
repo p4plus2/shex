@@ -1,12 +1,10 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include "dialogs/goto_dialog.h"
-#include "dialogs/select_range_dialog.h"
-
 #include <QMainWindow>
 #include <QUndoGroup>
 #include <QAction>
+#include "dialog_manager.h"
 
 class hex_editor;
 class dynamic_scrollbar;
@@ -30,21 +28,17 @@ class main_window : public QMainWindow
 		void version();
 		void update_hex_editor();
 		
-		inline void show_goto_dialog() { raise_dialog(goto_window); }
-		inline void show_select_range_dialog() { raise_dialog(select_range_window); }
-		
 	private:
 		QLabel *statusbar = new QLabel(this);
 		QTabWidget *tab_widget = new QTabWidget(this);
 		QUndoGroup *undo_group = new QUndoGroup(this);
+		dialog_manager *dialog_controller = new dialog_manager(this);
 		int new_counter = 0;
-		
-		goto_dialog *goto_window = new goto_dialog(this);
-		select_range_dialog *select_range_window = new select_range_dialog(this);
 		
 		QMenu *file_menu;
 		QMenu *edit_menu;
 		QMenu *navigation_menu;
+		QMenu *ROM_menu;
 		QMenu *options_menu;
 		QMenu *help_menu;
 		
@@ -64,6 +58,9 @@ class main_window : public QMainWindow
 		
 		QAction *goto_action = new QAction("&Goto offset", this);
 		
+		QAction *expand_action = new QAction("&Expand ROM", this);
+		QAction *metadata_editor_action = new QAction("&Metadata editor", this);
+		
 		QAction *scrollbar_toggle_action = new QAction("&Scrollbar toggle", this);
 		
 		QAction *version_action = new QAction("&Version", this);
@@ -73,7 +70,6 @@ class main_window : public QMainWindow
 		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar);
 		void create_new_tab(QString name, bool new_file = false);
 		hex_editor *get_editor(int i);
-		void raise_dialog(QDialog *dialog);
 		
 };
 

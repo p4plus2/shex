@@ -43,28 +43,12 @@ void main_window::close_tab(int i)
 
 void main_window::changed_tab(int i)
 {
-	cut_action->disconnect();
-	copy_action->disconnect();
-	paste_action->disconnect();
-	delete_action->disconnect();
-	select_all_action->disconnect();
-	scrollbar_toggle_action->disconnect();
-	goto_window->disconnect();
-	select_range_window->disconnect();
-	
 	if(i == -1){
 		return;
 	}
 	
 	hex_editor *editor = get_editor(i);
-	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
-	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
-	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
-	connect(delete_action, SIGNAL(triggered()), editor, SLOT(delete_text()));
-	connect(select_all_action, SIGNAL(triggered()), editor, SLOT(select_all()));
-	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
-	connect(goto_window, SIGNAL(triggered(int,bool)), editor, SLOT(goto_offset(int, bool)));
-	connect(select_range_window, SIGNAL(triggered(int,int,bool)), editor, SLOT(select_range(int,int,bool)));
+
 	editor->set_focus();
 }
 
@@ -134,6 +118,10 @@ void main_window::create_menu()
 	navigation_menu = menuBar()->addMenu("&Navigation");
 	navigation_menu->addAction(goto_action);
 	
+	ROM_menu = menuBar()->addMenu("&ROM");
+	ROM_menu->addAction(expand_action);
+	ROM_menu->addAction(metadata_editor_action);
+	
 	options_menu = menuBar()->addMenu("&Options");
 	options_menu->addAction(scrollbar_toggle_action);
 	
@@ -172,10 +160,17 @@ void main_window::init_actions()
 	select_all_action->setShortcut(QKeySequence::SelectAll);
 	
 	select_range_action->setShortcut(QKeySequence("Ctrl+r"));
-	connect(select_range_action, SIGNAL(triggered()), this, SLOT(show_select_range_dialog()));
+	connect(select_range_action, SIGNAL(triggered()), dialog_controller, SLOT(show_select_range_dialog()));
 	
 	goto_action->setShortcut(QKeySequence("Ctrl+g"));
-	connect(goto_action, SIGNAL(triggered()), this, SLOT(show_goto_dialog()));
+	connect(goto_action, SIGNAL(triggered()), dialog_controller, SLOT(show_goto_dialog()));
+	
+	expand_action->setShortcut(QKeySequence("Ctrl+e"));
+	connect(expand_action, SIGNAL(triggered()), dialog_controller, SLOT(show_expand_dialog()));
+	
+	metadata_editor_action->setShortcut(QKeySequence("Ctrl+m"));
+	connect(expand_action, SIGNAL(triggered()), dialog_controller, SLOT(show_metadata_editor_dialog()));
+	
 	
 	scrollbar_toggle_action->setShortcut(QKeySequence("Alt+s"));
 	
@@ -191,6 +186,14 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(editor, SIGNAL(toggle_scroll_mode(bool)), scrollbar, SLOT(toggle_mode(bool)));
 	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
 	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(setText(QString)));
+	
+	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
+	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
+	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
+	connect(delete_action, SIGNAL(triggered()), editor, SLOT(delete_text()));
+	connect(select_all_action, SIGNAL(triggered()), editor, SLOT(select_all()));
+	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
+	dialog_controller->connect_to_editor(editor);
 }
 
 void main_window::create_new_tab(QString name, bool new_file)
@@ -214,13 +217,6 @@ void main_window::create_new_tab(QString name, bool new_file)
 hex_editor *main_window::get_editor(int i)
 {
 	return dynamic_cast<hex_editor *>(tab_widget->widget(i)->layout()->itemAt(0)->widget());
-}
-
-void main_window::raise_dialog(QDialog *dialog)
-{
-	dialog->show();
-	dialog->raise();
-	dialog->activateWindow();
 }
 
 main_window::~main_window()
