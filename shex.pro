@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     rom_metadata.cpp \
     dialogs/metadata_editor_dialog.cpp \
     dialog_manager.cpp \
-    dialogs/expand_rom_dialog.cpp
+    dialogs/expand_rom_dialog.cpp \
+    dialogs/abstract_dialog.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -36,7 +37,8 @@ HEADERS  += main_window.h \
     debug.h \
     dialogs/metadata_editor_dialog.h \
     dialog_manager.h \
-    dialogs/expand_rom_dialog.h
+    dialogs/expand_rom_dialog.h \
+    dialogs/abstract_dialog.h
 
 OTHER_FILES += \
     version.sh

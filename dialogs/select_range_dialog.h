@@ -1,17 +1,19 @@
 #ifndef select_range_DIALOG_H
 #define select_range_DIALOG_H
 
-#include <QDialog>
 #include <QLabel>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QLineEdit>
 
-class select_range_dialog : public QDialog
+#include "abstract_dialog.h"
+
+class select_range_dialog : public abstract_dialog
 {
 		Q_OBJECT
 	public:
-		explicit select_range_dialog(QWidget *parent = 0);
+		explicit select_range_dialog();
+		virtual QString id(){ return "select_range"; }
 		
 	signals:
 		void triggered(int start, int end, bool mode);

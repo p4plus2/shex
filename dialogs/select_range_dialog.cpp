@@ -4,8 +4,7 @@
 #include <QGridLayout>
 #include <QMessageBox>
 
-select_range_dialog::select_range_dialog(QWidget *parent) :
-        QDialog(parent)
+select_range_dialog::select_range_dialog()
 {	
 	connect(close, SIGNAL(clicked()), this, SLOT(close()));
 	connect(select_range, SIGNAL(clicked()), this, SLOT(range_entered()));

@@ -44,12 +44,14 @@ void main_window::close_tab(int i)
 void main_window::changed_tab(int i)
 {
 	if(i == -1){
+		dialog_controller->set_active_editor(nullptr);
 		return;
 	}
 	
 	hex_editor *editor = get_editor(i);
 
 	editor->set_focus();
+	dialog_controller->set_active_editor(editor);
 }
 
 void main_window::file_save_state(bool clean)
@@ -91,6 +93,12 @@ void main_window::version()
 void main_window::update_hex_editor()
 {
 	get_editor(tab_widget->currentIndex())->update_undo_action();
+}
+
+void main_window::closeEvent(QCloseEvent *event)
+{
+	QApplication::quit();
+	QMainWindow::closeEvent(event);
 }
 
 void main_window::create_menu()

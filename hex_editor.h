@@ -16,6 +16,7 @@ class hex_editor : public QWidget
 	public:
 		explicit hex_editor(QWidget *parent = 0, QString file_name = "", QUndoGroup *undo_group = 0);
 		~hex_editor();
+		ROM_buffer *get_buffer(){ return buffer; }
 		virtual QSize minimumSizeHint() const;
 		QString get_file_name();
 		void set_focus();

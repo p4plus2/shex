@@ -28,6 +28,9 @@ class main_window : public QMainWindow
 		void version();
 		void update_hex_editor();
 		
+	protected:
+		virtual void closeEvent(QCloseEvent *event);
+		
 	private:
 		QLabel *statusbar = new QLabel(this);
 		QTabWidget *tab_widget = new QTabWidget(this);

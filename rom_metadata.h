@@ -2,6 +2,7 @@
 #define ROM_metadata_H
 
 #include <QObject>
+#include <map>
 
 class ROM_metadata {
 		Q_GADGET
@@ -23,7 +24,21 @@ class ROM_metadata {
 			VERSION = 0x1B,
 			COMPLEMENT = 0x1C,
 			CHECKSUM = 0x1E,
-			RESET_VECTOR = 0x3C
+		};
+		
+		enum vectors{
+			NATIVE_COP = 0x04,
+			NATIVE_BRK = 0x06,
+			NATIVE_ABORT = 0x08,
+			NATIVE_NMI = 0x0A,
+			NATIVE_UNUSED = 0x0C,
+			NATIVE_IRQ = 0x0E,
+			EMULATION_COP = 0x14,
+			EMULATION_UNKNOWN = 0x16,
+			EMULATION_ABORT = 0x18,
+			EMULATION_NMI = 0x1A,
+			EMULATION_RESET = 0x1C,
+			EMULATION_IRQ = 0x1E
 		};
 		
 		enum region{
@@ -43,10 +58,10 @@ class ROM_metadata {
 		};
 		
 		enum DSP1_memory_mapper{
-			DSP1_UNMAPPED,
-			DSP1_LOROM_1MB,
-			DSP1_LOROM_2MB,
-			DSP1_HIROM
+			DSP1UNMAPPED,
+			DSP1LOROM_1MB,
+			DSP1LOROM_2MB,
+			DSP1HIROM
 		};
 		
 		enum cart_chips {
@@ -65,9 +80,15 @@ class ROM_metadata {
 			ST010,
 			ST011,
 			ST018,
-			TOTAL_CHIPS,
-			NO_CHIPS
+			NO_CHIPS,
 		};
+		
+		static const std::map <header_field, QString> header_strings;
+		static const std::map <vectors, QString> vector_strings;
+		static const std::map <region, QString> region_strings;
+		static const std::map <memory_mapper, QString> mapper_strings;
+		static const std::map <DSP1_memory_mapper, QString> dsp_strings;
+		static const std::map <ROM_metadata::cart_chips, QString> chip_strings;
 		
 		virtual ~ROM_metadata(){}
 		void analyze();
@@ -77,6 +98,7 @@ class ROM_metadata {
 		memory_mapper get_mapper();
 		DSP1_memory_mapper get_dsp1_mapper();
 		unsigned short get_header_field(header_field field, bool word = false);
+		unsigned short get_vector(vectors vector);
 		void update_header_field(header_field field, unsigned short data, bool word = false);
 		void set_enabled_chip(cart_chips chip);
 		int snes_to_pc(int address);
@@ -95,12 +117,12 @@ class ROM_metadata {
 		bool has_header = false;
 
 		unsigned int header_index;
-		unsigned int ram_size;
-		unsigned char mapper_id;
-		unsigned char rom_type;
-		unsigned char rom_size;
+		unsigned int ram_size = 0x00;
+		unsigned char mapper_id = 0x00;
+		unsigned char rom_type = 0x00;
+		unsigned char rom_size = 0x00;
 		
-		memory_mapper mapper;
-		bool chips[TOTAL_CHIPS] = {0};
+		memory_mapper mapper = LOROM;
+		bool chips[NO_CHIPS] = {0};
 };
 #endif // ROM_metadata_H

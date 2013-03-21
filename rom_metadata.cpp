@@ -44,14 +44,14 @@ ROM_metadata::DSP1_memory_mapper ROM_metadata::get_dsp1_mapper()
 {
 	if(has_chip(DSP1)){
 		if((mapper_id & 0x2f) == 0x20 && size() <= 0x100000){
-			return DSP1_LOROM_1MB;
+			return DSP1LOROM_1MB;
 		}else if((mapper_id & 0x2f) == 0x20){
-			return DSP1_LOROM_2MB;
+			return DSP1LOROM_2MB;
 		}else if((mapper_id & 0x2f) == 0x21){
-			return DSP1_HIROM;
+			return DSP1HIROM;
 		}
 	}
-	return DSP1_UNMAPPED;
+	return DSP1UNMAPPED;
 }
 
 unsigned short ROM_metadata::get_header_field(header_field field, bool word)
@@ -61,6 +61,11 @@ unsigned short ROM_metadata::get_header_field(header_field field, bool word)
 		entry |= at(header_index + field + 1) << 8;
 	}
 	return entry;
+}
+
+unsigned short ROM_metadata::get_vector(vectors vector)
+{
+	return get_header_field((header_field)(0x20 + vector), true);
 }
 
 int ROM_metadata::snes_to_pc(int address)
@@ -179,7 +184,7 @@ unsigned ROM_metadata::score_header(int address)
 	int score = 0;
 	header_index = address;
 	
-	unsigned short reset_vector = get_header_field(RESET_VECTOR, true);
+	unsigned short reset_vector = get_vector(EMULATION_RESET);
 	unsigned short checksum = get_header_field(CHECKSUM, true);
 	unsigned short complement = get_header_field(COMPLEMENT, true);
 	
@@ -315,3 +320,74 @@ void ROM_metadata::find_mapper()
 		mapper = LOROM;
 	}
 }
+
+const std::map <ROM_metadata::header_field, QString> ROM_metadata::header_strings = {
+        {ROM_metadata::CART_NAME, "Cart name"},
+	{ROM_metadata::MAPPER, "Mapper"},
+	{ROM_metadata::ROM_TYPE, "ROM type"},
+	{ROM_metadata::ROM_SIZE, "ROM size"},
+	{ROM_metadata::RAM_SIZE, "RAM size"},
+	{ROM_metadata::CART_REGION, "Cart region"},
+	{ROM_metadata::COMPANY, "Company"},
+	{ROM_metadata::VERSION, "Version"},
+	{ROM_metadata::COMPLEMENT, "Checksum Complement"},
+	{ROM_metadata::CHECKSUM, "Checksum"}
+};
+
+const std::map <ROM_metadata::vectors, QString> ROM_metadata::vector_strings = {
+        {ROM_metadata::NATIVE_COP, "Native COP"},
+	{ROM_metadata::NATIVE_BRK, "Native BRK"},
+	{ROM_metadata::NATIVE_ABORT, "Native ABORT"},
+	{ROM_metadata::NATIVE_NMI, "Native NMI"},
+	{ROM_metadata::NATIVE_UNUSED, "Unused"},
+	{ROM_metadata::NATIVE_IRQ, "Native IRQ"},
+	{ROM_metadata::EMULATION_COP, "Emulation COP"},
+	{ROM_metadata::EMULATION_UNKNOWN, "Unused"},
+	{ROM_metadata::EMULATION_ABORT, "Emulation ABORT"},
+	{ROM_metadata::EMULATION_NMI, "Emulation NMI"},
+	{ROM_metadata::EMULATION_RESET, "Reset"},
+	{ROM_metadata::EMULATION_IRQ, "Emulation IRQ"}
+};
+
+const std::map <ROM_metadata::region, QString> ROM_metadata::region_strings = {
+        {ROM_metadata::NTSC, "NTSC"},
+	{ROM_metadata::PAL, "PAL"}
+};
+
+const std::map <ROM_metadata::memory_mapper, QString> ROM_metadata::mapper_strings = {
+	{ROM_metadata::LOROM, "LOROM"},
+	{ROM_metadata::HIROM, "HIROM"},
+	{ROM_metadata::EXLOROM, "ExLOROM"},
+	{ROM_metadata::EXHIROM, "ExHIROM"},
+	{ROM_metadata::SUPERFXROM, "SuperFX ROM"},
+	{ROM_metadata::SA1ROM, "SA1 ROM"},
+	{ROM_metadata::SPC7110ROM, "SPC7110 ROM"},
+	{ROM_metadata::SDD1ROM, "SDD1 ROM"}
+};
+
+const std::map <ROM_metadata::DSP1_memory_mapper, QString> ROM_metadata::dsp_strings = {
+	{ROM_metadata::DSP1UNMAPPED,"DSP! Unmapped"},
+	{ROM_metadata::DSP1LOROM_1MB,"DSP1 2MB HIROM"},
+	{ROM_metadata::DSP1LOROM_2MB,"DSP1 1MB LOROM"},
+	{ROM_metadata::DSP1HIROM,"DSP1 HIROM"}
+};
+
+const std::map <ROM_metadata::cart_chips, QString> ROM_metadata::chip_strings = {
+	{ROM_metadata::SUPERFX, "SuperFX"},
+	{ROM_metadata::SA1, "SA1"},
+	{ROM_metadata::SRTC, "SRTC"},
+	{ROM_metadata::SDD1, "SDD1"},
+	{ROM_metadata::SPC7110, "SPC7110"},
+	{ROM_metadata::SPC7110RTC, "SPC7110 RTC"},
+	{ROM_metadata::CX4, "CX4"},
+	{ROM_metadata::DSP1, "DSP1"},
+	{ROM_metadata::DSP2, "DSP2"},
+	{ROM_metadata::DSP3, "DSP3"},
+	{ROM_metadata::DSP4, "DSP4"},
+	{ROM_metadata::OBC1, "OBC1"},
+	{ROM_metadata::ST010, "ST-010"},
+	{ROM_metadata::ST011, "ST-011"},
+        {ROM_metadata::ST018, "ST-018"},
+	{ROM_metadata::NO_CHIPS, "No chips"}
+        
+};

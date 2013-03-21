@@ -20,22 +20,21 @@ class dialog_manager : public QObject
 		~dialog_manager();
 		
 		void connect_to_editor(hex_editor *editor);
+		void set_active_editor(hex_editor *editor);
 		
 	signals:
 		
 	public slots:
-		inline void show_goto_dialog() { raise_dialog(goto_window); }
-		inline void show_select_range_dialog() { raise_dialog(select_range_window); }
-		inline void show_expand_dialog(){ raise_dialog(expand_ROM_window); }
-		inline void show_metadata_editor_dialog(){ raise_dialog(metadata_editor_window); qDebug() << "test";}
+		inline void show_goto_dialog() { raise_dialog("goto"); }
+		inline void show_select_range_dialog() { raise_dialog("select_range"); }
+		inline void show_expand_dialog(){ raise_dialog("expand_ROM"); }
+		inline void show_metadata_editor_dialog(){ raise_dialog("metadata_editor"); }
 		
 	private:
-		goto_dialog *goto_window = new goto_dialog();
-		select_range_dialog *select_range_window = new select_range_dialog();
-		expand_ROM_dialog *expand_ROM_window = new expand_ROM_dialog();
-		metadata_editor_dialog *metadata_editor_window = new metadata_editor_dialog();
+		QList<abstract_dialog *> dialog_list;
 		
-		void raise_dialog(QDialog *dialog);
+		void raise_dialog(QString id);
+		abstract_dialog *find_dialog(QString id);
 		
 };
 

@@ -1,17 +1,19 @@
 #ifndef GOTO_DIALOG_H
 #define GOTO_DIALOG_H
 
-#include <QDialog>
 #include <QLabel>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QLineEdit>
 
-class goto_dialog : public QDialog
+#include "abstract_dialog.h"
+
+class goto_dialog : public abstract_dialog
 {
 		Q_OBJECT
 	public:
-		explicit goto_dialog(QWidget *parent = 0);
+		explicit goto_dialog();
+		virtual QString id(){ return "goto"; }
 		
 	signals:
 		void triggered(int address, bool mode);

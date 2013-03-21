@@ -1,13 +1,14 @@
 #ifndef EXPAND_ROM_DIALOG_H
 #define EXPAND_ROM_DIALOG_H
 
-#include <QDialog>
+#include "abstract_dialog.h"
 
-class expand_ROM_dialog : public QDialog
+class expand_ROM_dialog : public abstract_dialog
 {
 		Q_OBJECT
 	public:
-		explicit expand_ROM_dialog(QWidget *parent = 0);
+		explicit expand_ROM_dialog();
+		virtual QString id(){ return "expand_ROM"; }
 		
 	signals:
 		
