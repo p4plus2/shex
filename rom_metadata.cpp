@@ -56,16 +56,30 @@ ROM_metadata::DSP1_memory_mapper ROM_metadata::get_dsp1_mapper()
 
 unsigned short ROM_metadata::get_header_field(header_field field, bool word)
 {
-	unsigned short entry = at(header_index + field);
+	unsigned short entry = at(header_index + field) & 0x00FF;
 	if(word){
 		entry |= at(header_index + field + 1) << 8;
 	}
 	return entry;
 }
 
+unsigned short ROM_metadata::get_header_field(checksums field)
+{
+	return get_header_field((header_field)field, true);
+}
+
 unsigned short ROM_metadata::get_vector(vectors vector)
 {
 	return get_header_field((header_field)(0x20 + vector), true);
+}
+
+QString ROM_metadata::get_cart_name()
+{
+	QString name;
+	for(int i = 0; i < 22; i++){
+		name.append(at(header_index + i));
+	}
+	return name;
 }
 
 int ROM_metadata::snes_to_pc(int address)
@@ -185,8 +199,8 @@ unsigned ROM_metadata::score_header(int address)
 	header_index = address;
 	
 	unsigned short reset_vector = get_vector(EMULATION_RESET);
-	unsigned short checksum = get_header_field(CHECKSUM, true);
-	unsigned short complement = get_header_field(COMPLEMENT, true);
+	unsigned short checksum = get_header_field(CHECKSUM);
+	unsigned short complement = get_header_field(COMPLEMENT);
 	
 	unsigned char resetop = at((address & ~0x7fff) | (reset_vector & 0x7fff));
 	unsigned char guessed_mapper = get_header_field(MAPPER) & ~0x10;
@@ -321,20 +335,22 @@ void ROM_metadata::find_mapper()
 	}
 }
 
-const std::map <ROM_metadata::header_field, QString> ROM_metadata::header_strings = {
-        {ROM_metadata::CART_NAME, "Cart name"},
+const QPair <ROM_metadata::header_field, QString> ROM_metadata::header_strings[] = {
 	{ROM_metadata::MAPPER, "Mapper"},
 	{ROM_metadata::ROM_TYPE, "ROM type"},
 	{ROM_metadata::ROM_SIZE, "ROM size"},
 	{ROM_metadata::RAM_SIZE, "RAM size"},
 	{ROM_metadata::CART_REGION, "Cart region"},
 	{ROM_metadata::COMPANY, "Company"},
-	{ROM_metadata::VERSION, "Version"},
-	{ROM_metadata::COMPLEMENT, "Checksum Complement"},
+	{ROM_metadata::VERSION, "Version"}
+};
+
+const QPair <ROM_metadata::checksums, QString> ROM_metadata::checksum_strings[] = {
+        {ROM_metadata::COMPLEMENT, "Checksum Complement"},
 	{ROM_metadata::CHECKSUM, "Checksum"}
 };
 
-const std::map <ROM_metadata::vectors, QString> ROM_metadata::vector_strings = {
+const QPair <ROM_metadata::vectors, QString> ROM_metadata::vector_strings[] = {
         {ROM_metadata::NATIVE_COP, "Native COP"},
 	{ROM_metadata::NATIVE_BRK, "Native BRK"},
 	{ROM_metadata::NATIVE_ABORT, "Native ABORT"},
@@ -349,12 +365,12 @@ const std::map <ROM_metadata::vectors, QString> ROM_metadata::vector_strings = {
 	{ROM_metadata::EMULATION_IRQ, "Emulation IRQ"}
 };
 
-const std::map <ROM_metadata::region, QString> ROM_metadata::region_strings = {
+const QPair <ROM_metadata::region, QString> ROM_metadata::region_strings[] = {
         {ROM_metadata::NTSC, "NTSC"},
 	{ROM_metadata::PAL, "PAL"}
 };
 
-const std::map <ROM_metadata::memory_mapper, QString> ROM_metadata::mapper_strings = {
+const QPair <ROM_metadata::memory_mapper, QString> ROM_metadata::mapper_strings[] = {
 	{ROM_metadata::LOROM, "LOROM"},
 	{ROM_metadata::HIROM, "HIROM"},
 	{ROM_metadata::EXLOROM, "ExLOROM"},
@@ -365,14 +381,14 @@ const std::map <ROM_metadata::memory_mapper, QString> ROM_metadata::mapper_strin
 	{ROM_metadata::SDD1ROM, "SDD1 ROM"}
 };
 
-const std::map <ROM_metadata::DSP1_memory_mapper, QString> ROM_metadata::dsp_strings = {
+const QPair <ROM_metadata::DSP1_memory_mapper, QString> ROM_metadata::dsp_strings[] = {
 	{ROM_metadata::DSP1UNMAPPED,"DSP! Unmapped"},
 	{ROM_metadata::DSP1LOROM_1MB,"DSP1 2MB HIROM"},
 	{ROM_metadata::DSP1LOROM_2MB,"DSP1 1MB LOROM"},
 	{ROM_metadata::DSP1HIROM,"DSP1 HIROM"}
 };
 
-const std::map <ROM_metadata::cart_chips, QString> ROM_metadata::chip_strings = {
+const QPair <ROM_metadata::cart_chips, QString> ROM_metadata::chip_strings[] = {
 	{ROM_metadata::SUPERFX, "SuperFX"},
 	{ROM_metadata::SA1, "SA1"},
 	{ROM_metadata::SRTC, "SRTC"},

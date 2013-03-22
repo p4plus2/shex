@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <map>
+#include <QPair>
 
 class ROM_metadata {
 		Q_GADGET
@@ -14,7 +15,6 @@ class ROM_metadata {
 
 	public:
 		enum header_field {
-			CART_NAME = 0x00,
 			MAPPER = 0x15,
 			ROM_TYPE = 0x16,
 			ROM_SIZE = 0x17,
@@ -22,8 +22,13 @@ class ROM_metadata {
 			CART_REGION = 0x19,
 			COMPANY = 0x1A,
 			VERSION = 0x1B,
+			HEADER_COUNT = 7
+		};
+		
+		enum checksums {
 			COMPLEMENT = 0x1C,
 			CHECKSUM = 0x1E,
+			CHECKSUM_COUNT = 2
 		};
 		
 		enum vectors{
@@ -38,7 +43,8 @@ class ROM_metadata {
 			EMULATION_ABORT = 0x18,
 			EMULATION_NMI = 0x1A,
 			EMULATION_RESET = 0x1C,
-			EMULATION_IRQ = 0x1E
+			EMULATION_IRQ = 0x1E,
+			VECTOR_COUNT = 12
 		};
 		
 		enum region{
@@ -83,12 +89,13 @@ class ROM_metadata {
 			NO_CHIPS,
 		};
 		
-		static const std::map <header_field, QString> header_strings;
-		static const std::map <vectors, QString> vector_strings;
-		static const std::map <region, QString> region_strings;
-		static const std::map <memory_mapper, QString> mapper_strings;
-		static const std::map <DSP1_memory_mapper, QString> dsp_strings;
-		static const std::map <ROM_metadata::cart_chips, QString> chip_strings;
+		static const QPair <header_field, QString> header_strings[];
+		static const QPair <checksums, QString> checksum_strings[];
+		static const QPair <vectors, QString> vector_strings[];
+		static const QPair <region, QString> region_strings[];
+		static const QPair <memory_mapper, QString> mapper_strings[];
+		static const QPair <DSP1_memory_mapper, QString> dsp_strings[];
+		static const QPair <ROM_metadata::cart_chips, QString> chip_strings[];
 		
 		virtual ~ROM_metadata(){}
 		void analyze();
@@ -98,7 +105,9 @@ class ROM_metadata {
 		memory_mapper get_mapper();
 		DSP1_memory_mapper get_dsp1_mapper();
 		unsigned short get_header_field(header_field field, bool word = false);
+		unsigned short get_header_field(checksums field);
 		unsigned short get_vector(vectors vector);
+		QString get_cart_name();
 		void update_header_field(header_field field, unsigned short data, bool word = false);
 		void set_enabled_chip(cart_chips chip);
 		int snes_to_pc(int address);

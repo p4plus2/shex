@@ -13,7 +13,7 @@ ROM_buffer::ROM_buffer(QString file_name)
 		buffer = ROM.readAll();
 		analyze();
 	}else{
-		buffer[0] = 0;
+		buffer.fill(0x00, 0x8000);
 		
 	}
 	qDebug() << ENUM_STRING(memory_mapper, get_mapper());
