@@ -15,11 +15,12 @@ class metadata_editor_dialog : public abstract_dialog
 	public:
 		explicit metadata_editor_dialog();
 		virtual QString id(){ return "metadata_editor"; }
-		virtual void refresh();
 		
 	signals:
 		
 	public slots:
+		virtual void refresh();
+		void write();
 		
 	private:
 		QLabel *mapper_label = new QLabel("Memory mapper: ", this);
@@ -29,19 +30,21 @@ class metadata_editor_dialog : public abstract_dialog
 		QLabel *header_labels[ROM_metadata::HEADER_COUNT];
 		QLabel *checksum_labels[ROM_metadata::CHECKSUM_COUNT];
 		QLabel *vector_labels[ROM_metadata::VECTOR_COUNT];
-		
+
 		QLabel *current_mapper_label = new QLabel("", this);
 		QLabel *current_chips_label = new QLabel("", this);
 		QLabel *current_region_label = new QLabel("", this);
-		QLabel *current_name_label = new QLabel("", this);
-		QLabel *current_header_labels[ROM_metadata::HEADER_COUNT];
-		QLabel *current_checksum_labels[ROM_metadata::CHECKSUM_COUNT];
-		QLabel *current_vector_labels[ROM_metadata::VECTOR_COUNT];
+		QLineEdit *current_name_line_edit = new QLineEdit("", this);
+		QLineEdit *current_header_line_edits[ROM_metadata::HEADER_COUNT];
+		QLineEdit *current_checksum_line_edits[ROM_metadata::CHECKSUM_COUNT];
+		QLineEdit *current_vector_line_edits[ROM_metadata::VECTOR_COUNT];
 		
+		QPushButton *reload = new QPushButton("Reload", this);
 		QPushButton *apply = new QPushButton("Apply", this);
 		QPushButton *cancel = new QPushButton("Cancel", this);
 		
 		QString calculate_chips();
+		unsigned short validate_hex(QString input);
 };
 
 #endif // METADATA_EDITOR_DIALOG_H

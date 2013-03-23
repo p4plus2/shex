@@ -76,11 +76,38 @@ unsigned short ROM_metadata::get_vector(vectors vector)
 QString ROM_metadata::get_cart_name()
 {
 	QString name;
-	for(int i = 0; i < 22; i++){
+	for(int i = 0; i < 21; i++){
 		name.append(at(header_index + i));
 	}
 	return name;
 }
+
+void ROM_metadata::update_header_field(header_field field, unsigned short data, bool word)
+{
+	update_byte(data & 0x00FF, header_index + field);
+	if(word){
+		update_byte(data >> 8, header_index + field + 1);
+	}
+}
+
+void ROM_metadata::update_header_field(checksums field, unsigned short data)
+{
+	update_header_field((header_field)field, data, true);
+}
+
+void ROM_metadata::update_vector(vectors vector, unsigned short data)
+{
+	update_header_field((header_field)(0x20 + vector), data, true);
+}
+
+void ROM_metadata::update_cart_name(QString name)
+{
+	QByteArray n = name.toAscii();
+	for(int i = 0; i < 21; i++){
+		update_byte(n[i], header_index+i);
+	}
+}
+
 
 int ROM_metadata::snes_to_pc(int address)
 {
@@ -355,10 +382,8 @@ const QPair <ROM_metadata::vectors, QString> ROM_metadata::vector_strings[] = {
 	{ROM_metadata::NATIVE_BRK, "Native BRK"},
 	{ROM_metadata::NATIVE_ABORT, "Native ABORT"},
 	{ROM_metadata::NATIVE_NMI, "Native NMI"},
-	{ROM_metadata::NATIVE_UNUSED, "Unused"},
 	{ROM_metadata::NATIVE_IRQ, "Native IRQ"},
 	{ROM_metadata::EMULATION_COP, "Emulation COP"},
-	{ROM_metadata::EMULATION_UNKNOWN, "Unused"},
 	{ROM_metadata::EMULATION_ABORT, "Emulation ABORT"},
 	{ROM_metadata::EMULATION_NMI, "Emulation NMI"},
 	{ROM_metadata::EMULATION_RESET, "Reset"},

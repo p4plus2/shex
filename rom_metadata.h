@@ -36,15 +36,13 @@ class ROM_metadata {
 			NATIVE_BRK = 0x06,
 			NATIVE_ABORT = 0x08,
 			NATIVE_NMI = 0x0A,
-			NATIVE_UNUSED = 0x0C,
 			NATIVE_IRQ = 0x0E,
 			EMULATION_COP = 0x14,
-			EMULATION_UNKNOWN = 0x16,
 			EMULATION_ABORT = 0x18,
 			EMULATION_NMI = 0x1A,
 			EMULATION_RESET = 0x1C,
 			EMULATION_IRQ = 0x1E,
-			VECTOR_COUNT = 12
+			VECTOR_COUNT = 10
 		};
 		
 		enum region{
@@ -109,7 +107,9 @@ class ROM_metadata {
 		unsigned short get_vector(vectors vector);
 		QString get_cart_name();
 		void update_header_field(header_field field, unsigned short data, bool word = false);
-		void set_enabled_chip(cart_chips chip);
+		void update_header_field(checksums field, unsigned short data);
+		void update_vector(vectors vector, unsigned short data);
+		void update_cart_name(QString name);
 		int snes_to_pc(int address);
 		int pc_to_snes(int address);
 		
