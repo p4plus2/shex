@@ -30,6 +30,7 @@ class ROM_buffer : public ROM_metadata
 		inline virtual char at(int index){ return index == size() ? 0 : buffer.at(index + header_size()); }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 		inline void set_active(){ undo_stack->setActive(); }
+		inline bool is_active(){ return undo_stack->isActive(); }
 		
 		enum paste_style{
 			NO_SPACES,

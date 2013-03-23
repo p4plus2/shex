@@ -68,6 +68,7 @@ class hex_editor : public QWidget
 		bool is_dragging = false;
 		bool selection_active = false;
 		bool click_side = false;
+		bool is_active = true;
 		QFont font;
 		int font_width;
 		int font_height;

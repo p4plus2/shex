@@ -14,6 +14,7 @@ void dialog_manager::connect_to_editor(hex_editor *editor)
 {
 	connect(find_dialog("goto"), SIGNAL(triggered(int,bool)), editor, SLOT(goto_offset(int, bool)));
 	connect(find_dialog("select_range"), SIGNAL(triggered(int,int,bool)),editor, SLOT(select_range(int,int,bool)));
+	qDebug() << "test";
 }
 
 void dialog_manager::set_active_editor(hex_editor *editor)

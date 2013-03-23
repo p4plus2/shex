@@ -96,6 +96,8 @@ void metadata_editor_dialog::write()
 		                            validate_hex(current_vector_line_edits[i]->text()));
 	}
 	
+	buffer->analyze();
+	refresh();
 	active_editor->update();
 }
 

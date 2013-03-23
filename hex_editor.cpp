@@ -134,7 +134,7 @@ void hex_editor::update_undo_action()
 
 void hex_editor::goto_offset(int address, bool mode)
 {
-	if(!hasFocus()){
+	if(!buffer->is_active()){
 		return;
 	}
 	if(mode){
@@ -161,7 +161,7 @@ void hex_editor::goto_offset(int address, bool mode)
 
 void hex_editor::select_range(int start, int end, bool mode)
 {
-	if(!hasFocus()){
+	if(!buffer->is_active()){
 		return;
 	}
 	if(mode){
@@ -209,7 +209,7 @@ void hex_editor::context_menu(const QPoint& position)
 void hex_editor::cut()
 {
 	int position[2];
-	if(!hasFocus() || !get_selection_range(position)){
+	if(!buffer->is_active() || !get_selection_range(position)){
 		return;
 	}
 	
@@ -222,7 +222,7 @@ void hex_editor::cut()
 void hex_editor::copy()
 {
 	int position[2];
-	if(!hasFocus() || !get_selection_range(position)){
+	if(!buffer->is_active() || !get_selection_range(position)){
 		return;
 	}
 	
@@ -232,7 +232,7 @@ void hex_editor::copy()
 
 void hex_editor::paste(bool raw)
 {
-	if(!hasFocus()){
+	if(!buffer->is_active()){
 		return;
 	}
 	int position[2];
@@ -248,7 +248,7 @@ void hex_editor::paste(bool raw)
 
 void hex_editor::delete_text()
 {
-	if(!hasFocus()){
+	if(!buffer->is_active()){
 		return;
 	}
 	int position[2];
@@ -264,7 +264,7 @@ void hex_editor::delete_text()
 
 void hex_editor::select_all()
 {
-	if(!hasFocus()){
+	if(!buffer->is_active()){
 		return;
 	}
 	selection_start = get_byte_position(0);

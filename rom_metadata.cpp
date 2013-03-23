@@ -5,6 +5,7 @@
 
 void ROM_metadata::analyze() 
 {
+	has_header = false;
 	if((size() & 0x7fff) == 512){
 		has_header = true;
 	}else{
@@ -367,7 +368,7 @@ const QPair <ROM_metadata::header_field, QString> ROM_metadata::header_strings[]
 	{ROM_metadata::ROM_TYPE, "ROM type"},
 	{ROM_metadata::ROM_SIZE, "ROM size"},
 	{ROM_metadata::RAM_SIZE, "RAM size"},
-	{ROM_metadata::CART_REGION, "Cart region"},
+	{ROM_metadata::CART_REGION, "Country"},
 	{ROM_metadata::COMPANY, "Company"},
 	{ROM_metadata::VERSION, "Version"}
 };
