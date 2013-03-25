@@ -23,23 +23,26 @@ select_range_dialog::select_range_dialog()
 	layout->addWidget(select_range, 4, 1);
 	layout->addWidget(close, 4, 2);
 	setLayout(layout);
+	
+	start_input->setProperty("maxLength", 7);
+	end_input->setProperty("maxLength", 7);
 }
 
 void select_range_dialog::range_entered()
 {
 	int start_address = parse_input(start_input->text());
 	int end_address = parse_input(end_input->text());
-	if(start_address > 1 << 24 || end_address > 1 << 24){
-		QMessageBox::warning(this, "Address error", "One or more addresses are out of the SNES's bounds!"
-		                     "  Please check your addresses.");
-	}else if(start_address < 0 || end_address < 0){
+	if(relative->isChecked()){
+		start_address = active_editor->get_buffer()->pc_to_snes(active_editor->get_relative_position(start_address));
+		end_address = active_editor->get_buffer()->pc_to_snes(active_editor->get_relative_position(end_address));
+	}
+	if(!validate_address(start_address) || !validate_address(end_address)){
 		return;
 	}
-
 	if(start_address > end_address){
 		qSwap(start_address, end_address);
 	}
-	emit triggered(start_address, end_address, absolute->isChecked() ? true : false);
+	emit triggered(start_address, end_address);
 }
 
 int select_range_dialog::parse_input(QString input)

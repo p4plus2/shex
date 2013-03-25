@@ -132,22 +132,13 @@ void hex_editor::update_undo_action()
 	update_window();
 }
 
-void hex_editor::goto_offset(int address, bool mode)
+void hex_editor::goto_offset(int address)
 {
 	if(!buffer->is_active()){
 		return;
 	}
-	if(mode){
-		address = buffer->snes_to_pc(address);
-	}else{
-		address = get_buffer_position(cursor_position) + address;
-	}
-	
-	if(address < 0){
-		QMessageBox::warning(this, "Address error", "The address you specificed is larger than the file."
-		                     "  Please check your input and try again.");
-		return;
-	}
+
+	address = buffer->snes_to_pc(address);
 	offset = address - (rows / 2) * columns;
 	offset -= offset % columns;
 	if(offset < 0){
@@ -156,28 +147,18 @@ void hex_editor::goto_offset(int address, bool mode)
 		offset = buffer->size() - rows * columns;
 	}
 	cursor_position = get_byte_position(address);
+	selection_active = false;
 	update_window();
 }
 
-void hex_editor::select_range(int start, int end, bool mode)
+void hex_editor::select_range(int start, int end)
 {
 	if(!buffer->is_active()){
 		return;
 	}
-	if(mode){
-		start = buffer->snes_to_pc(start);
-		end = buffer->snes_to_pc(end);
-	}else{
-		start = get_buffer_position(cursor_position) + start;
-		end = get_buffer_position(cursor_position) + end;
-	}
-	
-	if(start < 0 || end < 0){
-		QMessageBox::warning(this, "Address error", "One or more addresses are larger than the file."
-		                     "  Please check your input and try again.");
-		return;
-	}
-	end++;
+	start = buffer->snes_to_pc(start);
+	end = buffer->snes_to_pc(end);
+
 	offset = start - (rows / 2) * columns;
 	offset -= offset % columns;
 	if(offset < 0){
@@ -201,7 +182,12 @@ void hex_editor::context_menu(const QPoint& position)
 	menu.addSeparator();
 	menu.addAction("Select all", this, SLOT(select_all()), QKeySequence::SelectAll);
 	menu.addSeparator();
-	menu.addAction("Disassemble", this, SLOT(disassemble()))->setDisabled(!selection_active);
+	menu.addAction("Follow branch", this, 
+	               SLOT(branch()), QKeySequence("Ctrl+b"))->setDisabled(!follow_selection(true));
+	menu.addAction("Follow jump", this, 
+	               SLOT(jump()), QKeySequence("Ctrl+j"))->setDisabled(!follow_selection(false));
+	menu.addAction("Disassemble", this, 
+	               SLOT(disassemble()), QKeySequence("Ctrl+d"))->setDisabled(!selection_active);
 	
 	menu.exec(mapToGlobal(position));
 }
@@ -274,8 +260,40 @@ void hex_editor::select_all()
 	update();
 }
 
+void hex_editor::branch()
+{
+	int position[2];
+	if(!buffer->is_active() || !get_selection_range(position)){
+		return;
+	}
+	QString text = "selected bytes: ";
+	text.append(QString::number(buffer->branch_address(position[1], 
+	            buffer->to_little_endian(buffer->range(position[0], position[1]))), 16));
+	
+	goto_offset(buffer->branch_address(position[1] - buffer->header_size(), 
+	            buffer->to_little_endian(buffer->range(position[0], position[1]))));
+}
+
+void hex_editor::jump()
+{
+	int position[2];
+	if(!buffer->is_active() || !get_selection_range(position)){
+		return;
+	}
+	QString text = "selected bytes: ";
+	text.append(QString::number(buffer->jump_address(position[1], 
+	            buffer->to_little_endian(buffer->range(position[0], position[1]))), 16));
+	
+	goto_offset(buffer->jump_address(position[1] - buffer->header_size(), 
+	            buffer->to_little_endian(buffer->range(position[0], position[1]))));
+	QByteArray selection = buffer->to_little_endian(buffer->range(position[0], position[1]));
+}
+
 void hex_editor::disassemble()
 {
+	if(!buffer->is_active()){
+		return;
+	}
 }
 
 void hex_editor::paintEvent(QPaintEvent *event)
@@ -579,6 +597,23 @@ bool hex_editor::get_selection_range(int position[2])
 	}
 	position[1]++;
 	return selection_active;
+}
+
+bool hex_editor::follow_selection(bool type)
+{
+	int position[2];
+	if(get_selection_range(position)){
+		int range = position[1]-position[0];
+		if(type && (range == 1 || range == 2)){
+			return true;
+		}else if(!type && (range == 2 || range == 3)){
+			if(buffer->validate_address(buffer->jump_address(position[1] - buffer->header_size(),
+			            buffer->to_little_endian(buffer->range(position[0], position[1]))), false)){
+				return true;                
+			}
+		}
+	}
+	return false;
 }
 
 int hex_editor::get_buffer_position(QPoint &point, bool byte_align)

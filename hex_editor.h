@@ -16,7 +16,8 @@ class hex_editor : public QWidget
 	public:
 		explicit hex_editor(QWidget *parent = 0, QString file_name = "", QUndoGroup *undo_group = 0);
 		~hex_editor();
-		ROM_buffer *get_buffer(){ return buffer; }
+		inline ROM_buffer *get_buffer(){ return buffer; }
+		inline int get_relative_position(int address){ return get_buffer_position(cursor_position) + address; }
 		virtual QSize minimumSizeHint() const;
 		QString get_file_name();
 		void set_focus();
@@ -30,8 +31,8 @@ class hex_editor : public QWidget
 	public slots:
 		void update_cursor_state();
 		void update_undo_action();
-		void goto_offset(int address, bool mode);
-		void select_range(int start, int end, bool mode);
+		void goto_offset(int address);
+		void select_range(int start, int end);
 		void slider_update(int position);
 		void scroll_mode_changed();
 		void auto_scroll_update();
@@ -42,6 +43,8 @@ class hex_editor : public QWidget
 		void paste(bool raw = false);
 		void delete_text();
 		void select_all();
+		void branch();
+		void jump();
 		void disassemble();
 
 	protected:
@@ -87,6 +90,7 @@ class hex_editor : public QWidget
 		QString get_status_text();
 		int get_selection_point(QPoint point);
 		bool get_selection_range(int position[2]);
+		bool follow_selection(bool type);
 		int get_buffer_position(int x, int y, bool byte_align = true);
 		int get_buffer_position(QPoint &point, bool byte_align = true);
 		QPoint get_byte_position(int address, bool byte_align = true);

@@ -2,8 +2,7 @@
 #define ABSTRACT_DIALOG_H
 
 #include <QDialog>
-
-class hex_editor;
+#include "hex_editor.h"
 
 class abstract_dialog : public QDialog
 {
@@ -20,6 +19,8 @@ class abstract_dialog : public QDialog
 		
 	protected:
 		hex_editor *active_editor;
+		
+		inline bool validate_address(int addr){ return active_editor->get_buffer()->validate_address(addr); }
 		
 };
 

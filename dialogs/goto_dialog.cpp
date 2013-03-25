@@ -20,6 +20,8 @@ goto_dialog::goto_dialog()
 	layout->addWidget(goto_offset, 3, 1);
 	layout->addWidget(close, 3, 2);
 	setLayout(layout);
+	
+	offset_input->setProperty("maxLength", 7);
 }
 
 void goto_dialog::address_entered()
@@ -27,14 +29,13 @@ void goto_dialog::address_entered()
 	bool status;
 	QString input = offset_input->text().remove(QRegExp("[^0-9A-Fa-f]"));
 	int address = input.toInt(&status, 16);
-	if(address > 1 << 24){
-		status = false;
-	}else if(input.isEmpty()){
+	if(input.isEmpty()){
 		return;
 	}
-	if(status){
-		emit triggered(address, absolute->isChecked() ? true : false);
-	}else{
-		QMessageBox::warning(this, "Address error", "Address out of SNES bounds!  Please check your address.");
+	if(relative->isChecked()){
+		address = active_editor->get_buffer()->pc_to_snes(active_editor->get_relative_position(address));
+	}
+	if(validate_address(address)){
+		emit triggered(address);
 	}
 }

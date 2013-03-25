@@ -1,4 +1,5 @@
 #include "rom_metadata.h"
+#include <QMessageBox>
 #include "debug.h"
 
 //Used super-famicom.hpp of nall by byuu as a reference
@@ -109,6 +110,13 @@ void ROM_metadata::update_cart_name(QString name)
 	}
 }
 
+QByteArray ROM_metadata::to_little_endian(QByteArray bytes)
+{
+	int temp = bytes[0];
+	bytes[0] = bytes[bytes.size()-1];
+	bytes[bytes.size()-1] = temp;
+	return bytes;
+}
 
 int ROM_metadata::snes_to_pc(int address)
 {
@@ -150,7 +158,7 @@ int ROM_metadata::pc_to_snes(int address)
 {
 	switch(mapper){
 		case LOROM:
-			if (address>=0x400000 || address > size()){
+			if (address>=0x400000/* || address > size()*/){
 				return -1;
 			}
 			address = ((address<<1)&0x7F0000)|(address&0x7FFF)|0x8000;
@@ -159,7 +167,7 @@ int ROM_metadata::pc_to_snes(int address)
 			}
 		return address;
 		case HIROM:
-			if(address>=0x400000 || address > size()){
+			if(address>=0x400000/* || address > size()*/){
 				return -1;
 			}
 		return address|0xC00000;
@@ -182,6 +190,55 @@ int ROM_metadata::pc_to_snes(int address)
 		default:
 		return -1;
 	}
+}
+
+bool ROM_metadata::validate_address(int address, bool error_method)
+{
+	address_error = "";
+	QString address_string = QString::number(address, 16).toUpper();
+	if(address > 1 << 24){
+		address_error = "$" + address_string + " is out of the SNES's bounds!";
+	}else if(address < 0){
+		address_error = "$" + address_string + " is a negative address!";
+	}else if(snes_to_pc(address) > size()){
+		address_error = "$" + address_string + " is larger than the ROM's size!";
+	}else if(snes_to_pc(address) < 0 || !address){
+		address_error = "$" + address_string + " is not a valid "+ mapper_strings[mapper].second +" address!";
+	}
+	
+	if(address_error != "" && error_method){
+		QMessageBox::warning(0, "Address error!", address_error);
+		qDebug() << address_error;
+		return false;
+	}else if(address_error != ""){
+		qDebug() << address_error;
+		return false;
+	}
+	
+	return true;
+}
+
+int ROM_metadata::branch_address(int address, QByteArray branch)
+{
+	address = pc_to_snes(address);
+	short word = address & 0xFFFF;
+	if(branch.size() == 1){
+		char relative_branch = branch[0];
+		return (address & 0xFF0000) | ((word + relative_branch) & 0xFFFF);
+	}
+	short relative_branch = branch[0] & 0x00FF;
+	relative_branch |= (branch[1] & 0x00FF) << 8;
+	return (address & 0xFF0000) | ((word + relative_branch) & 0xFFFF);
+}
+
+int ROM_metadata::jump_address(int address, QByteArray jump)
+{
+	address = pc_to_snes(address);
+	address &= 0xFF0000;
+	if(jump.size() == 3){
+		address = jump[0] << 16;
+	}
+	return (address | ((jump[1] & 0xFF)<< 8) | (jump[2] & 0xFF)) & 0xFFFFFF;
 }
 
 void ROM_metadata::read_header() 

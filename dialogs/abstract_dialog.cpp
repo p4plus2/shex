@@ -1,7 +1,5 @@
 #include "abstract_dialog.h"
 
-#include "hex_editor.h"
-
 abstract_dialog::abstract_dialog()
 {
 }

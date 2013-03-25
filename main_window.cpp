@@ -126,9 +126,13 @@ void main_window::create_menu()
 	navigation_menu = menuBar()->addMenu("&Navigation");
 	navigation_menu->addAction(goto_action);
 	
-	ROM_menu = menuBar()->addMenu("&ROM");
+	ROM_menu = menuBar()->addMenu("&ROM utilities");
 	ROM_menu->addAction(expand_action);
 	ROM_menu->addAction(metadata_editor_action);
+	ROM_menu->addSeparator();
+	ROM_menu->addAction(branch_action);
+	ROM_menu->addAction(jump_action);
+	ROM_menu->addAction(disassemble_action);
 	
 	options_menu = menuBar()->addMenu("&Options");
 	options_menu->addAction(scrollbar_toggle_action);
@@ -179,6 +183,11 @@ void main_window::init_actions()
 	metadata_editor_action->setShortcut(QKeySequence("Ctrl+m"));
 	connect(metadata_editor_action, SIGNAL(triggered()), dialog_controller, SLOT(show_metadata_editor_dialog()));
 	
+	branch_action->setShortcut(QKeySequence("Ctrl+b"));
+	
+	jump_action->setShortcut(QKeySequence("Ctrl+j"));
+	
+	disassemble_action->setShortcut(QKeySequence("Ctrl+d"));
 	
 	scrollbar_toggle_action->setShortcut(QKeySequence("Alt+s"));
 	
@@ -201,6 +210,11 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(delete_action, SIGNAL(triggered()), editor, SLOT(delete_text()));
 	connect(select_all_action, SIGNAL(triggered()), editor, SLOT(select_all()));
 	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
+	
+	connect(branch_action, SIGNAL(triggered()), editor, SLOT(branch()));
+	connect(jump_action, SIGNAL(triggered()), editor, SLOT(jump()));
+	connect(disassemble_action, SIGNAL(triggered()), editor, SLOT(disassemble()));
+	
 	dialog_controller->connect_to_editor(editor);
 }
 

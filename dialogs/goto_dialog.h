@@ -16,7 +16,7 @@ class goto_dialog : public abstract_dialog
 		virtual QString id(){ return "goto"; }
 		
 	signals:
-		void triggered(int address, bool mode);
+		void triggered(int address);
 		
 	public slots:
 		void address_entered();

@@ -28,6 +28,7 @@ class ROM_buffer : public ROM_metadata
 		inline QString get_file_name(){ return ROM.fileName(); }
 		inline virtual int size(){ return buffer.size() - header_size(); }
 		inline virtual char at(int index){ return index == size() ? 0 : buffer.at(index + header_size()); }
+		inline QByteArray range(int start, int end){ return buffer.mid(start, end-start); }
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 		inline void set_active(){ undo_stack->setActive(); }
 		inline bool is_active(){ return undo_stack->isActive(); }

@@ -110,18 +110,26 @@ class ROM_metadata {
 		void update_header_field(checksums field, unsigned short data);
 		void update_vector(vectors vector, unsigned short data);
 		void update_cart_name(QString name);
+		QByteArray to_little_endian(QByteArray bytes);
 		int snes_to_pc(int address);
 		int pc_to_snes(int address);
+		bool validate_address(int address, bool error_method = true);
+		int branch_address(int address, QByteArray branch);
+		int jump_address(int address, QByteArray jump);
 		
 		virtual int size() = 0;
 		virtual char at(int index) = 0;
 		virtual void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0) = 0;
+		
+		inline QString get_address_error(){ return address_error; }
 	private:
 		void read_header();
 		unsigned int find_header();
 		unsigned int score_header(int address);
 		void find_chips();
 		void find_mapper();
+		
+		QString address_error;
 		
 		bool has_header = false;
 

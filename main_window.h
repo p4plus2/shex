@@ -63,6 +63,9 @@ class main_window : public QMainWindow
 		
 		QAction *expand_action = new QAction("&Expand ROM", this);
 		QAction *metadata_editor_action = new QAction("&Metadata editor", this);
+		QAction *branch_action = new QAction("Follow &branchr", this);
+		QAction *jump_action = new QAction("Follow &jump", this);
+		QAction *disassemble_action = new QAction("&Disassemble", this);
 		
 		QAction *scrollbar_toggle_action = new QAction("&Scrollbar toggle", this);
 		

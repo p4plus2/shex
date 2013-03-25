@@ -16,7 +16,7 @@ class select_range_dialog : public abstract_dialog
 		virtual QString id(){ return "select_range"; }
 		
 	signals:
-		void triggered(int start, int end, bool mode);
+		void triggered(int start, int end);
 		
 	public slots:
 		void range_entered();
