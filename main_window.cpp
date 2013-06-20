@@ -16,7 +16,6 @@ main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
 {
 	statusBar()->addWidget(statusbar);
-	create_menu();
 	
 	QWidget* widget = new QWidget(this);
 	QHBoxLayout *tab_layout = new QHBoxLayout(widget);
@@ -28,7 +27,8 @@ main_window::main_window(QWidget *parent)
 	setMinimumSize(600, QApplication::desktop()->height() < 650 ? 330 : 660);
 	connect(tab_widget, SIGNAL(tabCloseRequested(int)), this, SLOT(close_tab(int)));
 	connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(changed_tab(int)));
-
+	menu_controller->connect_to_widget(this);
+	menu_controller->connect_to_widget(dialog_controller);
 #ifdef USE_DEFAULT_ROM
 	create_new_tab("smw.smc");
 #endif
@@ -101,100 +101,6 @@ void main_window::closeEvent(QCloseEvent *event)
 	QMainWindow::closeEvent(event);
 }
 
-void main_window::create_menu()
-{
-	init_actions();
-	file_menu = menuBar()->addMenu("&File");
-	file_menu->addAction(new_file_action);
-	file_menu->addAction(open_action);
-	file_menu->addAction(save_action);
-	file_menu->addSeparator();
-	file_menu->addAction(exit_action);
-	
-	edit_menu = menuBar()->addMenu("&Edit");
-	edit_menu->addAction(undo_action);
-	edit_menu->addAction(redo_action);
-	edit_menu->addSeparator();
-	edit_menu->addAction(cut_action);
-	edit_menu->addAction(copy_action);
-	edit_menu->addAction(paste_action);
-	edit_menu->addAction(delete_action);
-	edit_menu->addSeparator();
-	edit_menu->addAction(select_all_action);
-	edit_menu->addAction(select_range_action);
-	
-	navigation_menu = menuBar()->addMenu("&Navigation");
-	navigation_menu->addAction(goto_action);
-	
-	ROM_menu = menuBar()->addMenu("&ROM utilities");
-	ROM_menu->addAction(expand_action);
-	ROM_menu->addAction(metadata_editor_action);
-	ROM_menu->addSeparator();
-	ROM_menu->addAction(branch_action);
-	ROM_menu->addAction(jump_action);
-	ROM_menu->addAction(disassemble_action);
-	
-	options_menu = menuBar()->addMenu("&Options");
-	options_menu->addAction(scrollbar_toggle_action);
-	
-	help_menu = menuBar()->addMenu("&Help");
-	help_menu->addAction(version_action);
-}
-
-void main_window::init_actions()
-{
-	new_file_action->setShortcuts(QKeySequence::New);
-	connect(new_file_action, SIGNAL(triggered()), this, SLOT(new_file()));
-	
-	open_action->setShortcuts(QKeySequence::Open);
-	connect(open_action, SIGNAL(triggered()), this, SLOT(open()));
-	
-	save_action->setShortcuts(QKeySequence::Save);
-	connect(save_action, SIGNAL(triggered()), this, SLOT(save()));
-	
-	exit_action->setShortcuts(QKeySequence::Quit);
-	connect(exit_action, SIGNAL(triggered()), this, SLOT(close()));
-	
-	undo_action->setShortcuts(QKeySequence::Undo);
-	connect(undo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
-	
-	redo_action->setShortcuts(QKeySequence::Redo);
-	connect(redo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
-	
-	cut_action->setShortcuts(QKeySequence::Cut);
-	
-	copy_action->setShortcuts(QKeySequence::Copy);
-	
-	paste_action->setShortcuts(QKeySequence::Paste);
-	
-	delete_action->setShortcut(QKeySequence::Delete);
-	
-	select_all_action->setShortcut(QKeySequence::SelectAll);
-	
-	select_range_action->setShortcut(QKeySequence("Ctrl+r"));
-	connect(select_range_action, SIGNAL(triggered()), dialog_controller, SLOT(show_select_range_dialog()));
-	
-	goto_action->setShortcut(QKeySequence("Ctrl+g"));
-	connect(goto_action, SIGNAL(triggered()), dialog_controller, SLOT(show_goto_dialog()));
-	
-	expand_action->setShortcut(QKeySequence("Ctrl+e"));
-	connect(expand_action, SIGNAL(triggered()), dialog_controller, SLOT(show_expand_dialog()));
-	
-	metadata_editor_action->setShortcut(QKeySequence("Ctrl+m"));
-	connect(metadata_editor_action, SIGNAL(triggered()), dialog_controller, SLOT(show_metadata_editor_dialog()));
-	
-	branch_action->setShortcut(QKeySequence("Ctrl+b"));
-	
-	jump_action->setShortcut(QKeySequence("Ctrl+j"));
-	
-	disassemble_action->setShortcut(QKeySequence("Ctrl+d"));
-	
-	scrollbar_toggle_action->setShortcut(QKeySequence("Alt+s"));
-	
-	version_action->setShortcut(QKeySequence("Alt+v"));
-	connect(version_action, SIGNAL(triggered()), this, SLOT(version()));
-}
-
 void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar)
 {
 	connect(scrollbar, SIGNAL(valueChanged(int)), editor, SLOT(slider_update(int)));
@@ -204,18 +110,8 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
 	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(setText(QString)));
 	
-	connect(cut_action, SIGNAL(triggered()), editor, SLOT(cut()));
-	connect(copy_action, SIGNAL(triggered()), editor, SLOT(copy()));
-	connect(paste_action, SIGNAL(triggered()), editor, SLOT(paste()));
-	connect(delete_action, SIGNAL(triggered()), editor, SLOT(delete_text()));
-	connect(select_all_action, SIGNAL(triggered()), editor, SLOT(select_all()));
-	connect(scrollbar_toggle_action, SIGNAL(triggered()), editor, SLOT(scroll_mode_changed()));
-	
-	connect(branch_action, SIGNAL(triggered()), editor, SLOT(branch()));
-	connect(jump_action, SIGNAL(triggered()), editor, SLOT(jump()));
-	connect(disassemble_action, SIGNAL(triggered()), editor, SLOT(disassemble()));
-	
 	dialog_controller->connect_to_editor(editor);
+	menu_controller->connect_to_widget(editor);
 }
 
 void main_window::create_new_tab(QString name, bool new_file)

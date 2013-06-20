@@ -5,6 +5,7 @@
 #include <QUndoGroup>
 #include <QAction>
 #include "dialog_manager.h"
+#include "menu_manager.h"
 
 class hex_editor;
 class dynamic_scrollbar;
@@ -36,43 +37,9 @@ class main_window : public QMainWindow
 		QTabWidget *tab_widget = new QTabWidget(this);
 		QUndoGroup *undo_group = new QUndoGroup(this);
 		dialog_manager *dialog_controller = new dialog_manager(this);
+		menu_manager *menu_controller = new menu_manager(this, menuBar());
 		int new_counter = 0;
-		
-		QMenu *file_menu;
-		QMenu *edit_menu;
-		QMenu *navigation_menu;
-		QMenu *ROM_menu;
-		QMenu *options_menu;
-		QMenu *help_menu;
-		
-		QAction *new_file_action = new QAction("&New", this);
-		QAction *open_action = new QAction("&Open...", this);
-		QAction *save_action = new QAction("&Save", this);
-		QAction *exit_action = new QAction("E&xit", this);
-		
-		QAction *undo_action = undo_group->createUndoAction(this);
-		QAction *redo_action = undo_group->createRedoAction(this);
-		QAction *cut_action = new QAction("Cu&t", this);
-		QAction *copy_action = new QAction("&Copy", this);
-		QAction *paste_action = new QAction("&Paste", this);
-		QAction *delete_action = new QAction("&Delete", this);
-		QAction *select_all_action = new QAction("&Select all", this);
-		QAction *select_range_action = new QAction("&Select Range", this);
-		
-		QAction *goto_action = new QAction("&Goto offset", this);
-		
-		QAction *expand_action = new QAction("&Expand ROM", this);
-		QAction *metadata_editor_action = new QAction("&Metadata editor", this);
-		QAction *branch_action = new QAction("Follow &branchr", this);
-		QAction *jump_action = new QAction("Follow &jump", this);
-		QAction *disassemble_action = new QAction("&Disassemble", this);
-		
-		QAction *scrollbar_toggle_action = new QAction("&Scrollbar toggle", this);
-		
-		QAction *version_action = new QAction("&Version", this);
-		
-		void create_menu();
-		void init_actions();
+
 		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar);
 		void create_new_tab(QString name, bool new_file = false);
 		hex_editor *get_editor(int i);

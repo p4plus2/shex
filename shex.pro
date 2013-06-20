@@ -23,7 +23,12 @@ SOURCES += main.cpp\
     dialogs/metadata_editor_dialog.cpp \
     dialog_manager.cpp \
     dialogs/expand_rom_dialog.cpp \
-    dialogs/abstract_dialog.cpp
+    dialogs/abstract_dialog.cpp \
+    menu_manager.cpp \
+    menus/abstract_menu_item.cpp \
+    menus/editor_menu_item.cpp \
+    menus/window_menu_item.cpp \
+    menus/dialog_menu_item.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -38,7 +43,12 @@ HEADERS  += main_window.h \
     dialogs/metadata_editor_dialog.h \
     dialog_manager.h \
     dialogs/expand_rom_dialog.h \
-    dialogs/abstract_dialog.h
+    dialogs/abstract_dialog.h \
+    menu_manager.h \
+    menus/abstract_menu_item.h \
+    menus/editor_menu_item.h \
+    menus/window_menu_item.h \
+    menus/dialog_menu_item.h
 
 OTHER_FILES += \
     version.sh
