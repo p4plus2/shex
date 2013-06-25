@@ -133,7 +133,7 @@ class ROM_metadata {
 		
 		bool has_header = false;
 
-		unsigned int header_index;
+		unsigned int header_index = 0x00;
 		unsigned int ram_size = 0x00;
 		unsigned char mapper_id = 0x00;
 		unsigned char rom_type = 0x00;

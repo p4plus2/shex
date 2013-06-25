@@ -40,7 +40,7 @@ class undo_action_command : public QUndoCommand
 class undo_paste_command : public undo_action_command
 {
 	public:
-		undo_paste_command(QByteArray *b, int l, QByteArray *d):undo_action_command(b, l, d){}
+		using undo_action_command::undo_action_command;
 		void undo();
 		void redo();
 };
@@ -48,7 +48,7 @@ class undo_paste_command : public undo_action_command
 class undo_delete_command : public undo_action_command
 {
 	public:
-		undo_delete_command(QByteArray *b, int l, QByteArray *d):undo_action_command(b, l, d){}
+		using undo_action_command::undo_action_command;
 		void undo();
 		void redo();
 	private:

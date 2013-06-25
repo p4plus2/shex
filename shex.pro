@@ -26,9 +26,6 @@ SOURCES += main.cpp\
     dialogs/abstract_dialog.cpp \
     menu_manager.cpp \
     menus/abstract_menu_item.cpp \
-    menus/editor_menu_item.cpp \
-    menus/window_menu_item.cpp \
-    menus/dialog_menu_item.cpp \
     menus/history_menu_item.cpp
 
 HEADERS  += main_window.h \
@@ -47,10 +44,8 @@ HEADERS  += main_window.h \
     dialogs/abstract_dialog.h \
     menu_manager.h \
     menus/abstract_menu_item.h \
-    menus/editor_menu_item.h \
-    menus/window_menu_item.h \
-    menus/dialog_menu_item.h \
-    menus/history_menu_item.h
+    menus/history_menu_item.h \
+    menus/generic_menu_item.h
 
 OTHER_FILES += \
     version.sh

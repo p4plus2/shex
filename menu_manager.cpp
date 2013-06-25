@@ -1,9 +1,7 @@
 #include <QMenuBar>
 #include "menu_manager.h"
-#include "menus/editor_menu_item.h"
-#include "menus/window_menu_item.h"
-#include "menus/dialog_menu_item.h"
 #include "menus/history_menu_item.h"
+#include "menus/generic_menu_item.h"
 #include "debug.h"
 
 
@@ -34,43 +32,45 @@ void menu_manager::create_actions()
 {
 typedef QKeySequence hotkey;
 	//temporary comment until toggles are ready
-#define add_toggle_action(M,N,R,T,H) menu->addAction(new M##_menu_item(N, SLOT(R), ""/*SIGNAL(T)*/, H, menu))
-#define add_action(M,N,R,H) menu->addAction(new M##_menu_item(N, SLOT(R), "", H, menu))
+#define add_toggle_action(M,N,R,T,H) menu->addAction(new generic_menu_item<M *>(N, SLOT(R), ""/*SIGNAL(T)*/, H, menu))
+#define add_action(M,N,R,H) menu->addAction(new generic_menu_item<M *>(N, SLOT(R), "", H, menu))
+#define add_history_action(N,R,H) menu->addAction(new history_menu_item(N, SLOT(R), "", H, menu))
 	QMenu *menu = find_menu("&File");
-	add_action(window, "&New", new_file(), hotkey::New);
-	add_action(window, "&Open", open(), hotkey::Open);
-	add_action(window, "&Save", save(), hotkey::Save);
+	add_action(main_window, "&New", new_file(), hotkey::New);
+	add_action(main_window, "&Open", open(), hotkey::Open);
+	add_action(main_window, "&Save", save(), hotkey::Save);
 	menu->addSeparator();
-	add_action(window, "E&xit", close(), hotkey::Quit);
+	add_action(main_window, "E&xit", close(), hotkey::Quit);
 
 	menu = find_menu("&Edit");
-	add_action(history, "U&ndo", update_hex_editor(), hotkey::Undo);
-	add_action(history, "R&edo", update_hex_editor(), hotkey::Redo);
+	add_history_action("U&ndo", update_hex_editor(), hotkey::Undo);
+	add_history_action("R&edo", update_hex_editor(), hotkey::Redo);
 	menu->addSeparator();
-	add_toggle_action(editor, "Cu&t", cut(), toggle(bool),hotkey::Cut);
-	add_toggle_action(editor, "&Copy", copy(), toggle(bool), hotkey::Copy);
-	add_toggle_action(editor, "&Paste", paste(), toggle(bool), hotkey::Paste);
-	add_toggle_action(editor, "&Delete", delete_text(), toggle(bool), hotkey::Delete);
+	add_toggle_action(hex_editor, "Cu&t", cut(), toggle(bool),hotkey::Cut);
+	add_toggle_action(hex_editor, "&Copy", copy(), toggle(bool), hotkey::Copy);
+	add_toggle_action(hex_editor, "&Paste", paste(), toggle(bool), hotkey::Paste);
+	add_toggle_action(hex_editor, "&Delete", delete_text(), toggle(bool), hotkey::Delete);
 	menu->addSeparator();
-	add_toggle_action(editor, "&Select all", select_all(), toggle(bool), hotkey::SelectAll);
-	add_toggle_action(dialog, "Select &range", show_select_range_dialog(), toggle(bool), hotkey("Ctrl+r"));
+	add_toggle_action(hex_editor, "&Select all", select_all(), toggle(bool), hotkey::SelectAll);
+	add_toggle_action(dialog_manager, "Select &range", show_select_range_dialog(), toggle(bool), hotkey("Ctrl+r"));
 
 	menu = find_menu("&Navigation");
-	add_toggle_action(dialog, "&Goto offset", show_goto_dialog(), toggle(bool), hotkey("Ctrl+g"));
+	add_toggle_action(dialog_manager, "&Goto offset", show_goto_dialog(), toggle(bool), hotkey("Ctrl+g"));
 	
 	menu = find_menu("&ROM utilities");
-	add_toggle_action(dialog, "&Expand ROM", show_expand_dialog(), toggle(bool), hotkey("Ctrl+e"));
-	add_toggle_action(dialog, "&Metadata editor", show_metadata_editor_dialog(), toggle(bool), hotkey("Ctrl+m"));
+	add_toggle_action(dialog_manager, "&Expand ROM", show_expand_dialog(), toggle(bool), hotkey("Ctrl+e"));
+	add_toggle_action(dialog_manager, "&Metadata editor", 
+	                  show_metadata_editor_dialog(), toggle(bool), hotkey("Ctrl+m"));
 	menu->addSeparator();
-	add_toggle_action(editor, "Follow &branch", branch(), toggle(bool),hotkey("Ctrl+b"));
-	add_toggle_action(editor, "Follow &jump", jump(), toggle(bool), hotkey("Ctrl+j"));
-	add_toggle_action(editor, "&Disassemble", disassemble(), toggle(bool), hotkey("Ctrl+d"));
+	add_toggle_action(hex_editor, "Follow &branch", branch(), toggle(bool),hotkey("Ctrl+b"));
+	add_toggle_action(hex_editor, "Follow &jump", jump(), toggle(bool), hotkey("Ctrl+j"));
+	add_toggle_action(hex_editor, "&Disassemble", disassemble(), toggle(bool), hotkey("Ctrl+d"));
 
 	menu = find_menu("&Options");
-	add_toggle_action(editor, "&Scrollbar toggle", scroll_mode_changed(), toggle(bool), hotkey("Alt+s"));
+	add_toggle_action(hex_editor, "&Scrollbar toggle", scroll_mode_changed(), toggle(bool), hotkey("Alt+s"));
 	
 	menu = find_menu("&Help");
-	add_toggle_action(window, "&Version", version(), toggle(bool), hotkey("Alt+v"));
+	add_toggle_action(main_window, "&Version", version(), toggle(bool), hotkey("Alt+v"));
 
 #undef add_action
 #undef add_toggle_action
