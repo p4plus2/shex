@@ -29,6 +29,7 @@ main_window::main_window(QWidget *parent)
 	connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(changed_tab(int)));
 	menu_controller->connect_to_widget(this);
 	menu_controller->connect_to_widget(dialog_controller);
+	menu_controller->connect_to_widget(undo_group);
 #ifdef USE_DEFAULT_ROM
 	create_new_tab("smw.smc");
 #endif

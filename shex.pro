@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     menus/abstract_menu_item.cpp \
     menus/editor_menu_item.cpp \
     menus/window_menu_item.cpp \
-    menus/dialog_menu_item.cpp
+    menus/dialog_menu_item.cpp \
+    menus/history_menu_item.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -48,7 +49,8 @@ HEADERS  += main_window.h \
     menus/abstract_menu_item.h \
     menus/editor_menu_item.h \
     menus/window_menu_item.h \
-    menus/dialog_menu_item.h
+    menus/dialog_menu_item.h \
+    menus/history_menu_item.h
 
 OTHER_FILES += \
     version.sh

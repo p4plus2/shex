@@ -3,6 +3,7 @@
 #include "menus/editor_menu_item.h"
 #include "menus/window_menu_item.h"
 #include "menus/dialog_menu_item.h"
+#include "menus/history_menu_item.h"
 #include "debug.h"
 
 
@@ -33,24 +34,18 @@ void menu_manager::create_actions()
 {
 typedef QKeySequence hotkey;
 	//temporary comment until toggles are ready
-#define add_toggle_action(M,N,R,T,H) menu->addAction(new M##_menu_item(N, SLOT(R), ""/*SIGNAL(T)*/, H, menu));
-#define add_action(M,N,R,H) menu->addAction(new M##_menu_item(N, SLOT(R), "", H, menu));
+#define add_toggle_action(M,N,R,T,H) menu->addAction(new M##_menu_item(N, SLOT(R), ""/*SIGNAL(T)*/, H, menu))
+#define add_action(M,N,R,H) menu->addAction(new M##_menu_item(N, SLOT(R), "", H, menu))
 	QMenu *menu = find_menu("&File");
 	add_action(window, "&New", new_file(), hotkey::New);
 	add_action(window, "&Open", open(), hotkey::Open);
 	add_action(window, "&Save", save(), hotkey::Save);
 	menu->addSeparator();
 	add_action(window, "E&xit", close(), hotkey::Quit);
-	
-	//this needs fixed as well.
-	//QAction *undo_action = undo_group->createUndoAction(this);
-	//QAction *redo_action = undo_group->createRedoAction(this);
-	//undo_action->setShortcuts(hotkey::Undo);
-	//connect(undo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
-	//redo_action->setShortcuts(hotkey::Redo);
-	//connect(redo_action, SIGNAL(triggered()), this, SLOT(update_hex_editor()));
-	
+
 	menu = find_menu("&Edit");
+	add_action(history, "U&ndo", update_hex_editor(), hotkey::Undo);
+	add_action(history, "R&edo", update_hex_editor(), hotkey::Redo);
 	menu->addSeparator();
 	add_toggle_action(editor, "Cu&t", cut(), toggle(bool),hotkey::Cut);
 	add_toggle_action(editor, "&Copy", copy(), toggle(bool), hotkey::Copy);
