@@ -8,12 +8,20 @@ dialog_manager::dialog_manager(QObject *parent) :
 	dialog_list.append(new select_range_dialog());
 	dialog_list.append(new expand_ROM_dialog());
 	dialog_list.append(new metadata_editor_dialog());
+	dialog_list.append(new find_replace_dialog());
 }
 
 void dialog_manager::connect_to_editor(hex_editor *editor)
 {
 	connect(find_dialog("goto"), SIGNAL(triggered(int)), editor, SLOT(goto_offset(int)));
-	connect(find_dialog("select_range"), SIGNAL(triggered(int,int)),editor, SLOT(select_range(int,int)));
+	connect(find_dialog("select_range"), SIGNAL(triggered(int,int)), editor, SLOT(select_range(int,int)));
+	connect(find_dialog("find_replace"), SIGNAL(count(QString, bool)), editor, SLOT(count(QString, bool)));
+	connect(find_dialog("find_replace"), SIGNAL(search(QString, bool, bool)),
+	        editor, SLOT(search(QString, bool, bool)));
+	connect(find_dialog("find_replace"), SIGNAL(replace(QString, QString, bool, bool)),
+	        editor, SLOT(replace(QString, QString, bool, bool)));
+	connect(find_dialog("find_replace"), SIGNAL(replace_all(QString, QString, bool)),
+	        editor, SLOT(replace_all(QString, QString, bool)));
 }
 
 void dialog_manager::set_active_editor(hex_editor *editor)

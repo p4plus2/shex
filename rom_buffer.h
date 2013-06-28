@@ -9,6 +9,7 @@
 #include <QMimeData>
 #include <QUndoGroup>
 #include <QUndoStack>
+#include <QRegExp>
 
 class ROM_buffer : public ROM_metadata
 {
@@ -24,6 +25,10 @@ class ROM_buffer : public ROM_metadata
 		virtual void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0);
 		QString get_line(int index, int length);
 		QString get_formatted_address(int address);
+		int count(QString find, bool mode);
+		int search(QString find, int position, bool direction, bool mode);
+		int replace(QString find, QString replace, int position, bool direction, bool mode);
+		int replace_all(QString find, QString replace, bool mode);
 		
 		inline QString get_file_name(){ return ROM.fileName(); }
 		inline virtual int size(){ return buffer.size() - header_size(); }
@@ -32,6 +37,7 @@ class ROM_buffer : public ROM_metadata
 		inline bool check_paste_data(){ return !clipboard->mimeData()->hasText(); }
 		inline void set_active(){ undo_stack->setActive(); }
 		inline bool is_active(){ return undo_stack->isActive(); }
+		inline QString to_hex(QString input) { return input.remove(QRegExp("[^0-9A-Fa-f]")); }
 		
 		enum paste_style{
 			NO_SPACES,
@@ -42,6 +48,12 @@ class ROM_buffer : public ROM_metadata
 			ASM_LONG_TABLE,
 			C_SOURCE
 		};
+		
+		enum search_error{
+			NOT_FOUND = -1,
+			INVALID_FIND = -2,
+			INVALID_REPLACE = -3
+		};
 
 	private:
 		QFile ROM;
@@ -49,6 +61,8 @@ class ROM_buffer : public ROM_metadata
 		QClipboard *clipboard = QApplication::clipboard();
 		QUndoStack *undo_stack;
 		paste_style paste_type = NO_SPACES;
+		
+		QByteArray input_to_byte_array(QString input, int mode);
 };
 
 #endif // ROM_BUFFER_H

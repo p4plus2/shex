@@ -296,6 +296,83 @@ void hex_editor::disassemble()
 	}
 }
 
+void hex_editor::count(QString find, bool mode)
+{
+	if(!buffer->is_active()){
+		return;
+	}
+	int result = buffer->count(find, mode);
+	if(result < 0){
+		search_error(result, find);
+	}else{
+		update_status_text(QString::number(result) + " Results found for " + find);
+	}
+
+}
+
+void hex_editor::search(QString find, bool direction, bool mode)
+{	
+	if(!buffer->is_active()){
+		return;
+	}
+	
+	int position[2];
+	if(!get_selection_range(position)){
+		position[1] = get_buffer_position(cursor_position) + buffer->header_size();
+	}else if(!direction){
+		position[1] = position[0] - 1;
+	}
+	int result = buffer->search(find, position[1], direction, mode);
+	if(result < 0){
+		search_error(result, find);
+	}else{
+		int start = buffer->pc_to_snes(result - buffer->header_size());
+		int end = 0;
+		if(mode){
+			end = buffer->pc_to_snes(result - buffer->header_size() + buffer->to_hex(find).length()/2 - 1);
+		}else{
+			end = buffer->pc_to_snes(result - buffer->header_size() + find.length() - 1);
+		}
+		goto_offset(end);
+		select_range(start, end);
+	}
+}
+
+void hex_editor::replace(QString find, QString replace, bool direction, bool mode)
+{
+	if(!buffer->is_active()){
+		return;
+	}
+	int position = get_buffer_position(cursor_position) + buffer->header_size();
+	int result = buffer->replace(find, replace, position, direction, mode);
+	if(result < 0){
+		search_error(result, find, replace);
+	}else{
+		int start = buffer->pc_to_snes(result - buffer->header_size());
+		int end = 0;
+		if(mode){
+			end = buffer->pc_to_snes(result - buffer->header_size() + buffer->to_hex(replace).length()/2 - 1);
+		}else{
+			end = buffer->pc_to_snes(result - buffer->header_size() + replace.length() - 1);
+		}
+		goto_offset(end);
+		select_range(start, end);
+	}
+}
+
+void hex_editor::replace_all(QString find, QString replace, bool mode)
+{
+	if(!buffer->is_active()){
+		return;
+	}
+	int result = buffer->replace_all(find, replace, mode);
+	if(result < 0){
+		search_error(result, find, replace);
+	}else{
+		update_status_text(QString::number(result) + " Results found for " + find);
+	}
+}
+
 void hex_editor::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
@@ -725,6 +802,17 @@ void hex_editor::update_window()
 	emit update_status_text(get_status_text());
 	cursor_state = true;
 	update();
+}
+
+void hex_editor::search_error(int error, QString find, QString replace_with)
+{
+	if(error == ROM_buffer::INVALID_REPLACE){
+		update_status_text("Error: Invalid replace hex string: " + replace_with);
+	}else if(error == ROM_buffer::INVALID_FIND){
+		update_status_text("Error: Invalid find hex string: " + find);
+	}else if(error == ROM_buffer::NOT_FOUND){
+		update_status_text("Error: String " + find + " not found.");
+	}
 }
 
 hex_editor::~hex_editor()

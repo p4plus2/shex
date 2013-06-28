@@ -1,6 +1,7 @@
 #ifndef DIALOG_MANAGER_H
 #define DIALOG_MANAGER_H
 
+#include "dialogs/find_replace_dialog.h"
 #include "dialogs/goto_dialog.h"
 #include "dialogs/select_range_dialog.h"
 #include "dialogs/expand_rom_dialog.h"
@@ -29,6 +30,7 @@ class dialog_manager : public QObject
 		inline void show_select_range_dialog() { raise_dialog("select_range"); }
 		inline void show_expand_dialog(){ raise_dialog("expand_ROM"); }
 		inline void show_metadata_editor_dialog(){ raise_dialog("metadata_editor"); }
+		inline void show_find_replace_dialog(){ raise_dialog("find_replace"); }
 		
 	private:
 		QList<abstract_dialog *> dialog_list;

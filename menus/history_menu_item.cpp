@@ -28,7 +28,7 @@ void history_menu_item::connect_to_widget(QUndoGroup *group)
 
 void history_menu_item::connect_to_widget(main_window *window)
 {
-	connect(this, SIGNAL(triggered()), window, run.toAscii().data());
+	connect(this, SIGNAL(triggered()), window, run.toUtf8().data());
 }
 
 

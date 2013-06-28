@@ -14,9 +14,9 @@ class generic_menu_item : public abstract_menu_item
 		void connect_to_widget(W widget)
 		{
 			connect(static_cast<abstract_menu_item *>(this), 
-			        SIGNAL(triggered()),widget, run.toAscii().data());
+			        SIGNAL(triggered()),widget, run.toUtf8().data());
 			if(toggle != ""){
-				connect(widget, toggle.toAscii().data(), 
+				connect(widget, toggle.toUtf8().data(), 
 				        static_cast<abstract_menu_item *>(this), SLOT(setEnabled(bool)));
 			}
 		}

@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     dialogs/abstract_dialog.cpp \
     menu_manager.cpp \
     menus/abstract_menu_item.cpp \
-    menus/history_menu_item.cpp
+    menus/history_menu_item.cpp \
+    dialogs/find_replace_dialog.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -45,7 +46,8 @@ HEADERS  += main_window.h \
     menu_manager.h \
     menus/abstract_menu_item.h \
     menus/history_menu_item.h \
-    menus/generic_menu_item.h
+    menus/generic_menu_item.h \
+    dialogs/find_replace_dialog.h
 
 OTHER_FILES += \
     version.sh

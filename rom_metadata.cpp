@@ -104,7 +104,7 @@ void ROM_metadata::update_vector(vectors vector, unsigned short data)
 
 void ROM_metadata::update_cart_name(QString name)
 {
-	QByteArray n = name.toAscii();
+	QByteArray n = name.toUtf8();
 	for(int i = 0; i < 21; i++){
 		update_byte(n[i], header_index+i);
 	}

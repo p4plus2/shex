@@ -46,6 +46,10 @@ class hex_editor : public QWidget
 		void branch();
 		void jump();
 		void disassemble();
+		void count(QString find, bool mode);
+		void search(QString find, bool direction, bool mode);
+		void replace(QString find, QString replace, bool direction, bool mode);
+		void replace_all(QString find, QString replace, bool mode);
 
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
@@ -99,6 +103,7 @@ class hex_editor : public QWidget
 		void update_selection_position(int amount);
 		void update_selection(int x, int y);
 		void update_window();
+		void search_error(int error, QString find = "", QString replace_with = "");
 		
 		inline int column_width(int size){ return size * font_width; }
 		inline int column_height(int size){ return size * font_height; }

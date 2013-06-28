@@ -53,6 +53,8 @@ typedef QKeySequence hotkey;
 	menu->addSeparator();
 	add_toggle_action(hex_editor, "&Select all", select_all(), toggle(bool), hotkey::SelectAll);
 	add_toggle_action(dialog_manager, "Select &range", show_select_range_dialog(), toggle(bool), hotkey("Ctrl+r"));
+	menu->addSeparator();
+	add_toggle_action(dialog_manager, "&Find/Replace", show_find_replace_dialog(), toggle(bool), hotkey("Ctrl+f"));
 
 	menu = find_menu("&Navigation");
 	add_toggle_action(dialog_manager, "&Goto offset", show_goto_dialog(), toggle(bool), hotkey("Ctrl+g"));

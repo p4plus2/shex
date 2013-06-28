@@ -225,3 +225,75 @@ QString ROM_buffer::get_formatted_address(int address)
 	return QString::number(bank, 16).rightJustified(2, '0').toUpper() +
 			":" + QString::number(word,16).rightJustified(4, '0').toUpper();
 }
+
+
+int ROM_buffer::count(QString find, bool mode)
+{
+	QByteArray search_for = input_to_byte_array(find, mode);
+	if(search_for.isEmpty()){
+		return INVALID_FIND;
+	}
+	return buffer.count(search_for);
+}
+
+int ROM_buffer::search(QString find, int position, bool direction, bool mode)
+{	
+	QByteArray search_for = input_to_byte_array(find, mode);
+	if(search_for.isEmpty()){
+		return INVALID_FIND;
+	}
+	int found_at = NOT_FOUND;
+	for(int pass = 0; pass < 2 && found_at == NOT_FOUND; pass++){
+		if(direction){
+			found_at = buffer.indexOf(search_for, position);
+			position = 0;
+		}else{
+			found_at = buffer.lastIndexOf(search_for, position);
+			position = -1;
+		}
+	}
+	return found_at;
+}
+
+int ROM_buffer::replace(QString find, QString replace, int position, bool direction, bool mode)
+{
+	int result = search(find, position, direction, mode);
+	if(result < 0){
+		return result;
+	}
+	QByteArray replace_with = input_to_byte_array(replace, mode);
+	if(replace_with.isEmpty() && !replace.isEmpty()){
+		return INVALID_REPLACE;
+	}
+	buffer.remove(result, input_to_byte_array(find, mode).length());
+	buffer.insert(result, replace_with);
+	return result;
+}
+
+int ROM_buffer::replace_all(QString find, QString replace, bool mode)
+{
+	QByteArray search_for = input_to_byte_array(find, mode);
+	QByteArray replace_with = input_to_byte_array(replace, mode);
+	if(replace_with.isEmpty()){
+		return INVALID_FIND;
+	}else if(replace_with.isEmpty() && !replace.isEmpty()){
+		return INVALID_REPLACE;
+	}
+	int results = count(find, mode);
+	buffer.replace(search_for, replace_with);
+	qDebug() << results;
+	return results;
+}
+
+QByteArray ROM_buffer::input_to_byte_array(QString input, int mode)
+{
+	if(mode){
+		QString hex = to_hex(input);
+		if(hex.length() & 1){
+			return QByteArray();
+		}else{
+			return QByteArray::fromHex(hex.toUtf8());
+		}
+	}
+	return input.toUtf8();
+}
