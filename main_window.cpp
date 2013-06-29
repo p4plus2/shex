@@ -36,6 +36,8 @@ main_window::main_window(QWidget *parent)
 	qDebug() << character_mapper::load_map("test2.map");
 	qDebug() << hex << character_mapper::get_map()->keys() << '\n' << character_mapper::get_map()->values();
 	qDebug() << character_mapper::decode("APPLE").toHex();
+	qDebug() << character_mapper::encode(character_mapper::decode("APPLE"));
+	qDebug() << character_mapper::encode(0xFC);
 #endif
 }
 

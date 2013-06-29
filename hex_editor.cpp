@@ -1,4 +1,5 @@
 #include "hex_editor.h"
+#include "character_mapper.h"
 #include "debug.h"
 
 #include <QPainter>
@@ -457,7 +458,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			char key = event->modifiers() != Qt::ShiftModifier &&
 			                event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z ? 
 			                        event->key() + 32 : event->key();
-			handle_typed_character(key, true);
+			handle_typed_character(character_mapper::decode(key), true);
 		}
 	}else{
 		if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){

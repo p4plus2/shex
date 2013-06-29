@@ -9,6 +9,8 @@ class character_mapper
 		static QMap<unsigned char, unsigned char> *get_map(){ return map; }
 		static unsigned char decode(unsigned char input);
 		static QByteArray decode(QByteArray input);
+		static unsigned char encode(unsigned char input);
+		static QByteArray encode(QByteArray input);
 	private:
 		static QMap<unsigned char, unsigned char> *map;
 		static bool map_state;

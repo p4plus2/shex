@@ -1,5 +1,6 @@
 #include "character_mapper.h"
 #include <QFile>
+#include "debug.h"
 
 bool character_mapper::load_map(QString map_file_path)
 {
@@ -64,6 +65,27 @@ QByteArray character_mapper::decode(QByteArray input)
 		for(int i = input.length() - 1; i > -1; i--){
 			unsigned char current = input.at(i);
 			input[i] = map->contains(current) ? map->value(current) : current;
+		}
+	}
+	return input;
+}
+
+unsigned char character_mapper::encode(unsigned char input)
+{
+	if(map != nullptr && map->key(input) && map_state){
+		return map->key(input);
+	}
+	return input;
+	
+}
+
+QByteArray character_mapper::encode(QByteArray input)
+{
+	if(map != nullptr && map_state){
+		qDebug() << input.length();
+		for(int i = input.length() - 1; i > -1; i--){
+			unsigned char current = input.at(i);
+			input[i] = map->key(current) ? map->key(current) : current;
 		}
 	}
 	return input;

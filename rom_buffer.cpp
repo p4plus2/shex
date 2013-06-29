@@ -1,6 +1,7 @@
 #include "rom_buffer.h"
 #include "undo_commands.h"
 #include "debug.h"
+#include "character_mapper.h"
 
 #include <QTextStream>
 #include <QRegExp>
@@ -204,8 +205,8 @@ QString ROM_buffer::get_line(int index, int length)
 	string_stream << "    ";
 
 	for(int i = index; i < line_length; i++){
-		if(isprint((unsigned char)buffer.at(i))){
-			string_stream << buffer.at(i);
+		if(isprint(character_mapper::encode(buffer.at(i)))){
+			string_stream << (char)character_mapper::encode(buffer.at(i));
 		}else{
 			string_stream << ".";
 		}
@@ -295,5 +296,6 @@ QByteArray ROM_buffer::input_to_byte_array(QString input, int mode)
 			return QByteArray::fromHex(hex.toUtf8());
 		}
 	}
-	return input.toUtf8();
+	qDebug() << input << character_mapper::decode(input.toUtf8());
+	return character_mapper::decode(input.toUtf8());
 }
