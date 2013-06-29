@@ -3,6 +3,7 @@
 #include "dynamic_scrollbar.h"
 #include "version.h"
 #include "debug.h"
+#include "character_mapper.h"
 
 #include <QStatusBar>
 #include <QHBoxLayout>
@@ -32,6 +33,9 @@ main_window::main_window(QWidget *parent)
 	menu_controller->connect_to_widget(undo_group);
 #ifdef USE_DEFAULT_ROM
 	create_new_tab("smw.smc");
+	qDebug() << character_mapper::load_map("test2.map");
+	qDebug() << hex << character_mapper::get_map()->keys() << '\n' << character_mapper::get_map()->values();
+	qDebug() << character_mapper::decode("APPLE").toHex();
 #endif
 }
 
