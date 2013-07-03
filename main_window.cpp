@@ -33,11 +33,6 @@ main_window::main_window(QWidget *parent)
 	menu_controller->connect_to_widget(undo_group);
 #ifdef USE_DEFAULT_ROM
 	create_new_tab("smw.smc");
-	qDebug() << character_mapper::load_map("test2.map");
-	qDebug() << hex << character_mapper::get_map()->keys() << '\n' << character_mapper::get_map()->values();
-	qDebug() << character_mapper::decode("APPLE").toHex();
-	qDebug() << character_mapper::encode(character_mapper::decode("APPLE"));
-	qDebug() << character_mapper::encode(0xFC);
 #endif
 }
 
@@ -146,5 +141,5 @@ hex_editor *main_window::get_editor(int i)
 
 main_window::~main_window()
 {
-	
+	character_mapper::delete_active_map();
 }

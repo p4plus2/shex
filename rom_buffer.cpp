@@ -296,6 +296,5 @@ QByteArray ROM_buffer::input_to_byte_array(QString input, int mode)
 			return QByteArray::fromHex(hex.toUtf8());
 		}
 	}
-	qDebug() << input << character_mapper::decode(input.toUtf8());
 	return character_mapper::decode(input.toUtf8());
 }

@@ -70,6 +70,7 @@ typedef QKeySequence hotkey;
 
 	menu = find_menu("&Options");
 	add_toggle_action(hex_editor, "&Scrollbar toggle", scroll_mode_changed(), toggle(bool), hotkey("Alt+s"));
+	add_action(dialog_manager, "&Character map editor", show_map_editor_dialog(), hotkey("Alt+c"));
 	
 	menu = find_menu("&Help");
 	add_toggle_action(main_window, "&Version", version(), toggle(bool), hotkey("Alt+v"));
