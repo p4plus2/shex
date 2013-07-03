@@ -27,6 +27,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 	        this, SLOT(context_menu(const QPoint&)));
+	connect(qApp->clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboard_changed()));
 	
 	QSize minimum = minimumSizeHint();
 	minimum.setHeight(rows/2*font_height+vertical_offset+vertical_shift);
@@ -50,6 +51,9 @@ void hex_editor::set_focus()
 	emit update_status_text(get_status_text());
 	setFocus();
 	buffer->set_active();
+	emit selection_toggled(selection_active);
+	emit focused(true);
+	clipboard_changed();
 }
 
 void hex_editor::slider_update(int position)
@@ -128,7 +132,7 @@ void hex_editor::update_undo_action()
 	if(get_buffer_position(cursor_position) > buffer->size()){
 		cursor_position = get_byte_position(buffer->size());
 	}
-	selection_active = false;
+	set_selection_active(false);
 	is_dragging = false;
 	update_window();
 }
@@ -148,7 +152,7 @@ void hex_editor::goto_offset(int address)
 		offset = buffer->size() - rows * columns;
 	}
 	cursor_position = get_byte_position(address);
-	selection_active = false;
+	set_selection_active(false);
 	update_window();
 }
 
@@ -169,26 +173,26 @@ void hex_editor::select_range(int start, int end)
 	}
 	selection_start = get_byte_position(start);
 	selection_current = get_byte_position(end);
-	selection_active = true;
+	set_selection_active(true);
 	update_window();
 }
 
 void hex_editor::context_menu(const QPoint& position)
 {	
 	QMenu menu;
-	menu.addAction("Cut", this, SLOT(cut()), QKeySequence::Cut)->setDisabled(!selection_active);
-	menu.addAction("Copy", this, SLOT(copy()), QKeySequence::Copy)->setDisabled(!selection_active);
-	menu.addAction("Paste", this, SLOT(paste()), QKeySequence::Paste)->setDisabled(buffer->check_paste_data());
-	menu.addAction("Delete", this, SLOT(delete_text()), QKeySequence::Delete)->setDisabled(!selection_active);
+	menu.addAction("Cut", this, SLOT(cut()), QKeySequence::Cut)->setEnabled(selection_active);
+	menu.addAction("Copy", this, SLOT(copy()), QKeySequence::Copy)->setEnabled(selection_active);
+	menu.addAction("Paste", this, SLOT(paste()), QKeySequence::Paste)->setEnabled(buffer->check_paste_data());
+	menu.addAction("Delete", this, SLOT(delete_text()), QKeySequence::Delete)->setEnabled(selection_active);
 	menu.addSeparator();
 	menu.addAction("Select all", this, SLOT(select_all()), QKeySequence::SelectAll);
 	menu.addSeparator();
 	menu.addAction("Follow branch", this, 
-	               SLOT(branch()), QKeySequence("Ctrl+b"))->setDisabled(!follow_selection(true));
+	               SLOT(branch()), QKeySequence("Ctrl+b"))->setEnabled(follow_selection(true));
 	menu.addAction("Follow jump", this, 
-	               SLOT(jump()), QKeySequence("Ctrl+j"))->setDisabled(!follow_selection(false));
+	               SLOT(jump()), QKeySequence("Ctrl+j"))->setEnabled(follow_selection(false));
 	menu.addAction("Disassemble", this, 
-	               SLOT(disassemble()), QKeySequence("Ctrl+d"))->setDisabled(!selection_active);
+	               SLOT(disassemble()), QKeySequence("Ctrl+d"))->setEnabled(selection_active);
 	
 	menu.exec(mapToGlobal(position));
 }
@@ -202,7 +206,7 @@ void hex_editor::cut()
 	
 	buffer->cut(position[0], position[1]);
 	cursor_position = selection_start;
-	selection_active = false;
+	set_selection_active(false);
 	update_window();
 }
 
@@ -228,7 +232,7 @@ void hex_editor::paste(bool raw)
 	}else{
 		int size = buffer->paste(get_buffer_position(cursor_position), 0, raw);
 		cursor_position = get_byte_position(get_buffer_position(cursor_position)+size);
-		selection_active = false;
+		set_selection_active(false);
 	}
 	update_window();
 }
@@ -243,7 +247,7 @@ void hex_editor::delete_text()
 		buffer->delete_text(get_buffer_position(cursor_position));
 	}else{
 		buffer->delete_text(position[0], position[1]);	
-		selection_active = false;
+		set_selection_active(false);
 		cursor_position = selection_start;
 	}
 	update_window();
@@ -256,7 +260,7 @@ void hex_editor::select_all()
 	}
 	selection_start = get_byte_position(0);
 	selection_current = get_byte_position(buffer->size());
-	selection_active = true;
+	set_selection_active(true);
 	emit update_status_text(get_status_text());
 	update();
 }
@@ -558,7 +562,7 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 		return;
 	}
 	
-	selection_active = false;
+	set_selection_active(false);
 	if(x > column_width(11) && x < column_width(11+columns*3)-font_width){
 		update_cursor_position(x, y);
 		is_dragging = true;
@@ -575,7 +579,7 @@ void hex_editor::mouseMoveEvent(QMouseEvent *event)
 	}
 	
 	if(is_dragging){
-		selection_active = true;
+		set_selection_active(true);
 		update_selection(mouse_position.x(), event->y());
 		if(event->y() > column_height(rows)){
 			scroll_timer->start(20);
@@ -803,6 +807,7 @@ void hex_editor::update_window()
 	emit update_status_text(get_status_text());
 	cursor_state = true;
 	update();
+	emit selection_toggled(selection_active);
 }
 
 void hex_editor::search_error(int error, QString find, QString replace_with)
@@ -818,6 +823,9 @@ void hex_editor::search_error(int error, QString find, QString replace_with)
 
 hex_editor::~hex_editor()
 {
+	emit selection_toggled(false);
+	emit clipboard_usable(false);
+	emit focused(false);
 	delete buffer;
 }
 

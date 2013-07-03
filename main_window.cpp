@@ -28,6 +28,7 @@ main_window::main_window(QWidget *parent)
 	setMinimumSize(600, QApplication::desktop()->height() < 650 ? 330 : 660);
 	connect(tab_widget, SIGNAL(tabCloseRequested(int)), this, SLOT(close_tab(int)));
 	connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(changed_tab(int)));
+	connect(this, SIGNAL(active_editors(bool)), dialog_controller, SIGNAL(active_editors(bool)));
 	menu_controller->connect_to_widget(this);
 	menu_controller->connect_to_widget(dialog_controller);
 	menu_controller->connect_to_widget(undo_group);
@@ -41,6 +42,9 @@ void main_window::close_tab(int i)
 	QWidget *widget = tab_widget->widget(i);
 	tab_widget->removeTab(i);
 	delete widget;
+	if(!tab_widget->count()){
+		emit active_editors(false);
+	}
 }
 
 void main_window::changed_tab(int i)
@@ -132,6 +136,7 @@ void main_window::create_new_tab(QString name, bool new_file)
 	tab_widget->setCurrentWidget(widget);
 	editor->set_focus();
 	setMinimumSize(tab_widget->minimumSize());
+	emit active_editors(true);
 }
 
 hex_editor *main_window::get_editor(int i)

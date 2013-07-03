@@ -62,7 +62,9 @@ void map_editor_dialog::load_map()
 	active_map = QFileDialog::getOpenFileName(this, "Open file", QDir::homePath(), 
 	                                          "Map files (*.map *.txt);;All files(*.*)");
 	character_mapper::load_map(active_map);
-	active_editor->update();
+	if(active_editor){
+		active_editor->update();
+	}
 	QMap<unsigned char, unsigned char> *loaded_map = character_mapper::get_map();
 	for(int i = 0; i < 0x5F; i++){
 		input_list[i]->setText(QString::number(loaded_map->value(i+0x20), 16).rightJustified(2, '0'));
@@ -86,7 +88,9 @@ void map_editor_dialog::apply_map()
 	}
 	
 	character_mapper::set_map(new_map);
-	active_editor->update();
+	if(active_editor){
+		active_editor->update();
+	}
 }
 
 void map_editor_dialog::clear_map()

@@ -13,8 +13,6 @@ class history_menu_item : public abstract_menu_item
 		virtual void connect_to_widget(QUndoGroup *group);
 		virtual void connect_to_widget(main_window *window);
 		
-	signals:
-		
 	public slots:
 		void set_prefix(const QString &t);
 		

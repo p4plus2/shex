@@ -27,6 +27,9 @@ class hex_editor : public QWidget
 		void update_range(int value);
 		void update_status_text(QString text);
 		void toggle_scroll_mode(bool mode);
+		void selection_toggled(bool state);
+		void focused(bool has_focus);
+		void clipboard_usable(bool);
 
 	public slots:
 		void update_cursor_state();
@@ -50,6 +53,8 @@ class hex_editor : public QWidget
 		void search(QString find, bool direction, bool mode);
 		void replace(QString find, QString replace, bool direction, bool mode);
 		void replace_all(QString find, QString replace, bool mode);
+		
+		inline void clipboard_changed(){ emit clipboard_usable(buffer->check_paste_data()); }
 
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
@@ -110,6 +115,7 @@ class hex_editor : public QWidget
 		inline int to_ascii_column(int x){ return column_width(14+columns*3+(x-font_width*11)/font_width/3); }
 		inline int to_hex_column(int x){ return column_width(11+(x-font_width*(14+columns*3))/font_width*3); }
 		inline int get_max_lines(){ return buffer->size() / columns - rows; }
+		inline void set_selection_active(bool s){ selection_active = s; emit selection_toggled(s); }
 		
 		static const QString offset_header;
 };

@@ -25,6 +25,7 @@ class dialog_manager : public QObject
 		void set_active_editor(hex_editor *editor);
 		
 	signals:
+		void active_editors(bool active);
 		
 	public slots:
 		inline void show_goto_dialog() { raise_dialog("goto"); }

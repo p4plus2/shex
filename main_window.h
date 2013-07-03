@@ -29,6 +29,9 @@ class main_window : public QMainWindow
 		void version();
 		void update_hex_editor();
 		
+	signals:
+		void active_editors(bool active);
+		
 	protected:
 		virtual void closeEvent(QCloseEvent *event);
 		

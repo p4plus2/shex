@@ -16,8 +16,6 @@ class metadata_editor_dialog : public abstract_dialog
 		explicit metadata_editor_dialog();
 		virtual QString id(){ return "metadata_editor"; }
 		
-	signals:
-		
 	public slots:
 		virtual void refresh();
 		void write();

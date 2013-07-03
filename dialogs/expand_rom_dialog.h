@@ -9,11 +9,6 @@ class expand_ROM_dialog : public abstract_dialog
 	public:
 		explicit expand_ROM_dialog();
 		virtual QString id(){ return "expand_ROM"; }
-		
-	signals:
-		
-	public slots:
-		
 };
 
 #endif // EXPAND_ROM_DIALOG_H

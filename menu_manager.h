@@ -21,17 +21,13 @@ class menu_manager : public QObject
 		{
 			foreach(QMenu *menu, menu_list){
 				foreach(QAction *action, menu->actions()){
-					if(!action->isSeparator() && action->text() != "Undo" && action->text() != "Redo"){
+					if(!action->isSeparator()){
 						dynamic_cast<abstract_menu_item *>(action)->connect_to_widget(widget);
 					}
 				}
 			}
 		}
 		
-		
-	signals:
-		
-	public slots:
 	private:
 		QMenuBar *menu_bar;
 		QList<QMenu *> menu_list;

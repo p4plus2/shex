@@ -21,11 +21,6 @@ class generic_menu_item : public abstract_menu_item
 			}
 		}
 		
-		
-	signals:
-		
-	public slots:
-		
 };
 
 #endif // GENERIC_MENU_ITEM_H

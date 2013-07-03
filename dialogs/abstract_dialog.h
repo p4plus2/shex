@@ -12,8 +12,6 @@ class abstract_dialog : public QDialog
 		void set_active_editor(hex_editor *editor);
 		virtual QString id() = 0;
 		
-	signals:
-		
 	public slots:
 		virtual void refresh();
 		

@@ -21,10 +21,6 @@ class abstract_menu_item : public QAction
 		virtual void connect_to_widget(QUndoGroup *group){Q_UNUSED(group);}
 		virtual void connect_to_widget(dialog_manager *dialog_controller){Q_UNUSED(dialog_controller);}
 		
-	signals:
-		
-	public slots:
-		
 	protected:
 		QString run;
 		QString toggle;

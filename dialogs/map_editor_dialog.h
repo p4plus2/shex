@@ -12,6 +12,7 @@ class map_editor_dialog : public abstract_dialog
 	public:
 		explicit map_editor_dialog();
 		virtual QString id(){ return "map_editor"; }
+		virtual void refresh(){}
 		
 	public slots:
 		void load_map();
