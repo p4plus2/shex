@@ -29,11 +29,12 @@ class hex_editor : public QWidget
 		void toggle_scroll_mode(bool mode);
 		void selection_toggled(bool state);
 		void focused(bool has_focus);
-		void clipboard_usable(bool);
+		void clipboard_usable(bool usable);
+		void can_save(bool save);
 
 	public slots:
 		void update_cursor_state();
-		void update_undo_action();
+		void update_undo_action(bool direction);
 		void goto_offset(int address);
 		void select_range(int start, int end);
 		void slider_update(int position);
@@ -94,6 +95,7 @@ class hex_editor : public QWidget
 		int scroll_speed;
 		bool scroll_direction;
 		QPoint mouse_position;
+		int save_state = 0;
 		
 		void font_setup();
 		QString get_status_text();
@@ -116,6 +118,7 @@ class hex_editor : public QWidget
 		inline int to_hex_column(int x){ return column_width(11+(x-font_width*(14+columns*3))/font_width*3); }
 		inline int get_max_lines(){ return buffer->size() / columns - rows; }
 		inline void set_selection_active(bool s){ selection_active = s; emit selection_toggled(s); }
+		inline void update_save_state(int direction){ save_state += direction; emit can_save(!save_state); }
 		
 		static const QString offset_header;
 };

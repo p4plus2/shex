@@ -96,11 +96,6 @@ void main_window::version()
 	display_version_dialog();
 }
 
-void main_window::update_hex_editor()
-{
-	get_editor(tab_widget->currentIndex())->update_undo_action();
-}
-
 void main_window::closeEvent(QCloseEvent *event)
 {
 	QApplication::quit();
@@ -115,6 +110,7 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(editor, SIGNAL(toggle_scroll_mode(bool)), scrollbar, SLOT(toggle_mode(bool)));
 	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
 	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(setText(QString)));
+	connect(editor, SIGNAL(can_save(bool)), this, SLOT(file_save_state(bool)));
 	
 	dialog_controller->connect_to_editor(editor);
 	menu_controller->connect_to_widget(editor);

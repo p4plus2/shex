@@ -127,8 +127,12 @@ void hex_editor::update_cursor_state()
 	update();
 }
 
-void hex_editor::update_undo_action()
+void hex_editor::update_undo_action(bool direction)
 {
+	if(!is_active){
+		return;
+	}
+	update_save_state((direction << 1) + -1);
 	if(get_buffer_position(cursor_position) > buffer->size()){
 		cursor_position = get_byte_position(buffer->size());
 	}
@@ -208,6 +212,7 @@ void hex_editor::cut()
 	cursor_position = selection_start;
 	set_selection_active(false);
 	update_window();
+	update_save_state(1);
 }
 
 void hex_editor::copy()
@@ -219,6 +224,7 @@ void hex_editor::copy()
 	
 	buffer->copy(position[0], position[1]);
 	update_window();
+	update_save_state(1);
 }
 
 void hex_editor::paste(bool raw)
@@ -235,6 +241,7 @@ void hex_editor::paste(bool raw)
 		set_selection_active(false);
 	}
 	update_window();
+	update_save_state(1);
 }
 
 void hex_editor::delete_text()
@@ -251,6 +258,7 @@ void hex_editor::delete_text()
 		cursor_position = selection_start;
 	}
 	update_window();
+	update_save_state(1);
 }
 
 void hex_editor::select_all()
@@ -363,6 +371,7 @@ void hex_editor::replace(QString find, QString replace, bool direction, bool mod
 		goto_offset(end);
 		select_range(start, end);
 	}
+	update_save_state(1);
 }
 
 void hex_editor::replace_all(QString find, QString replace, bool mode)
@@ -376,6 +385,7 @@ void hex_editor::replace_all(QString find, QString replace, bool mode)
 	}else{
 		update_status_text(QString::number(result) + " Results found for " + find);
 	}
+	update_save_state(1);
 }
 
 void hex_editor::paintEvent(QPaintEvent *event)
@@ -531,6 +541,7 @@ void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 	}
 	update_cursor_position(cursor_position.x()+font_width*(2 * update_byte ? 2 : 1), cursor_position.y(), false);
 	update_window();
+	update_save_state(1);
 }
 
 void hex_editor::wheelEvent(QWheelEvent *event)

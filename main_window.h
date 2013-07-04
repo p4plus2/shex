@@ -27,7 +27,6 @@ class main_window : public QMainWindow
 		void open();
 		void save();
 		void version();
-		void update_hex_editor();
 		
 	signals:
 		void active_editors(bool active);

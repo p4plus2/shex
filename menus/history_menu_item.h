@@ -3,7 +3,7 @@
 #include "menus/abstract_menu_item.h"
 
 class QUndoGroup;
-class main_window;
+class hex_editor;
 
 class history_menu_item : public abstract_menu_item
 {
@@ -11,10 +11,13 @@ class history_menu_item : public abstract_menu_item
 	public:
 		history_menu_item(QString text, QString r, QString t, QKeySequence hotkey, QWidget *parent);
 		virtual void connect_to_widget(QUndoGroup *group);
-		virtual void connect_to_widget(main_window *window);
+		virtual void connect_to_widget(hex_editor *editor);
+	signals:
+		void run_history_update(bool direction);
 		
 	public slots:
 		void set_prefix(const QString &t);
+		inline void activated(){ emit run_history_update((text() == "U&ndo") ? true : false); }
 		
 	private:
 		QString prefix;

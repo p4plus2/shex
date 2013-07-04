@@ -43,8 +43,8 @@ typedef QKeySequence hotkey;
 	add_action(main_window, "E&xit", close(), hotkey::Quit);
 
 	menu = find_menu("&Edit");
-	add_history_action("U&ndo", update_hex_editor(), hotkey::Undo);
-	add_history_action("R&edo", update_hex_editor(), hotkey::Redo);
+	add_history_action("U&ndo", update_undo_action(bool), hotkey::Undo);
+	add_history_action("R&edo", update_undo_action(bool), hotkey::Redo);
 	menu->addSeparator();
 	add_toggle_action(hex_editor, "Cu&t", cut(), selection_toggled(bool),hotkey::Cut);
 	add_toggle_action(hex_editor, "&Copy", copy(), selection_toggled(bool), hotkey::Copy);

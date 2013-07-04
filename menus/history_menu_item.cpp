@@ -1,6 +1,6 @@
 #include "history_menu_item.h"
 #include <QUndoGroup>
-#include <main_window.h>
+#include "hex_editor.h"
 
 history_menu_item::history_menu_item(QString text, QString r, QString t, QKeySequence hotkey, QWidget *parent) :
         abstract_menu_item(text, parent)
@@ -9,6 +9,7 @@ history_menu_item::history_menu_item(QString text, QString r, QString t, QKeySeq
 	toggle = t;
 	setShortcut(hotkey);
 	prefix = text;
+	connect(this, SIGNAL(triggered()), this, SLOT(activated()));
 }
 
 
@@ -26,11 +27,10 @@ void history_menu_item::connect_to_widget(QUndoGroup *group)
 	
 }
 
-void history_menu_item::connect_to_widget(main_window *window)
+void history_menu_item::connect_to_widget(hex_editor *editor)
 {
-	connect(this, SIGNAL(triggered()), window, run.toUtf8().data());
+	connect(this, SIGNAL(run_history_update(bool)), editor, run.toUtf8().data());
 }
-
 
 void history_menu_item::set_prefix(const QString &t)
 
