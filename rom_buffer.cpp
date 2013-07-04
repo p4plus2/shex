@@ -6,10 +6,10 @@
 #include <QTextStream>
 #include <QRegExp>
 
-ROM_buffer::ROM_buffer(QString file_name)
+ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 {
-	if(file_name != ""){
-		ROM.setFileName(file_name);
+	ROM.setFileName(file_name);
+	if(!new_file){
 		ROM.open(QFile::ReadWrite);
 		buffer = ROM.readAll();
 		analyze();
@@ -102,10 +102,12 @@ void ROM_buffer::copy(int start, int end)
 
 int ROM_buffer::paste(int start, int end, bool raw)
 {
-	if(check_paste_data()){
+	qDebug() << start;
+	if(!check_paste_data()){
 		return 0;
 	}
 	QString copy_data = clipboard->text().toUtf8().trimmed();
+	QByteArray hex_data;
 	if(!raw){
 		if(copy_data.indexOf("const unsigned char") != -1){
 			copy_data.remove(0, copy_data.indexOf('{'));
@@ -115,9 +117,10 @@ int ROM_buffer::paste(int start, int end, bool raw)
 	
 		copy_data.remove(QRegExp("(0x|[\\t ])"));
 		copy_data.remove(QRegExp("([\\n\\r]db|dw|dl|[^0-9A-Fa-f])"));
+		hex_data = hex_data.fromHex(copy_data.toUtf8());
+	}else{
+		hex_data = hex_data.fromHex(copy_data.toUtf8().toHex());
 	}
-	
-	QByteArray hex_data = hex_data.fromHex(copy_data.toUtf8());
 	undo_stack->beginMacro("Paste");
 	if(end){
 		delete_text(start, end);

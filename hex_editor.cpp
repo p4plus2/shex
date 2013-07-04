@@ -8,11 +8,15 @@
 #include <QAction>
 #include <QMenu>
 
-hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group) :
+hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file) :
         QWidget(parent)
 {
-	buffer = new ROM_buffer(file_name);
+	buffer = new ROM_buffer(file_name, new_file);
 	buffer->initialize_undo(undo_group);
+	
+	if(new_file){
+		update_save_state(1);
+	}
 	
 	QTimer *cursor_timer = new QTimer(this);
 	cursor_timer->start(1000);
@@ -53,6 +57,7 @@ void hex_editor::set_focus()
 	buffer->set_active();
 	emit selection_toggled(selection_active);
 	emit focused(true);
+	emit update_save_state(0);
 	clipboard_changed();
 }
 
@@ -236,7 +241,7 @@ void hex_editor::paste(bool raw)
 	if(get_selection_range(position)){
 		buffer->paste(position[0], position[1], raw);
 	}else{
-		int size = buffer->paste(get_buffer_position(cursor_position), 0, raw);
+		int size = buffer->paste(get_buffer_position(cursor_position) + buffer->header_size(), 0, raw);
 		cursor_position = get_byte_position(get_buffer_position(cursor_position)+size);
 		set_selection_active(false);
 	}
@@ -251,7 +256,7 @@ void hex_editor::delete_text()
 	}
 	int position[2];
 	if(!get_selection_range(position)){
-		buffer->delete_text(get_buffer_position(cursor_position));
+		buffer->delete_text(get_buffer_position(cursor_position) + buffer->header_size());
 	}else{
 		buffer->delete_text(position[0], position[1]);	
 		set_selection_active(false);
@@ -435,8 +440,7 @@ void hex_editor::paint_selection(QPainter &painter)
 	if(start > end){
 		qSwap(start, end);
 	}
-	
-	for(; start < end+1; start++){
+	for(; start < end+1 && end != offset; start++){
 		QPoint position = get_byte_position(start);
 		painter.fillRect(position.x()-1, position.y(), font_width*3, font_height+4, 
 		                 palette().color(QPalette::Active, QPalette::Highlight));
@@ -465,6 +469,9 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			paste(true);
 			update();
 		}
+	}
+	if(event->modifiers() == Qt::ControlModifier){
+		return;
 	}
 	
 	if(click_side){
@@ -563,8 +570,8 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 	int x = event->x();
 	int y = event->y() - vertical_shift;
 	
-	if((event->x() > column_width(3*columns+15) && event->x() < column_width(4*columns+15))){
-		x = to_hex_column(x);
+	if((event->x() > column_width(3*columns+14) && event->x() < column_width(4*columns+14))){
+		x = to_hex_column(x) + 1;
 		click_side = true;
 	}else{
 		click_side = false;

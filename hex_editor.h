@@ -14,7 +14,7 @@ class hex_editor : public QWidget
 {
 	Q_OBJECT
 	public:
-		explicit hex_editor(QWidget *parent = 0, QString file_name = "", QUndoGroup *undo_group = 0);
+		explicit hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file = false);
 		~hex_editor();
 		inline ROM_buffer *get_buffer(){ return buffer; }
 		inline int get_relative_position(int address){ return get_buffer_position(cursor_position) + address; }

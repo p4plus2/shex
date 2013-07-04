@@ -14,7 +14,7 @@
 class ROM_buffer : public ROM_metadata
 {
 	public:
-		ROM_buffer(QString file_name);
+		ROM_buffer(QString file_name, bool new_file = false);
 		virtual ~ROM_buffer(){}
 		void initialize_undo(QUndoGroup *undo_group);
 		void cut(int start, int end);

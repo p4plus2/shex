@@ -73,7 +73,7 @@ void main_window::file_save_state(bool clean)
 void main_window::new_file()
 {
 	new_counter++;
-	create_new_tab("* Untitled_"+QString::number(new_counter), true);
+	create_new_tab("Untitled_"+QString::number(new_counter), true);
 }
 
 void main_window::open()
@@ -118,7 +118,7 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 
 void main_window::create_new_tab(QString name, bool new_file)
 {
-	hex_editor *editor = new hex_editor(this, new_file ? "" : name, undo_group);
+	hex_editor *editor = new hex_editor(this, name, undo_group, new_file);
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	init_connections(editor, scrollbar);
 	
