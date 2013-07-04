@@ -269,8 +269,11 @@ int ROM_buffer::replace(QString find, QString replace, int position, bool direct
 	if(replace_with.isEmpty() && !replace.isEmpty()){
 		return INVALID_REPLACE;
 	}
-	buffer.remove(result, input_to_byte_array(find, mode).length());
+	undo_stack->beginMacro("Replace");
+	delete_text(result, result+input_to_byte_array(find, mode).length());
+	undo_stack->push(new undo_paste_command(&buffer, result, new QByteArray(replace_with)));
 	buffer.insert(result, replace_with);
+	undo_stack->endMacro();
 	return result;
 }
 
@@ -278,14 +281,21 @@ int ROM_buffer::replace_all(QString find, QString replace, bool mode)
 {
 	QByteArray search_for = input_to_byte_array(find, mode);
 	QByteArray replace_with = input_to_byte_array(replace, mode);
-	if(replace_with.isEmpty()){
+	if(search_for.isEmpty()){
 		return INVALID_FIND;
 	}else if(replace_with.isEmpty() && !replace.isEmpty()){
 		return INVALID_REPLACE;
 	}
 	int results = count(find, mode);
-	buffer.replace(search_for, replace_with);
-	qDebug() << results;
+	undo_stack->beginMacro("Replace All");
+	int next = 0;
+	for(int i = 0; i < results; i++){
+		next = buffer.indexOf(search_for, next);;
+		delete_text(next, next+search_for.length());
+		undo_stack->push(new undo_paste_command(&buffer, next, new QByteArray(replace_with)));
+		buffer.insert(next, replace_with);
+	}
+	undo_stack->endMacro();
 	return results;
 }
 
