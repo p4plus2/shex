@@ -244,6 +244,11 @@ int ROM_metadata::jump_address(int address, QByteArray jump)
 void ROM_metadata::read_header() 
 {
 	header_index = find_header();
+	if(header_index > (unsigned int)size()){
+		header_index = 0x007fC0;
+		unknown_ROM = true;
+		qDebug() << "UNKNOWN ROM TRIGGERED!";
+	}
 	mapper_id = get_header_field(MAPPER);
 	rom_type = get_header_field(ROM_TYPE);
 	rom_size = get_header_field(ROM_SIZE);

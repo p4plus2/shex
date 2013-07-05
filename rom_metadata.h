@@ -132,6 +132,7 @@ class ROM_metadata {
 		QString address_error;
 		
 		bool has_header = false;
+		bool unknown_ROM = false;
 
 		unsigned int header_index = 0x00;
 		unsigned int ram_size = 0x00;

@@ -13,6 +13,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 {
 	buffer = new ROM_buffer(file_name, new_file);
 	buffer->initialize_undo(undo_group);
+	is_new = new_file;
 	
 	if(new_file){
 		update_save_state(1);
@@ -60,7 +61,6 @@ void hex_editor::set_focus()
 	emit update_save_state(0);
 	clipboard_changed();
 }
-
 void hex_editor::slider_update(int position)
 {
 	if(!scroll_mode){

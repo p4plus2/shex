@@ -20,6 +20,17 @@ ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 	qDebug() << ENUM_STRING(memory_mapper, get_mapper());
 }
 
+void ROM_buffer::save(QString path)
+{
+	if(path != ""){
+		ROM.close();
+		ROM.setFileName(path);	
+		ROM.open(QFile::ReadWrite);
+	}
+	ROM.seek(0);
+	ROM.write(buffer);
+}
+
 void ROM_buffer::initialize_undo(QUndoGroup *undo_group)
 {
 	undo_stack = new QUndoStack(undo_group);

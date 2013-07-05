@@ -21,6 +21,9 @@ class hex_editor : public QWidget
 		virtual QSize minimumSizeHint() const;
 		QString get_file_name();
 		void set_focus();
+		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
+		inline bool can_save(){ return save_state; }
+		inline bool new_file(){ return is_new; }
 
 	signals:
 		void update_slider(int position);
@@ -96,6 +99,7 @@ class hex_editor : public QWidget
 		bool scroll_direction;
 		QPoint mouse_position;
 		int save_state = 0;
+		bool is_new;
 		
 		void font_setup();
 		QString get_status_text();

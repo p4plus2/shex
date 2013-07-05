@@ -25,7 +25,7 @@ class main_window : public QMainWindow
 		void file_save_state(bool clean);
 		void new_file();
 		void open();
-		void save();
+		void save(bool override_name = false, int target = -1);
 		void version();
 		
 	signals:

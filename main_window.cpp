@@ -33,12 +33,30 @@ main_window::main_window(QWidget *parent)
 	menu_controller->connect_to_widget(dialog_controller);
 	menu_controller->connect_to_widget(undo_group);
 #ifdef USE_DEFAULT_ROM
-	create_new_tab("smw.smc");
+	create_new_tab("SMW.smc");
 #endif
 }
 
 void main_window::close_tab(int i)
 {
+	hex_editor *editor = get_editor(i);
+	if(editor->can_save()){
+		typedef QMessageBox message;
+		QString name = editor->get_file_name();
+		int button = message::warning(this, "Save", "Do you wish to save any unsaved changed to " + name, 
+		                              message::Yes | message::No | message::Cancel, message::Yes);
+		switch(button){
+			case message::Yes:
+				save(i);
+				
+			break;
+			case message::Cancel:
+				return;
+			break;
+			default:
+			break;
+		}
+	}
 	QWidget *widget = tab_widget->widget(i);
 	tab_widget->removeTab(i);
 	delete widget;
@@ -86,9 +104,15 @@ void main_window::open()
 	}
 }
 
-void main_window::save()
+void main_window::save(bool override_name, int target)
 {
-	qDebug() << ("Invoked <b>File|Save</b>");
+	hex_editor *editor = (target != -1 ) ? get_editor(target) : get_editor(tab_widget->currentIndex());
+	QString name = "";
+	if(editor->new_file() || override_name){
+		name = QFileDialog::getSaveFileName(this, "Save", QDir::homePath(), 
+	                                            "ROM files (*.smc *.sfc);;All files(*.*)");
+	}
+	editor->save(name);
 }
 
 void main_window::version()
@@ -118,11 +142,11 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 
 void main_window::create_new_tab(QString name, bool new_file)
 {
-	hex_editor *editor = new hex_editor(this, name, undo_group, new_file);
+	QWidget *widget = new QWidget(this);
+	hex_editor *editor = new hex_editor(widget, name, undo_group, new_file);
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	init_connections(editor, scrollbar);
 	
-	QWidget *widget = new QWidget(this);
 	QHBoxLayout *hex_layout = new QHBoxLayout(widget);
 	hex_layout->addWidget(editor);
 	hex_layout->addWidget(scrollbar);
