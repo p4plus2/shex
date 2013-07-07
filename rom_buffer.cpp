@@ -12,6 +12,10 @@ ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 	if(!new_file){
 		ROM.open(QFile::ReadWrite);
 		buffer = ROM.readAll();
+		if(ROM.size() < 0x8000){
+			ROM_error = "The ROM is too small to be valid.";
+			return;
+		}
 		analyze();
 	}else{
 		buffer.fill(0x00, 0x8000);
@@ -37,22 +41,33 @@ void ROM_buffer::initialize_undo(QUndoGroup *undo_group)
 	undo_stack->setActive();
 }
 
-void ROM_buffer::cut(int start, int end)
+void ROM_buffer::cut(int start, int end, bool ascii_mode)
 {
 	undo_stack->beginMacro("Cut");
-	copy(start, end);
+	copy(start, end, ascii_mode);
 	delete_text(start, end);
 	undo_stack->endMacro();
 }
 
-void ROM_buffer::copy(int start, int end)
+void ROM_buffer::copy(int start, int end, bool ascii_mode)
 {	
+	if(ascii_mode){
+		QByteArray text_data = character_mapper::encode(buffer.mid(start, end-start));
+		for(int i = 0; i < text_data.length(); i++){
+			if(!isprint(character_mapper::encode(text_data.at(i)))){
+				text_data[i] = '.';	                
+			}
+		}
+		
+		clipboard->setText(text_data);
+		return;
+	}
 	QByteArray hex_data = buffer.mid(start, end-start).toHex().toUpper();
 	QString copy_data;
 	QTextStream stream(&copy_data);
 	int nibble_count = hex_data.length();
 	
-	switch(paste_type){
+	switch(copy_type){
 		case NO_SPACES:
 			copy_data = hex_data;
 		break;
@@ -322,3 +337,5 @@ QByteArray ROM_buffer::input_to_byte_array(QString input, int mode)
 	}
 	return character_mapper::decode(input.toUtf8());
 }
+
+ROM_buffer::copy_style ROM_buffer::copy_type = ROM_buffer::NO_SPACES;

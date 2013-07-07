@@ -24,6 +24,7 @@ class hex_editor : public QWidget
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
 		inline bool new_file(){ return is_new; }
+		inline QString load_error() { return ROM_error; }
 
 	signals:
 		void update_slider(int position);
@@ -100,6 +101,7 @@ class hex_editor : public QWidget
 		QPoint mouse_position;
 		int save_state = 0;
 		bool is_new;
+		QString ROM_error = "";
 		
 		void font_setup();
 		QString get_status_text();

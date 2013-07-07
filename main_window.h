@@ -6,6 +6,7 @@
 #include <QAction>
 #include "dialog_manager.h"
 #include "menu_manager.h"
+#include "rom_buffer.h"
 
 class hex_editor;
 class dynamic_scrollbar;
@@ -27,6 +28,7 @@ class main_window : public QMainWindow
 		void open();
 		void save(bool override_name = false, int target = -1);
 		void version();
+		inline void set_copy_style(int style){ ROM_buffer::set_copy_style((ROM_buffer::copy_style)style); }
 		
 	signals:
 		void active_editors(bool active);

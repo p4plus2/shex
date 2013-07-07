@@ -144,6 +144,12 @@ void main_window::create_new_tab(QString name, bool new_file)
 {
 	QWidget *widget = new QWidget(this);
 	hex_editor *editor = new hex_editor(widget, name, undo_group, new_file);
+	if(editor->load_error() != ""){
+		QMessageBox::critical(this, "Invalid ROM", editor->load_error(), QMessageBox::Ok);
+		delete editor;
+		delete widget;
+		return;
+	}
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	init_connections(editor, scrollbar);
 	

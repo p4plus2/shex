@@ -2,6 +2,7 @@
 #include "menu_manager.h"
 #include "menus/history_menu_item.h"
 #include "menus/generic_menu_item.h"
+#include "rom_buffer.h"
 #include "debug.h"
 
 
@@ -11,6 +12,7 @@ menu_manager::menu_manager(QObject *parent, QMenuBar *m) :
 	menu_bar = m;
 	create_menus();
 	create_actions();
+	connect(copy_group, SIGNAL(triggered(QAction*)), this, SLOT(group_callback(QAction*)));
 }
 
 void menu_manager::create_menus()
@@ -25,15 +27,15 @@ void menu_manager::create_menus()
 	foreach(QMenu *menu, menu_list){
 		menu_bar->addMenu(menu);
 	}
-	find_menu("&File");
+	menu_list.append(new QMenu("&Copy style"));
 }
 
 void menu_manager::create_actions()
 {
 typedef QKeySequence hotkey;
-	//temporary comment until toggles are ready
 #define add_toggle_action(M,N,R,T,H) menu->addAction(new generic_menu_item<M *>(N, SLOT(R), SIGNAL(T), H, menu))
 #define add_action(M,N,R,H) menu->addAction(new generic_menu_item<M *>(N, SLOT(R), "", H, menu))
+#define add_group_action(C,N,R,E,H) menu->addAction(C->addAction(new group_menu_item(N, SLOT(R), E, H, menu)))
 #define add_history_action(N,R,H) menu->addAction(new history_menu_item(N, SLOT(R), "", H, menu))
 	QMenu *menu = find_menu("&File");
 	add_action(main_window, "&New", new_file(), hotkey::New);
@@ -73,7 +75,17 @@ typedef QKeySequence hotkey;
 	menu = find_menu("&Options");
 	add_toggle_action(hex_editor, "&Scrollbar toggle", scroll_mode_changed(), focused(bool), hotkey("Alt+s"));
 	add_action(dialog_manager, "&Character map editor", show_map_editor_dialog(), hotkey("Alt+c"));
-	
+	menu->addMenu(find_menu("&Copy style"));
+	menu = find_menu("&Copy style");
+	add_group_action(copy_group, "&No space", set_copy_style(int), ROM_buffer::NO_SPACES, hotkey("Alt+1"));
+	add_group_action(copy_group, "&Spaces", set_copy_style(int), ROM_buffer::SPACES, hotkey("Alt+2"));
+	add_group_action(copy_group, "&Hex format", set_copy_style(int), ROM_buffer::HEX_FORMAT, hotkey("Alt+3"));
+	add_group_action(copy_group, "&Byte table", set_copy_style(int), ROM_buffer::ASM_BYTE_TABLE, hotkey("Alt+4"));
+	add_group_action(copy_group, "&Word table", set_copy_style(int), ROM_buffer::ASM_WORD_TABLE, hotkey("Alt+5"));
+	add_group_action(copy_group, "&Long table", set_copy_style(int), ROM_buffer::ASM_LONG_TABLE, hotkey("Alt+6"));
+	add_group_action(copy_group, "&C source", set_copy_style(int), ROM_buffer::C_SOURCE, hotkey("Alt+7"));
+	enable_checkable(copy_group);
+
 	menu = find_menu("&Help");
 	add_action(main_window, "&Version", version(), hotkey("Alt+v"));
 
@@ -90,6 +102,15 @@ QMenu *menu_manager::find_menu(QString id)
 	}
 	qDebug() << "Error: Menu " << id << " not found";
 	return 0;
+}
+
+void menu_manager::enable_checkable(QActionGroup *group)
+{
+	QList<QAction *> actions = group->actions();
+	foreach(QAction *current, actions){
+		current->setCheckable(true);
+	}
+	actions.first()->setChecked(true);
 }
 
 menu_manager::~menu_manager()

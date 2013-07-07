@@ -12,6 +12,10 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
         QWidget(parent)
 {
 	buffer = new ROM_buffer(file_name, new_file);
+	if(buffer->load_error() != ""){
+		ROM_error = buffer->load_error();
+		return;
+	}
 	buffer->initialize_undo(undo_group);
 	is_new = new_file;
 	
@@ -213,7 +217,7 @@ void hex_editor::cut()
 		return;
 	}
 	
-	buffer->cut(position[0], position[1]);
+	buffer->cut(position[0], position[1], click_side);
 	cursor_position = selection_start;
 	set_selection_active(false);
 	update_window();
@@ -227,7 +231,7 @@ void hex_editor::copy()
 		return;
 	}
 	
-	buffer->copy(position[0], position[1]);
+	buffer->copy(position[0], position[1], click_side);
 	update_window();
 	update_save_state(1);
 }
@@ -476,9 +480,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	
 	if(click_side){
 		if(event->key() >= Qt::Key_Space && event->key() <= Qt::Key_AsciiTilde){
-			char key = event->modifiers() != Qt::ShiftModifier &&
-			                event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z ? 
-			                        event->key() + 32 : event->key();
+			char key = event->text().at(0).unicode();
 			handle_typed_character(character_mapper::decode(key), true);
 		}
 	}else{
@@ -516,10 +518,10 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			}
 		break;
 		case Qt::Key_Right:
-			update_cursor_position(cursor_position.x()+font_width, cursor_position.y());
+			update_cursor_position(cursor_position.x()+column_width(1+click_side), cursor_position.y());
 		break;
 		case Qt::Key_Left:
-			update_cursor_position(cursor_position.x()-column_width(2), cursor_position.y());
+			update_cursor_position(cursor_position.x()-column_width(2+click_side), cursor_position.y());
 		break;
 		case Qt::Key_PageUp:
 			update_cursor_position(cursor_position.x(), cursor_position.y() - column_height(rows));
