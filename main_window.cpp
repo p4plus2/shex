@@ -37,7 +37,7 @@ main_window::main_window(QWidget *parent)
 #endif
 }
 
-void main_window::close_tab(int i)
+bool main_window::close_tab(int i)
 {
 	hex_editor *editor = get_editor(i);
 	if(editor->can_save()){
@@ -47,11 +47,13 @@ void main_window::close_tab(int i)
 		                              message::Yes | message::No | message::Cancel, message::Yes);
 		switch(button){
 			case message::Yes:
-				save(i);
+				if(!save(i)){
+					return false;
+				}
 				
 			break;
 			case message::Cancel:
-				return;
+				return false;
 			break;
 			default:
 			break;
@@ -63,6 +65,7 @@ void main_window::close_tab(int i)
 	if(!tab_widget->count()){
 		emit active_editors(false);
 	}
+	return true;
 }
 
 void main_window::changed_tab(int i)
@@ -104,7 +107,7 @@ void main_window::open()
 	}
 }
 
-void main_window::save(bool override_name, int target)
+bool main_window::save(bool override_name, int target)
 {
 	hex_editor *editor = (target != -1 ) ? get_editor(target) : get_editor(tab_widget->currentIndex());
 	QString name = "";
@@ -112,7 +115,11 @@ void main_window::save(bool override_name, int target)
 		name = QFileDialog::getSaveFileName(this, "Save", QDir::homePath(), 
 	                                            "ROM files (*.smc *.sfc);;All files(*.*)");
 	}
+	if(name == ""){
+		return false;
+	}
 	editor->save(name);
+	return true;
 }
 
 void main_window::version()
@@ -122,6 +129,12 @@ void main_window::version()
 
 void main_window::closeEvent(QCloseEvent *event)
 {
+	while(tab_widget->count()){
+		if(!close_tab(0)){
+			event->setAccepted(false);
+			return;
+		}
+	}
 	QApplication::quit();
 	QMainWindow::closeEvent(event);
 }

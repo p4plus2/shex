@@ -50,11 +50,6 @@ QSize hex_editor::minimumSizeHint() const
 	             rows*font_height+vertical_offset+vertical_shift);
 }
 
-QString hex_editor::get_file_name()
-{
-	return buffer->get_file_name();
-}
-
 void hex_editor::set_focus()
 {
 	emit update_status_text(get_status_text());

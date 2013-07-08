@@ -21,12 +21,14 @@ class main_window : public QMainWindow
 		~main_window();
 		
 	public slots:
-		void close_tab(int i);
+		inline void close_tab(){ close_tab(tab_widget->currentIndex()); }
+		bool close_tab(int i);
 		void changed_tab(int i);
 		void file_save_state(bool clean);
 		void new_file();
 		void open();
-		void save(bool override_name = false, int target = -1);
+		bool save(bool override_name = false, int target = -1);
+		inline void save_as(){ save(true); }
 		void version();
 		inline void set_copy_style(int style){ ROM_buffer::set_copy_style((ROM_buffer::copy_style)style); }
 		

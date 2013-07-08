@@ -26,7 +26,8 @@ ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 
 void ROM_buffer::save(QString path)
 {
-	if(path != ""){
+	QFileInfo info(ROM);
+	if(path != "" || path != info.absolutePath()){
 		ROM.close();
 		ROM.setFileName(path);	
 		ROM.open(QFile::ReadWrite);

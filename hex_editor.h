@@ -19,12 +19,12 @@ class hex_editor : public QWidget
 		inline ROM_buffer *get_buffer(){ return buffer; }
 		inline int get_relative_position(int address){ return get_buffer_position(cursor_position) + address; }
 		virtual QSize minimumSizeHint() const;
-		QString get_file_name();
 		void set_focus();
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
 		inline bool new_file(){ return is_new; }
 		inline QString load_error() { return ROM_error; }
+		QString get_file_name() { return buffer->get_file_name(); }
 
 	signals:
 		void update_slider(int position);
