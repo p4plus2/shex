@@ -308,9 +308,12 @@ void hex_editor::jump()
 
 void hex_editor::disassemble()
 {
-	if(!buffer->is_active()){
+	int position[2];
+	if(!buffer->is_active() || !get_selection_range(position)){
 		return;
 	}
+	QByteArray data = buffer->range(position[0], position[1]);
+	emit send_disassemble_data(&data);
 }
 
 void hex_editor::count(QString find, bool mode)
@@ -626,6 +629,7 @@ void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 void hex_editor::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
+
 	rows = (size().height() - vertical_shift)/ font_height;
 	update_window();
 }

@@ -35,6 +35,7 @@ class hex_editor : public QWidget
 		void focused(bool has_focus);
 		void clipboard_usable(bool usable);
 		void can_save(bool save);
+		void send_disassemble_data(QByteArray *data);
 
 	public slots:
 		void update_cursor_state();

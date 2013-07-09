@@ -8,6 +8,7 @@ class hex_editor;
 class main_window;
 class dialog_manager;
 class QUndoGroup;
+class disassembler;
 
 class abstract_menu_item : public QAction
 {
@@ -20,6 +21,7 @@ class abstract_menu_item : public QAction
 		virtual void connect_to_widget(main_window *window){Q_UNUSED(window);}
 		virtual void connect_to_widget(QUndoGroup *group){Q_UNUSED(group);}
 		virtual void connect_to_widget(dialog_manager *dialog_controller){Q_UNUSED(dialog_controller);}
+		virtual void connect_to_widget(disassembler *disassembly_panel){Q_UNUSED(disassembly_panel);}
 		
 	protected:
 		QString run;

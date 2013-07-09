@@ -2,7 +2,9 @@
 #include "menu_manager.h"
 #include "menus/history_menu_item.h"
 #include "menus/generic_menu_item.h"
+#include "menus/toggle_menu_item.h"
 #include "rom_buffer.h"
+#include "disassembler.h"
 #include "debug.h"
 
 
@@ -34,6 +36,7 @@ void menu_manager::create_actions()
 {
 typedef QKeySequence hotkey;
 #define add_toggle_action(M,N,R,T,H) menu->addAction(new generic_menu_item<M *>(N, SLOT(R), SIGNAL(T), H, menu))
+#define add_widget_toggle_action(M,N,R,H) menu->addAction(new toggle_menu_item<M *>(N, SLOT(R), "", H, menu))
 #define add_action(M,N,R,H) menu->addAction(new generic_menu_item<M *>(N, SLOT(R), "", H, menu))
 #define add_group_action(C,N,R,E,H) menu->addAction(C->addAction(new group_menu_item(N, SLOT(R), E, H, menu)))
 #define add_history_action(N,R,H) menu->addAction(new history_menu_item(N, SLOT(R), "", H, menu))
@@ -77,6 +80,7 @@ typedef QKeySequence hotkey;
 	menu = find_menu("&Options");
 	add_toggle_action(hex_editor, "&Scrollbar toggle", scroll_mode_changed(), focused(bool), hotkey("Alt+s"));
 	add_action(dialog_manager, "&Character map editor", show_map_editor_dialog(), hotkey("Alt+c"));
+	add_widget_toggle_action(disassembler, "Disassembly panel toggle", toggle_display(bool), hotkey("Alt+d"));
 	menu->addMenu(find_menu("&Copy style"));
 	menu = find_menu("&Copy style");
 	add_group_action(copy_group, "&No space", set_copy_style(int), ROM_buffer::NO_SPACES, hotkey("Alt+1"));

@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtDebug>
 #include "main_window.h"
 #include "debug.h"

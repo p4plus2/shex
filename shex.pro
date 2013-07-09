@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     dialogs/find_replace_dialog.cpp \
     character_mapper.cpp \
     dialogs/map_editor_dialog.cpp \
-    menus/group_menu_item.cpp
+    menus/group_menu_item.cpp \
+    disassembler.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -53,7 +54,9 @@ HEADERS  += main_window.h \
     dialogs/find_replace_dialog.h \
     character_mapper.h \
     dialogs/map_editor_dialog.h \
-    menus/group_menu_item.h
+    menus/group_menu_item.h \
+    disassembler.h \
+    menus/toggle_menu_item.h
 
 OTHER_FILES += \
     version.sh

@@ -7,10 +7,13 @@
 #include "dialog_manager.h"
 #include "menu_manager.h"
 #include "rom_buffer.h"
+#include <QLayout>
 
+#include "debug.h"
 class hex_editor;
 class dynamic_scrollbar;
 class QLabel;
+class disassembler;
 
 class main_window : public QMainWindow
 {
@@ -37,7 +40,7 @@ class main_window : public QMainWindow
 		
 	protected:
 		virtual void closeEvent(QCloseEvent *event);
-		
+
 	private:
 		QLabel *statusbar = new QLabel(this);
 		QTabWidget *tab_widget = new QTabWidget(this);
@@ -46,9 +49,9 @@ class main_window : public QMainWindow
 		menu_manager *menu_controller = new menu_manager(this, menuBar());
 		int new_counter = 0;
 
-		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar);
+		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, disassembler *disassembly_panel);
 		void create_new_tab(QString name, bool new_file = false);
-		hex_editor *get_editor(int i);
+		hex_editor *get_editor(int i) const;
 		
 };
 

@@ -4,6 +4,7 @@
 #include "version.h"
 #include "debug.h"
 #include "character_mapper.h"
+#include "disassembler.h"
 
 #include <QStatusBar>
 #include <QHBoxLayout>
@@ -139,7 +140,7 @@ void main_window::closeEvent(QCloseEvent *event)
 	QMainWindow::closeEvent(event);
 }
 
-void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar)
+void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, disassembler *disassembly_panel)
 {
 	connect(scrollbar, SIGNAL(valueChanged(int)), editor, SLOT(slider_update(int)));
 	connect(editor, SIGNAL(update_slider(int)), scrollbar, SLOT(setValue(int)));
@@ -148,9 +149,11 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
 	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(setText(QString)));
 	connect(editor, SIGNAL(can_save(bool)), this, SLOT(file_save_state(bool)));
+	connect(editor, SIGNAL(send_disassemble_data(QByteArray*)), disassembly_panel, SLOT(disassemble(QByteArray*)));
 	
 	dialog_controller->connect_to_editor(editor);
 	menu_controller->connect_to_widget(editor);
+	menu_controller->connect_to_widget(disassembly_panel);
 }
 
 void main_window::create_new_tab(QString name, bool new_file)
@@ -164,11 +167,13 @@ void main_window::create_new_tab(QString name, bool new_file)
 		return;
 	}
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
-	init_connections(editor, scrollbar);
+	disassembler *disassembly_panel = new disassembler(editor);
+	init_connections(editor, scrollbar, disassembly_panel);
 	
 	QHBoxLayout *hex_layout = new QHBoxLayout(widget);
 	hex_layout->addWidget(editor);
 	hex_layout->addWidget(scrollbar);
+	hex_layout->addLayout(disassembly_panel->get_layout(disassembly_panel));
 	widget->setLayout(hex_layout);
 	tab_widget->addTab(widget, QFileInfo(name).fileName());
 	
@@ -178,7 +183,7 @@ void main_window::create_new_tab(QString name, bool new_file)
 	emit active_editors(true);
 }
 
-hex_editor *main_window::get_editor(int i)
+hex_editor *main_window::get_editor(int i) const
 {
 	return dynamic_cast<hex_editor *>(tab_widget->widget(i)->layout()->itemAt(0)->widget());
 }
