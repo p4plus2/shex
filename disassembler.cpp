@@ -48,7 +48,6 @@ void disassembler::disassemble(QByteArray *data)
 		}else{
 			decoded.append(op.name);
 		}
-		qDebug() << (error_stop && unlikely.contains(hex));
 		if(error_stop && unlikely.contains(hex)){
 			decoded.append("Unlikely opcode detected, aborting!");
 			break;
@@ -58,7 +57,9 @@ void disassembler::disassemble(QByteArray *data)
 	emit A_changed(A_state);
 	emit I_changed(I_state);
 	setPlainText(decoded);
-	show();
+	if(!isVisible()){
+		toggle_display(true);	
+	}
 }
 
 void disassembler::toggle_display(bool state) { 
