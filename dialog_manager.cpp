@@ -10,6 +10,7 @@ dialog_manager::dialog_manager(QObject *parent) :
 	dialog_list.append(new metadata_editor_dialog());
 	dialog_list.append(new find_replace_dialog());
 	dialog_list.append(new map_editor_dialog());
+	dialog_list.append(new bookmark_dialog());
 }
 
 void dialog_manager::connect_to_editor(hex_editor *editor)
