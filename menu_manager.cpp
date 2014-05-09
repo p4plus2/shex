@@ -30,7 +30,6 @@ void menu_manager::create_menus()
 		menu_bar->addMenu(menu);
 	}
 	menu_list.append(new QMenu("&Copy style"));
-	menu_list.append(new QMenu("&Bookmarks"));
 }
 
 void menu_manager::create_actions()
@@ -77,16 +76,10 @@ typedef QKeySequence hotkey;
 	add_toggle_action(hex_editor, "Follow &branch", branch(), focused(bool),hotkey("Ctrl+b"));
 	add_toggle_action(hex_editor, "Follow &jump", jump(), focused(bool), hotkey("Ctrl+j"));
 	add_toggle_action(hex_editor, "&Disassemble", disassemble(), focused(bool), hotkey("Ctrl+d"));
-	menu->addSeparator();
-	menu->addMenu(find_menu("&Bookmarks"));
-	menu = find_menu("&Bookmarks");
-	add_toggle_action(dialog_manager, "&Bookmark viewer", show_bookmarks_dialog(), 
-	                  active_editors(bool), hotkey("Ctrl+b"));
-	add_toggle_action(hex_editor, "&Add Bookmark", show_add_bookmark(), active_editors(bool), hotkey("F2"));
 
 	menu = find_menu("&Options");
 	add_toggle_action(hex_editor, "&Scrollbar toggle", scroll_mode_changed(), focused(bool), hotkey("Alt+s"));
-	add_action(dialog_manager, "Character &map editor", show_map_editor_dialog(), hotkey("Alt+c"));
+	add_action(dialog_manager, "&Character map editor", show_map_editor_dialog(), hotkey("Alt+c"));
 	add_widget_toggle_action(disassembler, "Disassembly panel toggle", toggle_display(bool), hotkey("Alt+d"));
 	menu->addMenu(find_menu("&Copy style"));
 	menu = find_menu("&Copy style");

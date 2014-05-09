@@ -14,8 +14,6 @@ class disassembler : public QPlainTextEdit
 		struct opcode{
 			QString name;
 			int size;
-			bool A_16;
-			bool I_16;
 		};
 
 		explicit disassembler(QWidget *parent = 0);
@@ -40,7 +38,10 @@ class disassembler : public QPlainTextEdit
 		QCheckBox *set_I = new QCheckBox("16 bit I", this);
 		QCheckBox *stop = new QCheckBox("Stop on unlikely", this);
 		static const QList<opcode> opcode_list;
-		static const QList<unsigned char> unlikely;
+		static const QSet<unsigned char> A_16_list;
+		static const QSet<unsigned char> I_16_list;
+
+		static const QSet<unsigned char> unlikely;
 		static bool display;
 		void layout_adjust();
 		
