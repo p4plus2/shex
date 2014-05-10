@@ -413,7 +413,7 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	if(cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset && !selection_active){
 		QRect active_line(hex_offset-1, cursor_position.y()-1+vertical_offset, 
 		                  columns*column_width(3)-font_width+2, font_height);
-		painter.fillRect(active_line, palette().color(QPalette::Highlight));
+		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
 		if(cursor_state){
 			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 
 			                 1, font_height, text);

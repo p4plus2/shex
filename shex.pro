@@ -31,7 +31,9 @@ SOURCES += main.cpp\
     character_mapper.cpp \
     dialogs/map_editor_dialog.cpp \
     menus/group_menu_item.cpp \
-    disassembler.cpp
+    disassembler.cpp \
+    disassembly_cores/isa_65c816.cpp \
+    disassembly_cores/disassembler_core.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -56,9 +58,9 @@ HEADERS  += main_window.h \
     dialogs/map_editor_dialog.h \
     menus/group_menu_item.h \
     disassembler.h \
-    menus/toggle_menu_item.h
+    menus/toggle_menu_item.h \
+    disassembly_cores/isa_65c816.h \
+    disassembly_cores/disassembler_core.h
 
 OTHER_FILES += \
     version.sh
-
-

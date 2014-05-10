@@ -40,6 +40,6 @@ void display_version_dialog()
 				     \"The current commit sha1 is: ${last_commit}\\n\"
 				     \"Compiled with: ${gcc_version}\\n\" + OS
 				     );
-	version_info.setWindowFlags(version_info.windowFlags() ^ Qt::WindowCloseButtonHint);
+	version_info.setWindowFlags(version_info.windowFlags());
 	version_info.exec();
 }" > version.h
