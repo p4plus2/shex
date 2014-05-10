@@ -110,7 +110,7 @@ void ROM_metadata::update_cart_name(QString name)
 	}
 }
 
-QByteArray ROM_metadata::to_little_endian(QByteArray bytes)
+QByteArray ROM_metadata::to_little_endian(QByteArray bytes) const
 {
 	int temp = bytes[0];
 	bytes[0] = bytes[bytes.size()-1];
@@ -118,7 +118,7 @@ QByteArray ROM_metadata::to_little_endian(QByteArray bytes)
 	return bytes;
 }
 
-int ROM_metadata::snes_to_pc(int address)
+int ROM_metadata::snes_to_pc(int address) const
 {
 	switch(mapper){
 		case LOROM:
@@ -154,7 +154,7 @@ int ROM_metadata::snes_to_pc(int address)
 	}
 }
 
-int ROM_metadata::pc_to_snes(int address)
+int ROM_metadata::pc_to_snes(int address) const
 {
 	switch(mapper){
 		case LOROM:
@@ -208,17 +208,15 @@ bool ROM_metadata::validate_address(int address, bool error_method)
 	
 	if(address_error != "" && error_method){
 		QMessageBox::warning(0, "Address error!", address_error);
-		qDebug() << address_error;
 		return false;
 	}else if(address_error != ""){
-		qDebug() << address_error;
 		return false;
 	}
 	
 	return true;
 }
 
-int ROM_metadata::branch_address(int address, QByteArray branch)
+int ROM_metadata::branch_address(int address, QByteArray branch) const
 {
 	address = pc_to_snes(address);
 	short word = address & 0xFFFF;
@@ -231,14 +229,16 @@ int ROM_metadata::branch_address(int address, QByteArray branch)
 	return (address & 0xFF0000) | ((word + relative_branch) & 0xFFFF);
 }
 
-int ROM_metadata::jump_address(int address, QByteArray jump)
+int ROM_metadata::jump_address(int address, QByteArray jump) const
 {
 	address = pc_to_snes(address);
 	address &= 0xFF0000;
+	int offset = 1;
 	if(jump.size() == 3){
 		address = jump[0] << 16;
+		offset = 0;
 	}
-	return (address | ((jump[1] & 0xFF)<< 8) | (jump[2] & 0xFF)) & 0xFFFFFF;
+	return (address | ((jump[1 - offset] & 0xFF)<< 8) | (jump[2 - offset] & 0xFF)) & 0xFFFFFF;
 }
 
 void ROM_metadata::read_header() 

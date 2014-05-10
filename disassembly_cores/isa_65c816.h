@@ -11,7 +11,7 @@ class isa_65c816 : public disassembler_core
 		Q_OBJECT
 	public:
 		explicit isa_65c816(QObject *parent = 0);
-		QString disassemble(QByteArray *data);
+		QString disassemble(int start, int end, const ROM_buffer *buffer);
 		QGridLayout *core_layout();
 		static QString id(){ return "65c86"; }
 		
@@ -38,6 +38,9 @@ class isa_65c816 : public disassembler_core
 		static const QSet<unsigned char> I_16_list;
 
 		static const QSet<unsigned char> unlikely;
+		
+		static const QSet<unsigned char> branch_list;
+		static const QSet<unsigned char> jump_list;
 };
 
 #endif // ISA_65C816_H

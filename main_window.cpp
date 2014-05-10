@@ -149,7 +149,8 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
 	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(setText(QString)));
 	connect(editor, SIGNAL(can_save(bool)), this, SLOT(file_save_state(bool)));
-	connect(editor, SIGNAL(send_disassemble_data(QByteArray*)), disassembly_panel, SLOT(disassemble(QByteArray*)));
+	connect(editor, SIGNAL(send_disassemble_data(int, int, const ROM_buffer*)), 
+				disassembly_panel, SLOT(disassemble(int, int, const ROM_buffer*)));
 	
 	dialog_controller->connect_to_editor(editor);
 	menu_controller->connect_to_widget(editor);

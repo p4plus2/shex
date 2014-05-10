@@ -303,7 +303,6 @@ void hex_editor::jump()
 	
 	goto_offset(buffer->jump_address(position[1] - buffer->header_size(), 
 	            buffer->to_little_endian(buffer->range(position[0], position[1]))));
-	QByteArray selection = buffer->to_little_endian(buffer->range(position[0], position[1]));
 }
 
 void hex_editor::disassemble()
@@ -312,8 +311,7 @@ void hex_editor::disassemble()
 	if(!buffer->is_active() || !get_selection_range(position)){
 		return;
 	}
-	QByteArray data = buffer->range(position[0], position[1]);
-	emit send_disassemble_data(&data);
+	emit send_disassemble_data(position[0], position[1], buffer);
 }
 
 void hex_editor::count(QString find, bool mode)

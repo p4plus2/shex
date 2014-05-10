@@ -17,9 +17,9 @@ disassembler::disassembler(QWidget *parent) :
 	setReadOnly(true);
 }
 
-void disassembler::disassemble(QByteArray *data)
+void disassembler::disassemble(int start, int end, const ROM_buffer *buffer)
 {
-	setPlainText(active_core()->disassemble(data));
+	setPlainText(active_core()->disassemble(start, end, buffer));
 	show();
 	toggle_display(true);
 }

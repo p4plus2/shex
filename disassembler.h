@@ -17,7 +17,7 @@ class disassembler : public QPlainTextEdit
 		QVBoxLayout *get_layout(disassembler *self);
 		
 	public slots:
-		void disassemble(QByteArray *data);
+		void disassemble(int start, int end, const ROM_buffer *buffer);
 		void toggle_display(bool state);
 		
 	private:

@@ -110,12 +110,12 @@ class ROM_metadata {
 		void update_header_field(checksums field, unsigned short data);
 		void update_vector(vectors vector, unsigned short data);
 		void update_cart_name(QString name);
-		QByteArray to_little_endian(QByteArray bytes);
-		int snes_to_pc(int address);
-		int pc_to_snes(int address);
+		QByteArray to_little_endian(QByteArray bytes) const;
+		int snes_to_pc(int address) const;
+		int pc_to_snes(int address) const;
 		bool validate_address(int address, bool error_method = true);
-		int branch_address(int address, QByteArray branch);
-		int jump_address(int address, QByteArray jump);
+		int branch_address(int address, QByteArray branch) const;
+		int jump_address(int address, QByteArray jump) const;
 		
 		virtual int size() = 0;
 		virtual char at(int index) = 0;
