@@ -9,6 +9,7 @@ void ROM_metadata::analyze()
 	has_header = false;
 	if((size() & 0x7fff) == 512){
 		has_header = true;
+		remove_copy_header();
 	}else{
 		has_header = false;
 	}

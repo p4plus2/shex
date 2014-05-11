@@ -24,6 +24,12 @@ ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 	qDebug() << ENUM_STRING(memory_mapper, get_mapper());
 }
 
+void ROM_buffer::remove_copy_header()
+{
+	header_buffer = buffer.mid(0, header_size());
+	buffer.remove(0, header_size());
+}
+
 void ROM_buffer::save(QString path)
 {
 	QFileInfo info(ROM);
@@ -32,7 +38,11 @@ void ROM_buffer::save(QString path)
 		ROM.setFileName(path);	
 		ROM.open(QFile::ReadWrite);
 	}
-	ROM.seek(0);
+	if(header_size()){
+		ROM.seek(0);
+		ROM.write(header_buffer);
+	}
+	ROM.seek(header_size());
 	ROM.write(buffer);
 }
 
@@ -173,7 +183,6 @@ void ROM_buffer::delete_text(int start, int end)
 void ROM_buffer::update_nibble(char byte, int position, int delete_start, int delete_end)
 {
 	bool remove = false;
-	position += header_size()*2;
 	if(position/2 == buffer.size()){
 		buffer[position/2] = 0;
 		remove = true;
@@ -194,7 +203,6 @@ void ROM_buffer::update_nibble(char byte, int position, int delete_start, int de
 
 void ROM_buffer::update_byte(char byte, int position, int delete_start, int delete_end)
 {
-	position += header_size();
 	bool remove = false;
 	if(position == buffer.size()){
 		buffer[position] = 0;
@@ -218,8 +226,6 @@ QString ROM_buffer::get_line(int index, int length)
 	}
 	QTextStream string_stream(&line);
 	string_stream << "$" << get_formatted_address(index) << ": ";
-
-	index += header_size();
 	
 	int line_length = index+length;
 

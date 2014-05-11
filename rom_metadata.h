@@ -117,6 +117,7 @@ class ROM_metadata {
 		int branch_address(int address, QByteArray branch) const;
 		int jump_address(int address, QByteArray jump) const;
 		
+		virtual void remove_copy_header() = 0;
 		virtual int size() = 0;
 		virtual char at(int index) = 0;
 		virtual void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0) = 0;

@@ -34,6 +34,7 @@ class ROM_buffer : public ROM_metadata
 		
 		ROM_buffer(QString file_name, bool new_file = false);
 		virtual ~ROM_buffer(){}
+		virtual void remove_copy_header();
 		void save(QString path);
 		void initialize_undo(QUndoGroup *undo_group);
 		void cut(int start, int end, bool ascii_mode);
@@ -50,8 +51,8 @@ class ROM_buffer : public ROM_metadata
 		int replace_all(QString find, QString replace, bool mode);
 		
 		inline QString get_file_name(){ QFileInfo info(ROM); return info.fileName();  }
-		inline virtual int size(){ return buffer.size() - header_size(); }
-		inline virtual char at(int index){ return index == size() ? 0 : buffer.at(index + header_size()); }
+		inline virtual int size(){ return buffer.size(); }
+		inline virtual char at(int index){ return index == size() ? 0 : buffer.at(index); }
 		inline QByteArray range(int start, int end) const { return buffer.mid(start, end-start); }
 		inline bool check_paste_data(){ return clipboard->mimeData()->hasText(); }
 		inline void set_active(){ undo_stack->setActive(); }
@@ -64,6 +65,7 @@ class ROM_buffer : public ROM_metadata
 	private:
 		QFile ROM;
 		QByteArray buffer;
+		QByteArray header_buffer;
 		QClipboard *clipboard = QApplication::clipboard();
 		QUndoStack *undo_stack;
 		static copy_style copy_type;

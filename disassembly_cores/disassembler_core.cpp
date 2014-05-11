@@ -21,10 +21,12 @@ QString disassembler_core::disassembly_text()
 {
 	QString text;
 	foreach(block b, disassembly_list){
-		if(!b.label.isEmpty() && !b.mnemonic.isEmpty()){
+		if(!b.label.isEmpty()){
 			text = text % b.label % ":\n";
 		}
-		text = text % (label_id > 0 ? "\t" : "") % b.mnemonic % "\n";
+		if(!b.mnemonic.isEmpty()){
+			text = text % (label_id > 0 ? "\t" : "") % b.mnemonic % "\n";
+		}
 	}
 	return text;
 }

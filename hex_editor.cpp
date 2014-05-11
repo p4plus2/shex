@@ -240,7 +240,7 @@ void hex_editor::paste(bool raw)
 	if(get_selection_range(position)){
 		buffer->paste(position[0], position[1], raw);
 	}else{
-		int size = buffer->paste(get_buffer_position(cursor_position) + buffer->header_size(), 0, raw);
+		int size = buffer->paste(get_buffer_position(cursor_position), 0, raw);
 		cursor_position = get_byte_position(get_buffer_position(cursor_position)+size);
 		set_selection_active(false);
 	}
@@ -255,7 +255,7 @@ void hex_editor::delete_text()
 	}
 	int position[2];
 	if(!get_selection_range(position)){
-		buffer->delete_text(get_buffer_position(cursor_position) + buffer->header_size());
+		buffer->delete_text(get_buffer_position(cursor_position));
 	}else{
 		buffer->delete_text(position[0], position[1]);	
 		set_selection_active(false);
@@ -287,7 +287,7 @@ void hex_editor::branch()
 	text.append(QString::number(buffer->branch_address(position[1], 
 	            buffer->to_little_endian(buffer->range(position[0], position[1]))), 16));
 	
-	goto_offset(buffer->branch_address(position[1] - buffer->header_size(), 
+	goto_offset(buffer->branch_address(position[1], 
 	            buffer->to_little_endian(buffer->range(position[0], position[1]))));
 }
 
@@ -301,7 +301,7 @@ void hex_editor::jump()
 	text.append(QString::number(buffer->jump_address(position[1], 
 	            buffer->to_little_endian(buffer->range(position[0], position[1]))), 16));
 	
-	goto_offset(buffer->jump_address(position[1] - buffer->header_size(), 
+	goto_offset(buffer->jump_address(position[1], 
 	            buffer->to_little_endian(buffer->range(position[0], position[1]))));
 }
 
@@ -336,7 +336,7 @@ void hex_editor::search(QString find, bool direction, bool mode)
 	
 	int position[2];
 	if(!get_selection_range(position)){
-		position[1] = get_buffer_position(cursor_position) + buffer->header_size();
+		position[1] = get_buffer_position(cursor_position);
 	}else if(!direction){
 		position[1] = position[0] - 1;
 	}
@@ -344,12 +344,12 @@ void hex_editor::search(QString find, bool direction, bool mode)
 	if(result < 0){
 		search_error(result, find);
 	}else{
-		int start = buffer->pc_to_snes(result - buffer->header_size());
+		int start = buffer->pc_to_snes(result);
 		int end = 0;
 		if(mode){
-			end = buffer->pc_to_snes(result - buffer->header_size() + buffer->to_hex(find).length()/2 - 1);
+			end = buffer->pc_to_snes(result + buffer->to_hex(find).length()/2 - 1);
 		}else{
-			end = buffer->pc_to_snes(result - buffer->header_size() + find.length() - 1);
+			end = buffer->pc_to_snes(result + find.length() - 1);
 		}
 		goto_offset(end);
 		select_range(start, end);
@@ -361,17 +361,17 @@ void hex_editor::replace(QString find, QString replace, bool direction, bool mod
 	if(!buffer->is_active()){
 		return;
 	}
-	int position = get_buffer_position(cursor_position) + buffer->header_size();
+	int position = get_buffer_position(cursor_position);
 	int result = buffer->replace(find, replace, position, direction, mode);
 	if(result < 0){
 		search_error(result, find, replace);
 	}else{
-		int start = buffer->pc_to_snes(result - buffer->header_size());
+		int start = buffer->pc_to_snes(result);
 		int end = 0;
 		if(mode){
-			end = buffer->pc_to_snes(result - buffer->header_size() + buffer->to_hex(replace).length()/2 - 1);
+			end = buffer->pc_to_snes(result + buffer->to_hex(replace).length()/2 - 1);
 		}else{
-			end = buffer->pc_to_snes(result - buffer->header_size() + replace.length() - 1);
+			end = buffer->pc_to_snes(result + replace.length() - 1);
 		}
 		goto_offset(end);
 		select_range(start, end);
@@ -688,8 +688,8 @@ int hex_editor::get_selection_point(QPoint point)
 
 bool hex_editor::get_selection_range(int position[2])
 {
-	position[0] = get_buffer_position(selection_start) + buffer->header_size();
-	position[1] = get_buffer_position(selection_current) + buffer->header_size();
+	position[0] = get_buffer_position(selection_start);
+	position[1] = get_buffer_position(selection_current);
 	if(position[0] > position[1]){
 		qSwap(position[0], position[1]);
 		qSwap(selection_start, selection_current);
@@ -706,7 +706,7 @@ bool hex_editor::follow_selection(bool type)
 		if(type && (range == 1 || range == 2)){
 			return true;
 		}else if(!type && (range == 2 || range == 3)){
-			if(buffer->validate_address(buffer->jump_address(position[1] - buffer->header_size(),
+			if(buffer->validate_address(buffer->jump_address(position[1],
 			            buffer->to_little_endian(buffer->range(position[0], position[1]))), false)){
 				return true;                
 			}

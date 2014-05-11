@@ -11,11 +11,13 @@ isa_65c816::isa_65c816(QObject *parent) :
 	connect(set_I, SIGNAL(toggled(bool)), this, SLOT(toggle_I(bool)));
 	connect(stop, SIGNAL(toggled(bool)), this, SLOT(toggle_error_stop(bool)));
 }
-//header remove
-#define label_op(D) \
-	destination = buffer->snes_to_pc(D) + 512; \
+#define get_operand(B) ((size > B && (i+B) < data.size()) ? ((unsigned char)data.at(i+B) << (B-1)*8) : 0)
+#define hex_to_string(A) QString::number(operand, 16).rightJustified((A), '0').toUpper()
+#define label_op(T) \
+	QByteArray little_endian = buffer->to_little_endian(data.mid(i+1, size-1)); \
+	int destination = buffer->snes_to_pc(buffer->T##_address(i+start, little_endian)); \
 	if(destination < start || destination > end){ \
-		QString op_text = QString::number(operand, 16).rightJustified((size-1)*2, '0'); \
+		QString op_text = hex_to_string((size-1)*2); \
 		add_mnemonic(start+i, op.name.arg('$' + op_text)); \
 	}else{ \
 		add_mnemonic(start+i, op.name.arg(add_label(destination))); \
@@ -27,47 +29,40 @@ QString isa_65c816::disassemble(int start, int end, const ROM_buffer *buffer)
 	QByteArray data = buffer->range(start, end);
 	bool stopped = false;
 	for(int i = 0; i < data.size();){
-		unsigned char hex = (unsigned char)data.at(i);
+		unsigned char hex = data.at(i);
 		disassembler_core::opcode op = opcode_list[hex];
 		int size = op.size;
-		if(op.size > 1){
+		
+		if(error_stop && unlikely.contains(hex)){
+			stopped = true;
+			break;
+		}else if(op.size > 1){
 			size += (A_state && A_16_list.contains(hex)) || (I_state && I_16_list.contains(hex));
-			int operand = (size > 1 && (i+1) < data.size()) ? (unsigned char)data.at(i+1) : 0;
-			operand |= (size > 2 && (i+2) < data.size()) ? ((unsigned char)data.at(i+2) << 8) : 0;
-			operand |= (size > 3 && (i+3) < data.size()) ? ((unsigned char)data.at(i+3) << 16) : 0;
+			int operand = get_operand(1) | get_operand(2) | get_operand(3);
 			if(i+size > data.size()){
-				QString op_text = QString::number(operand, 16).rightJustified((i+size-data.size())*2, '0');
+				QString op_text = hex_to_string(i+size-data.size()*2);
 				if(data.size() - i == 1){
 					op_text.clear();
 				}
 				QString dollar = (branch_list.contains(hex) || jump_list.contains(hex)) ? "$" : "";
 				add_mnemonic(start+i, op.name.arg(dollar + op_text.rightJustified((size-1)*2, 'X')));
 			}else if(branch_list.contains(hex)){
-				QByteArray little_endian = buffer->to_little_endian(data.mid(i+1, size-1));
-				int destination = buffer->branch_address(i+start, little_endian);
-				label_op(destination);
-				qDebug() << start << end << "jump" << destination << little_endian.toHex();
+				label_op(branch);
 			}else if(jump_list.contains(hex)){
-				QByteArray little_endian = buffer->to_little_endian(data.mid(i+1, size-1));
-				int destination = buffer->jump_address(start, little_endian);
-				label_op(destination);
+				label_op(jump);
 			}else{
-				QString op_text = QString::number(operand, 16).rightJustified((size-1)*2, '0');
+				QString op_text = hex_to_string((size-1)*2);
 				add_mnemonic(start+i, op.name.arg(op_text));
 				if(hex == 0xC2){
-					A_state = (data.at(i+1) & 0x20) ? 1 : 0;
-					I_state = (data.at(i+1) & 0x10) ? 1 : 0;			
+					A_state = (operand & 0x20) ? 1 : 0;
+					I_state = (operand & 0x10) ? 1 : 0;			
 				}else if(hex == 0xE2){
-					A_state = (data.at(i+1) & 0x20) ? 0 : 1;
-					I_state = (data.at(i+1) & 0x10) ? 0 : 1;
+					A_state = (operand & 0x20) ? 0 : 1;
+					I_state = (operand & 0x10) ? 0 : 1;
 				}
 			}
 		}else{
 			add_mnemonic(start+i, op.name);
-		}
-		if(error_stop && unlikely.contains(hex)){
-			stopped = true;
-			break;
 		}
 		i += size;
 	}
@@ -77,6 +72,8 @@ QString isa_65c816::disassemble(int start, int end, const ROM_buffer *buffer)
 }
 
 #undef label_op
+#undef hex_to_string
+#undef get_operand
 
 QGridLayout *isa_65c816::core_layout()
 {
