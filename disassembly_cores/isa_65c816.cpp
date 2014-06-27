@@ -53,12 +53,9 @@ QString isa_65c816::disassemble(int start, int end, const ROM_buffer *buffer)
 			}else{
 				QString op_text = hex_to_string((size-1)*2);
 				add_mnemonic(start+i, op.name.arg(op_text));
-				if(hex == 0xC2){
-					A_state = (operand & 0x20) ? 1 : 0;
-					I_state = (operand & 0x10) ? 1 : 0;			
-				}else if(hex == 0xE2){
-					A_state = (operand & 0x20) ? 0 : 1;
-					I_state = (operand & 0x10) ? 0 : 1;
+				if(hex == 0xC2 || hex == 0xE2){
+					A_state = (operand & 0x20) ? hex == 0xC2 : A_state;
+					I_state = (operand & 0x10) ? hex == 0xC2 : I_state;			
 				}
 			}
 		}else{

@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "character_mapper.h"
 #include "disassembler.h"
+#include "bookmarks.h"
 
 #include <QStatusBar>
 #include <QHBoxLayout>
@@ -169,12 +170,14 @@ void main_window::create_new_tab(QString name, bool new_file)
 	}
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	disassembler *disassembly_panel = new disassembler(editor);
+	bookmarks *bookmark_panel = new bookmarks(editor);
 	init_connections(editor, scrollbar, disassembly_panel);
 	
 	QHBoxLayout *hex_layout = new QHBoxLayout(widget);
 	hex_layout->addWidget(editor);
 	hex_layout->addWidget(scrollbar);
-	hex_layout->addLayout(disassembly_panel->get_layout(disassembly_panel));
+	hex_layout->addLayout(disassembly_panel->get_layout());
+	hex_layout->addLayout(bookmark_panel->get_layout());
 	widget->setLayout(hex_layout);
 	tab_widget->addTab(widget, QFileInfo(name).fileName());
 	

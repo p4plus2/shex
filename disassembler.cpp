@@ -39,10 +39,10 @@ void disassembler::toggle_display(bool state) {
 	layout_adjust();
 }
 
-QVBoxLayout *disassembler::get_layout(disassembler *self)
+QVBoxLayout *disassembler::get_layout()
 {	
 	box->addWidget(disassembler_cores);
-	box->addWidget(self);
+	box->addWidget(this);
 	current_core_layout = active_core()->core_layout();
 	return box;
 }

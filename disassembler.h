@@ -14,7 +14,7 @@ class disassembler : public QPlainTextEdit
 	public:
 
 		explicit disassembler(QWidget *parent = 0);
-		QVBoxLayout *get_layout(disassembler *self);
+		QVBoxLayout *get_layout();
 		
 	public slots:
 		void disassemble(int start, int end, const ROM_buffer *buffer);
