@@ -14,6 +14,7 @@ class hex_editor;
 class dynamic_scrollbar;
 class QLabel;
 class disassembler;
+class bookmarks;
 
 class main_window : public QMainWindow
 {
@@ -49,7 +50,8 @@ class main_window : public QMainWindow
 		menu_manager *menu_controller = new menu_manager(this, menuBar());
 		int new_counter = 0;
 
-		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, disassembler *disassembly_panel);
+		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, 
+		                      disassembler *disassembly_panel, bookmarks *bookmark_panel);
 		void create_new_tab(QString name, bool new_file = false);
 		hex_editor *get_editor(int i) const;
 		

@@ -201,6 +201,9 @@ void hex_editor::context_menu(const QPoint& position)
 	               SLOT(jump()), QKeySequence("Ctrl+j"))->setEnabled(follow_selection(false));
 	menu.addAction("Disassemble", this, 
 	               SLOT(disassemble()), QKeySequence("Ctrl+d"))->setEnabled(selection_active);
+	menu.addSeparator();
+	menu.addAction("Bookmark", this, 
+	               SLOT(create_bookmark()), QKeySequence("Ctrl+b"))->setEnabled(selection_active);
 	
 	menu.exec(mapToGlobal(position));
 }
@@ -312,6 +315,15 @@ void hex_editor::disassemble()
 		return;
 	}
 	emit send_disassemble_data(position[0], position[1], buffer);
+}
+
+void hex_editor::create_bookmark()
+{
+	int position[2];
+	if(!buffer->is_active() || !get_selection_range(position)){
+		return;
+	}
+	emit send_bookmark_data(position[0], position[1], buffer);
 }
 
 void hex_editor::count(QString find, bool mode)

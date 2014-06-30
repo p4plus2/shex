@@ -36,6 +36,7 @@ class hex_editor : public QWidget
 		void clipboard_usable(bool usable);
 		void can_save(bool save);
 		void send_disassemble_data(int start, int end, const ROM_buffer *buffer);
+		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);
 
 	public slots:
 		void update_cursor_state();
@@ -55,6 +56,7 @@ class hex_editor : public QWidget
 		void branch();
 		void jump();
 		void disassemble();
+		void create_bookmark();
 		void count(QString find, bool mode);
 		void search(QString find, bool direction, bool mode);
 		void replace(QString find, QString replace, bool direction, bool mode);

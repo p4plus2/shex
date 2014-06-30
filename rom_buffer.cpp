@@ -251,7 +251,7 @@ QString ROM_buffer::get_line(int index, int length)
 	return line;
 }
 
-QString ROM_buffer::get_formatted_address(int address)
+QString ROM_buffer::get_formatted_address(int address) const
 {
 	address = pc_to_snes(address);
 	int bank = address >> 16;

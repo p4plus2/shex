@@ -25,8 +25,8 @@ class disassembler : public QPlainTextEdit
 		void layout_adjust();
 		disassembler_core *active_core(){ return cores[disassembler_cores->currentText()]; }
 		
+		QWidget *core_layout = new QWidget(this);
 		QVBoxLayout *box = new QVBoxLayout();	
-		QGridLayout *current_core_layout;
 		QComboBox *disassembler_cores = new QComboBox(this);
 		QMap<QString, disassembler_core *> cores;
 };

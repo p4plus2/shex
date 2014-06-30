@@ -141,7 +141,8 @@ void main_window::closeEvent(QCloseEvent *event)
 	QMainWindow::closeEvent(event);
 }
 
-void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, disassembler *disassembly_panel)
+void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, 
+                                   disassembler *disassembly_panel, bookmarks *bookmark_panel)
 {
 	connect(scrollbar, SIGNAL(valueChanged(int)), editor, SLOT(slider_update(int)));
 	connect(editor, SIGNAL(update_slider(int)), scrollbar, SLOT(setValue(int)));
@@ -152,10 +153,13 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(editor, SIGNAL(can_save(bool)), this, SLOT(file_save_state(bool)));
 	connect(editor, SIGNAL(send_disassemble_data(int, int, const ROM_buffer*)), 
 				disassembly_panel, SLOT(disassemble(int, int, const ROM_buffer*)));
+	connect(editor, SIGNAL(send_bookmark_data(int, int, const ROM_buffer*)), 
+				bookmark_panel, SLOT(create_bookmark(int, int, const ROM_buffer*)));
 	
 	dialog_controller->connect_to_editor(editor);
 	menu_controller->connect_to_widget(editor);
 	menu_controller->connect_to_widget(disassembly_panel);
+	menu_controller->connect_to_widget(bookmark_panel);
 }
 
 void main_window::create_new_tab(QString name, bool new_file)
@@ -171,7 +175,7 @@ void main_window::create_new_tab(QString name, bool new_file)
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	disassembler *disassembly_panel = new disassembler(editor);
 	bookmarks *bookmark_panel = new bookmarks(editor);
-	init_connections(editor, scrollbar, disassembly_panel);
+	init_connections(editor, scrollbar, disassembly_panel, bookmark_panel);
 	
 	QHBoxLayout *hex_layout = new QHBoxLayout(widget);
 	hex_layout->addWidget(editor);

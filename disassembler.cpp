@@ -13,6 +13,7 @@ disassembler::disassembler(QWidget *parent) :
 	if(!display){
 		disassembler_cores->hide();
 		hide();
+		core_layout->hide();
 	}
 	setReadOnly(true);
 }
@@ -30,11 +31,7 @@ void disassembler::toggle_display(bool state) {
 	}
 	setVisible(state);
 	disassembler_cores->setVisible(state);
-	if(state){
-		box->addLayout(current_core_layout);
-	}else{
-		box->removeItem(current_core_layout);
-	}
+	core_layout->setVisible(state);
 	display = state;
 	layout_adjust();
 }
@@ -43,7 +40,8 @@ QVBoxLayout *disassembler::get_layout()
 {	
 	box->addWidget(disassembler_cores);
 	box->addWidget(this);
-	current_core_layout = active_core()->core_layout();
+	box->addWidget(core_layout);
+	core_layout->setLayout(active_core()->core_layout());
 	return box;
 }
 
@@ -56,6 +54,7 @@ void disassembler::layout_adjust()
 		parent->adjustSize();
 		parent->resize(parent->width(), height);
 		parent->setUpdatesEnabled(true);
+		parent->repaint();
 		parent = parent->parentWidget();
 	}
 }

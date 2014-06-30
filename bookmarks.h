@@ -11,13 +11,14 @@
 #include <QLineEdit>
 #include <QMap>
 #include <QRadioButton>
+#include "rom_buffer.h"
 
 class bookmarks : public QTableView
 {
 		Q_OBJECT
 	public:
 		explicit bookmarks(QWidget *parent = 0);
-		QGridLayout *get_layout();
+		QVBoxLayout *get_layout();
 		
 		void add_bookmark(QString address, QString description);
 		
@@ -31,8 +32,15 @@ class bookmarks : public QTableView
 		void reload_clicked();
 		void row_clicked(QModelIndex index);
 		
+		void create_bookmark(int start, int end, const ROM_buffer *buffer);
+		void toggle_display(bool state);
+		
 	private:
+		void init_grid_layout();
 		void set_color_button(QColor color);
+		void layout_adjust();
+		
+		QWidget *input_area = new QWidget(this);
 		
 		struct bookmark_data{
 			int size;
@@ -43,10 +51,12 @@ class bookmarks : public QTableView
 		
 		QMap<QString, bookmark_data> bookmark_map;
 		
+		static bool display;
 		int row = 0;
 		int active_row = 0;
 		QStandardItemModel *model = new QStandardItemModel();
 		
+		QVBoxLayout *box = new QVBoxLayout();	
 		QGridLayout *grid = new QGridLayout();
 		
 		QPushButton *add_button = new QPushButton("Add Bookmark");

@@ -2,6 +2,7 @@
 #include <QHeaderView>
 #include <QStringList>
 #include <QColorDialog>
+#include <QFontMetrics>
 #include "debug.h"
 
 bookmarks::bookmarks(QWidget *parent) :
@@ -11,6 +12,10 @@ bookmarks::bookmarks(QWidget *parent) :
 	labels << "Address" << "Description";
 	model->setHorizontalHeaderLabels(labels);
 	
+	if(!display){
+		hide();
+		input_area->hide();
+	}
 	
 	setModel(model);
 	verticalHeader()->hide();
@@ -38,6 +43,18 @@ bookmarks::bookmarks(QWidget *parent) :
 	update_button->hide();
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
 	code->setChecked(true);
+	address_input->setInputMask("$HH:HHHH");
+	size_input->setInputMask("999999");
+	
+	QFontMetrics metrics(QApplication::font(address_input));
+	
+	address_input->setMinimumWidth(metrics.width("$AA:AAAA") + 3); //pad this a bit, it looks better
+	address_input->setMaximumWidth(metrics.width("$AA:AAAA") + 3);
+	
+	size_input->setMinimumWidth(metrics.width("2222222") + 3);
+	size_input->setMaximumWidth(metrics.width("2222222") + 3);
+	
+	init_grid_layout();
 }
 
 void bookmarks::color_clicked()
@@ -108,23 +125,34 @@ void bookmarks::row_clicked(QModelIndex index)
 	data->setChecked(!bookmark.code);
 }
 
-QGridLayout *bookmarks::get_layout()
+void bookmarks::create_bookmark(int start, int end, const ROM_buffer *buffer)
 {
-	grid->addWidget(this, 0, 0, 1, 4);
-	grid->addWidget(address_label, 1, 0);
-	grid->addWidget(address_input, 1, 1);
-	grid->addWidget(size_label, 1, 2);
-	grid->addWidget(size_input, 1, 3);
-	grid->addWidget(description_label, 2, 0, 1, 2);
-	grid->addWidget(code, 2, 2, 1, 1);
-	grid->addWidget(data, 2, 3, 1, 1);
-	grid->addWidget(description_input, 3, 0, 1, 4);
-	grid->addWidget(color_label, 4, 0);
-	grid->addWidget(color_button, 4, 1);
-	grid->addWidget(add_button, 4, 2);
-	grid->addWidget(update_button, 4, 2);
-	grid->addWidget(reload_button, 4, 3);
-	return grid;
+	size_input->setText(QString::number(end - start));
+	description_input->setPlainText("");
+	address_input->setText(buffer->get_formatted_address(start));
+	code->setChecked(true);
+	
+	show();
+	toggle_display(true);
+}
+
+void bookmarks::toggle_display(bool state) { 
+	if(state == display){
+		return;
+	}
+	setVisible(state);
+	
+	input_area->setVisible(state);
+	
+	display = state;
+	layout_adjust();
+}
+
+QVBoxLayout *bookmarks::get_layout()
+{
+	box->addWidget(this);
+	box->addWidget(input_area);
+	return box;
 }
 
 void bookmarks::add_bookmark(QString address, QString description)
@@ -134,6 +162,26 @@ void bookmarks::add_bookmark(QString address, QString description)
 	row++;
 }
 
+void bookmarks::init_grid_layout()
+{
+	grid->addWidget(address_label, 0, 0, 1, 1, Qt::AlignRight);
+	grid->addWidget(address_input, 0, 1);
+	grid->addWidget(size_label, 0, 2, 1, 1, Qt::AlignRight);
+	grid->addWidget(size_input, 0, 3);
+	grid->addWidget(description_label, 1, 0, 1, 2);
+	grid->addWidget(code, 1, 2, 1, 1, Qt::AlignRight);
+	grid->addWidget(data, 1, 3, 1, 1);
+	grid->addWidget(description_input, 2, 0, 1, 4);
+	grid->addWidget(color_label, 3, 0, 1, 1, Qt::AlignRight);
+	grid->addWidget(color_button, 3, 1);
+	grid->addWidget(add_button, 3, 2);
+	grid->addWidget(update_button, 3, 2);
+	grid->addWidget(reload_button, 3, 3);
+	
+	
+	input_area->setLayout(grid);
+}
+
 void bookmarks::set_color_button(QColor color)
 {
 	QPalette palette;
@@ -141,3 +189,19 @@ void bookmarks::set_color_button(QColor color)
 	
 	color_button->setPalette(palette);
 }
+
+void bookmarks::layout_adjust()
+{
+        QWidget *parent = parentWidget();
+        while(parent){
+		int height = parent->height();
+		parent->setUpdatesEnabled(false);
+		parent->adjustSize();
+		parent->resize(parent->width(), height);
+		parent->setUpdatesEnabled(true);
+		parent->repaint();
+		parent = parent->parentWidget();
+	}
+}
+
+bool bookmarks::display = false;

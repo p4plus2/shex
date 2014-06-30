@@ -9,6 +9,7 @@ class main_window;
 class dialog_manager;
 class QUndoGroup;
 class disassembler;
+class bookmarks;
 
 class abstract_menu_item : public QAction
 {
@@ -22,6 +23,7 @@ class abstract_menu_item : public QAction
 		virtual void connect_to_widget(QUndoGroup *group){Q_UNUSED(group);}
 		virtual void connect_to_widget(dialog_manager *dialog_controller){Q_UNUSED(dialog_controller);}
 		virtual void connect_to_widget(disassembler *disassembly_panel){Q_UNUSED(disassembly_panel);}
+		virtual void connect_to_widget(bookmarks *bookmark_panel){Q_UNUSED(bookmark_panel);}
 		
 	protected:
 		QString run;
