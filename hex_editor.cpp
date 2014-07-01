@@ -46,7 +46,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 
 QSize hex_editor::minimumSizeHint() const
 {
-	return QSize((14 + columns * 4)*font_width,
+	return QSize(column_width(14 + columns * 4),
 	             rows*font_height+vertical_offset+vertical_shift);
 }
 
@@ -415,14 +415,14 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	painter.setPen(text);
 	painter.setFont(font);
 	
-	for(int i = hex_offset; i < columns * column_width(3) + hex_offset; i += column_width(6)){
+	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += column_width(6)){
 		painter.fillRect(i-1, vertical_offset-font_height, column_width(2)+2, 
 		                 column_height(rows+1)+6, palette().color(QPalette::AlternateBase));
 	}
 	
 	if(cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset && !selection_active){
 		QRect active_line(hex_offset-1, cursor_position.y()-1+vertical_offset, 
-		                  columns*column_width(3)-font_width+2, font_height);
+		                  total_byte_column_width-font_width+2, font_height);
 		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
 		if(cursor_state){
 			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 
@@ -501,12 +501,12 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	
 	switch(event->key()){
 		case Qt::Key_Backspace:
-			update_cursor_position(cursor_position.x()-column_width(3), cursor_position.y(), false);
+			update_cursor_position(cursor_position.x()-byte_column_width, cursor_position.y(), false);
 			delete_text();
 		break;
 			
 		case Qt::Key_Home:
-			update_cursor_position(column_width(11), cursor_position.y());
+			update_cursor_position(hex_offset, cursor_position.y());
 		break;
 		case Qt::Key_End:
 				update_cursor_position(column_width(9+columns*3), cursor_position.y());
@@ -591,7 +591,7 @@ void hex_editor::mousePressEvent(QMouseEvent *event)
 	}
 	
 	set_selection_active(false);
-	if(x > column_width(11) && x < column_width(11+columns*3)-font_width){
+	if(x > hex_offset && x < column_width(11+columns*3)-font_width){
 		update_cursor_position(x, y);
 		is_dragging = true;
 		selection_start = get_byte_position(get_buffer_position(x, y));
@@ -655,7 +655,9 @@ void hex_editor::font_setup()
 	font_width = font_info.averageCharWidth();
 	font_height = font_info.height();
 	hex_offset = column_width(11);
-	ascii_offset = column_width(15+columns*3);
+	byte_column_width = column_width(3);
+	total_byte_column_width = byte_column_width * columns;
+	ascii_offset = column_width(15+columns*byte_column_width);
 }
 
 QString hex_editor::get_status_text()
@@ -690,7 +692,7 @@ int hex_editor::get_selection_point(QPoint point)
 {
 	if(point.y() < 0){
 		point.setY(vertical_offset);
-		point.setX(column_width(11));
+		point.setX(hex_offset);
 	}else if(point.y() > column_height(rows)+vertical_offset - font_height){
 		point.setY(column_height(rows)+vertical_offset -font_height);
 		point.setX(column_width(11+columns*3)-font_width);
@@ -734,7 +736,7 @@ int hex_editor::get_buffer_position(QPoint &point, bool byte_align)
 
 int hex_editor::get_buffer_position(int x, int y, bool byte_align)
 {
-	int position = (x - column_width(11)) / font_width;
+	int position = (x - hex_offset) / font_width;
 	position -= position / 3;
 	position = ((y-vertical_offset)/font_height)*columns*2+position+offset*2;
 	return byte_align ? position/2 : position;
@@ -800,8 +802,8 @@ void hex_editor::update_selection(int x, int y)
 {
 	int old_offset = offset;
 	QPoint last_byte = get_byte_position(buffer->size()-1);
-	if(x < column_width(11)){
-		x = column_width(11);
+	if(x < hex_offset){
+		x = hex_offset;
 	}else if(x >= column_width(10+columns*3)-font_width){
 		x = column_width(10+columns*3)-font_width*2;
 	}else if(x >= last_byte.x()-font_width && y-font_height >= last_byte.y()){

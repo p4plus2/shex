@@ -94,6 +94,9 @@ class hex_editor : public QWidget
 		int font_height;
 		int vertical_offset = 6;
 		int vertical_shift;
+		int address_column_width = 11; //unused
+		int byte_column_width;
+		int total_byte_column_width;
 		bool scroll_mode = false;
 		bool auto_scrolling;
 		QTimer *scroll_timer = new QTimer(this);
@@ -121,8 +124,8 @@ class hex_editor : public QWidget
 		void update_window();
 		void search_error(int error, QString find = "", QString replace_with = "");
 		
-		inline int column_width(int size){ return size * font_width; }
-		inline int column_height(int size){ return size * font_height; }
+		inline int column_width(int size) const { return size * font_width; }
+		inline int column_height(int size) const { return size * font_height; }
 		inline int to_ascii_column(int x){ return column_width(14+columns*3+(x-font_width*11)/font_width/3); }
 		inline int to_hex_column(int x){ return column_width(11+(x-font_width*(14+columns*3))/font_width*3); }
 		inline int get_max_lines(){ return buffer->size() / columns - rows; }
