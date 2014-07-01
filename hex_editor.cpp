@@ -210,12 +210,12 @@ void hex_editor::context_menu(const QPoint& position)
 
 void hex_editor::cut()
 {
-	int position[2];
-	if(!buffer->is_active() || !get_selection_range(position)){
+	int start, end;
+	if(!buffer->is_active() || !get_selection_range(start, end)){
 		return;
 	}
 	
-	buffer->cut(position[0], position[1], click_side);
+	buffer->cut(start, end, click_side);
 	cursor_position = selection_start;
 	set_selection_active(false);
 	update_window();
@@ -224,12 +224,12 @@ void hex_editor::cut()
 
 void hex_editor::copy()
 {
-	int position[2];
-	if(!buffer->is_active() || !get_selection_range(position)){
+	int start, end;
+	if(!buffer->is_active() || !get_selection_range(start, end)){
 		return;
 	}
 	
-	buffer->copy(position[0], position[1], click_side);
+	buffer->copy(start, end, click_side);
 	update_window();
 	update_save_state(1);
 }
@@ -239,9 +239,9 @@ void hex_editor::paste(bool raw)
 	if(!buffer->is_active()){
 		return;
 	}
-	int position[2];
-	if(get_selection_range(position)){
-		buffer->paste(position[0], position[1], raw);
+	int start, end;
+	if(get_selection_range(start, end)){
+		buffer->paste(start, end, raw);
 	}else{
 		int size = buffer->paste(get_buffer_position(cursor_position), 0, raw);
 		cursor_position = get_byte_position(get_buffer_position(cursor_position)+size);
@@ -256,11 +256,11 @@ void hex_editor::delete_text()
 	if(!buffer->is_active()){
 		return;
 	}
-	int position[2];
-	if(!get_selection_range(position)){
+	int start, end;
+	if(!get_selection_range(start, end)){
 		buffer->delete_text(get_buffer_position(cursor_position));
 	}else{
-		buffer->delete_text(position[0], position[1]);	
+		buffer->delete_text(start, end);	
 		set_selection_active(false);
 		cursor_position = selection_start;
 	}
@@ -282,48 +282,48 @@ void hex_editor::select_all()
 
 void hex_editor::branch()
 {
-	int position[2];
-	if(!buffer->is_active() || !get_selection_range(position)){
+	int start, end;
+	if(!buffer->is_active() || !get_selection_range(start, end)){
 		return;
 	}
 	QString text = "selected bytes: ";
-	text.append(QString::number(buffer->branch_address(position[1], 
-	            buffer->to_little_endian(buffer->range(position[0], position[1]))), 16));
+	text.append(QString::number(buffer->branch_address(end, 
+	            buffer->to_little_endian(buffer->range(start, end))), 16));
 	
-	goto_offset(buffer->branch_address(position[1], 
-	            buffer->to_little_endian(buffer->range(position[0], position[1]))));
+	goto_offset(buffer->branch_address(end, 
+	            buffer->to_little_endian(buffer->range(start, end))));
 }
 
 void hex_editor::jump()
 {
-	int position[2];
-	if(!buffer->is_active() || !get_selection_range(position)){
+	int start, end;
+	if(!buffer->is_active() || !get_selection_range(start, end)){
 		return;
 	}
 	QString text = "selected bytes: ";
-	text.append(QString::number(buffer->jump_address(position[1], 
-	            buffer->to_little_endian(buffer->range(position[0], position[1]))), 16));
+	text.append(QString::number(buffer->jump_address(end, 
+	            buffer->to_little_endian(buffer->range(start, end))), 16));
 	
-	goto_offset(buffer->jump_address(position[1], 
-	            buffer->to_little_endian(buffer->range(position[0], position[1]))));
+	goto_offset(buffer->jump_address(end, 
+	            buffer->to_little_endian(buffer->range(start, end))));
 }
 
 void hex_editor::disassemble()
 {
-	int position[2];
-	if(!buffer->is_active() || !get_selection_range(position)){
+	int start, end;
+	if(!buffer->is_active() || !get_selection_range(start, end)){
 		return;
 	}
-	emit send_disassemble_data(position[0], position[1], buffer);
+	emit send_disassemble_data(start, end, buffer);
 }
 
 void hex_editor::create_bookmark()
 {
-	int position[2];
-	if(!buffer->is_active() || !get_selection_range(position)){
+	int start, end;
+	if(!buffer->is_active() || !get_selection_range(start, end)){
 		return;
 	}
-	emit send_bookmark_data(position[0], position[1], buffer);
+	emit send_bookmark_data(start, end, buffer);
 }
 
 void hex_editor::count(QString find, bool mode)
@@ -346,13 +346,13 @@ void hex_editor::search(QString find, bool direction, bool mode)
 		return;
 	}
 	
-	int position[2];
-	if(!get_selection_range(position)){
-		position[1] = get_buffer_position(cursor_position);
+	int start, end;
+	if(!get_selection_range(start, end)){
+		end = get_buffer_position(cursor_position);
 	}else if(!direction){
-		position[1] = position[0] - 1;
+		end = start - 1;
 	}
-	int result = buffer->search(find, position[1], direction, mode);
+	int result = buffer->search(find, end, direction, mode);
 	if(result < 0){
 		search_error(result, find);
 	}else{
@@ -544,17 +544,17 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 {
-	int position[2];
-	if(get_selection_range(position)){
+	int start, end;
+	if(get_selection_range(start, end)){
 		selection_active = false;
 		cursor_position = selection_start;
 	}else{
-		position[1] = 0;
+		end = 0;
 	}
 	if(update_byte){
-		buffer->update_byte(key, get_buffer_position(cursor_position), position[0], position[1]);
+		buffer->update_byte(key, get_buffer_position(cursor_position), start, end);
 	}else{
-		buffer->update_nibble(key, get_buffer_position(cursor_position, false), position[0], position[1]);
+		buffer->update_nibble(key, get_buffer_position(cursor_position, false), start, end);
 	}
 	update_cursor_position(cursor_position.x()+font_width*(2 * update_byte ? 2 : 1), cursor_position.y(), false);
 	update_window();
@@ -698,28 +698,28 @@ int hex_editor::get_selection_point(QPoint point)
 	return get_buffer_position(point);
 }
 
-bool hex_editor::get_selection_range(int position[2])
+bool hex_editor::get_selection_range(int &start, int &end)
 {
-	position[0] = get_buffer_position(selection_start);
-	position[1] = get_buffer_position(selection_current);
-	if(position[0] > position[1]){
-		qSwap(position[0], position[1]);
+	start = get_buffer_position(selection_start);
+	end = get_buffer_position(selection_current);
+	if(start > end){
+		qSwap(start, end);
 		qSwap(selection_start, selection_current);
 	}
-	position[1]++;
+	end++;
 	return selection_active;
 }
 
 bool hex_editor::follow_selection(bool type)
 {
-	int position[2];
-	if(get_selection_range(position)){
-		int range = position[1]-position[0];
+	int start, end;
+	if(get_selection_range(start, end)){
+		int range = end-start;
 		if(type && (range == 1 || range == 2)){
 			return true;
 		}else if(!type && (range == 2 || range == 3)){
-			if(buffer->validate_address(buffer->jump_address(position[1],
-			            buffer->to_little_endian(buffer->range(position[0], position[1]))), false)){
+			if(buffer->validate_address(buffer->jump_address(end,
+			   buffer->to_little_endian(buffer->range(start, end))), false)){
 				return true;                
 			}
 		}

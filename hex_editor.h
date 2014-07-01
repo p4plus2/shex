@@ -109,7 +109,7 @@ class hex_editor : public QWidget
 		void font_setup();
 		QString get_status_text();
 		int get_selection_point(QPoint point);
-		bool get_selection_range(int position[2]);
+		bool get_selection_range(int &start, int &end);
 		bool follow_selection(bool type);
 		int get_buffer_position(int x, int y, bool byte_align = true);
 		int get_buffer_position(QPoint &point, bool byte_align = true);
