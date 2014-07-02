@@ -9,3 +9,4 @@ Makefile*
 *.log
 *.map
 *callgrind*
+*.pro.user*

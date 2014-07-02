@@ -8,6 +8,8 @@
 #include <QAction>
 #include <QMenu>
 
+#include <QHBoxLayout>
+
 hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file) :
         QWidget(parent)
 {
@@ -42,6 +44,11 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	minimum.setHeight(rows/2*font_height+vertical_offset+vertical_shift);
 	setMinimumSize(minimum);
 	setFocusPolicy(Qt::WheelFocus);
+	
+	QHBoxLayout *layout = new QHBoxLayout();
+	layout->addWidget(hex);
+	layout->addWidget(ascii);
+	setLayout(layout);
 }
 
 QSize hex_editor::minimumSizeHint() const
@@ -60,6 +67,7 @@ void hex_editor::set_focus()
 	emit update_save_state(0);
 	clipboard_changed();
 }
+
 void hex_editor::slider_update(int position)
 {
 	if(!scroll_mode){
@@ -415,9 +423,9 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	painter.setPen(text);
 	painter.setFont(font);
 	
-	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += column_width(6)){
-		painter.fillRect(i-1, vertical_offset-font_height, column_width(2)+2, 
-		                 column_height(rows+1)+6, palette().color(QPalette::AlternateBase));
+	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += byte_column_width * 2){
+		painter.fillRect(i-1, 0, column_width(2)+2, 
+		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
 	}
 	
 	if(cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset && !selection_active){

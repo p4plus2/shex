@@ -34,7 +34,11 @@ SOURCES += main.cpp\
     disassembler.cpp \
     disassembly_cores/isa_65c816.cpp \
     disassembly_cores/disassembler_core.cpp \
-    bookmarks.cpp
+    bookmarks.cpp \
+    displays/hex_display.cpp \
+    displays/text_display.cpp \
+    displays/ascii_display.cpp \
+    displays/address_display.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -62,7 +66,11 @@ HEADERS  += main_window.h \
     menus/toggle_menu_item.h \
     disassembly_cores/isa_65c816.h \
     disassembly_cores/disassembler_core.h \
-    bookmarks.h
+    bookmarks.h \
+    displays/hex_display.h \
+    displays/text_display.h \
+    displays/ascii_display.h \
+    displays/address_display.h
 
 OTHER_FILES += \
     version.sh

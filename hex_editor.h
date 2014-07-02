@@ -10,6 +10,10 @@
 #include <QFont>
 #include <QTimer>
 
+#include "displays/hex_display.h"
+#include "displays/ascii_display.h"
+#include "displays/address_display.h"
+
 class hex_editor : public QWidget
 {
 	Q_OBJECT
@@ -77,6 +81,10 @@ class hex_editor : public QWidget
 		virtual void resizeEvent(QResizeEvent *event);
 
 	private:
+		address_display *address = new address_display(this);
+		hex_display *hex = new hex_display(this);
+		ascii_display *ascii = new ascii_display(this);
+		
 		ROM_buffer *buffer;
 		int columns = 16;
 		int rows = 32;
@@ -134,5 +142,4 @@ class hex_editor : public QWidget
 		
 		static const QString offset_header;
 };
-
 #endif // HEX_EDITOR_H
