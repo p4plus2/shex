@@ -81,9 +81,9 @@ class hex_editor : public QWidget
 		virtual void resizeEvent(QResizeEvent *event);
 
 	private:
-		address_display *address = new address_display(this);
-		hex_display *hex = new hex_display(this);
-		ascii_display *ascii = new ascii_display(this);
+		address_display *address;
+		hex_display *hex;
+		ascii_display *ascii;
 		
 		ROM_buffer *buffer;
 		int columns = 16;
@@ -97,12 +97,11 @@ class hex_editor : public QWidget
 		bool selection_active = false;
 		bool click_side = false;
 		bool is_active = true;
-		QFont font;
-		int font_width;
+		int font_width; //needs removed
 		int font_height;
 		int vertical_offset = 6;
 		int vertical_shift;
-		int address_column_width = 11; //unused
+
 		int byte_column_width;
 		int total_byte_column_width;
 		bool scroll_mode = false;

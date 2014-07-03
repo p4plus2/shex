@@ -30,8 +30,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	connect(cursor_timer, SIGNAL(timeout()), this, SLOT(update_cursor_state()));
 	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(auto_scroll_update()));
 	
-	font_setup();
-	
 	vertical_shift = column_height(1);
 	cursor_position = get_byte_position(0);
 	
@@ -40,12 +38,21 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	        this, SLOT(context_menu(const QPoint&)));
 	connect(qApp->clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboard_changed()));
 	
+	font_width = 10; //stop refactor crashes
+	font_height = 10;
+	
 	QSize minimum = minimumSizeHint();
 	minimum.setHeight(rows/2*font_height+vertical_offset+vertical_shift);
 	setMinimumSize(minimum);
 	setFocusPolicy(Qt::WheelFocus);
 	
+	//can't initialize in header -- relies on buffer here to be const
+	address = new address_display(buffer, this);
+	hex = new hex_display(buffer, this);
+	ascii = new ascii_display(buffer, this);
+	
 	QHBoxLayout *layout = new QHBoxLayout();
+	layout->addWidget(address);
 	layout->addWidget(hex);
 	layout->addWidget(ascii);
 	setLayout(layout);
@@ -416,40 +423,33 @@ void hex_editor::replace_all(QString find, QString replace, bool mode)
 void hex_editor::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
-	QPainter painter(this);
-	painter.translate(0, vertical_shift);
+//	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += byte_column_width * 2){
+//		painter.fillRect(i-1, 0, column_width(2)+2, 
+//		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
+//	}
 	
-	QColor text = palette().color(QPalette::WindowText);
-	painter.setPen(text);
-	painter.setFont(font);
+//	if(cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset && !selection_active){
+//		QRect active_line(hex_offset-1, cursor_position.y()-1+vertical_offset, 
+//		                  total_byte_column_width-font_width+2, font_height);
+//		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
+//		if(cursor_state){
+//			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 
+//			                 1, font_height, text);
+//			painter.fillRect(to_ascii_column(cursor_position.x()), cursor_position.y()-1+vertical_offset, 
+//			                 1, font_height, text);
+//		}
+//	}
 	
-	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += byte_column_width * 2){
-		painter.fillRect(i-1, 0, column_width(2)+2, 
-		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
-	}
-	
-	if(cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset && !selection_active){
-		QRect active_line(hex_offset-1, cursor_position.y()-1+vertical_offset, 
-		                  total_byte_column_width-font_width+2, font_height);
-		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
-		if(cursor_state){
-			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 
-			                 1, font_height, text);
-			painter.fillRect(to_ascii_column(cursor_position.x()), cursor_position.y()-1+vertical_offset, 
-			                 1, font_height, text);
-		}
-	}
-	
-	if(selection_active){
-		paint_selection(painter);
-	}
+//	if(selection_active){
+//		paint_selection(painter);
+//	}
 
-	painter.drawText(0, 0, offset_header);
-	int byte_count = rows * columns + offset;
-	for(int i = offset; i < byte_count; i += columns){
-		QString line = buffer->get_line(i, columns);
-		painter.drawText(0, column_height((i-offset)/columns)+font_height+vertical_offset, line);
-	}
+//	painter.drawText(0, 0, offset_header);
+//	int byte_count = rows * columns + offset;
+//	for(int i = offset; i < byte_count; i += columns){
+//		QString line = buffer->get_line(i, columns);
+//		painter.drawText(0, column_height((i-offset)/columns)+font_height+vertical_offset, line);
+//	}
 	
 }
 
@@ -650,22 +650,6 @@ void hex_editor::resizeEvent(QResizeEvent *event)
 
 	rows = (size().height() - vertical_shift)/ font_height;
 	update_window();
-}
-
-void hex_editor::font_setup()
-{
-	font.setFamily("Courier");
-	font.setStyleHint(QFont::TypeWriter);
-	font.setKerning(false);
-	font.setPixelSize(14);
-	
-	QFontMetrics font_info(font);
-	font_width = font_info.averageCharWidth();
-	font_height = font_info.height();
-	hex_offset = column_width(11);
-	byte_column_width = column_width(3);
-	total_byte_column_width = byte_column_width * columns;
-	ascii_offset = column_width(15+columns*byte_column_width);
 }
 
 QString hex_editor::get_status_text()

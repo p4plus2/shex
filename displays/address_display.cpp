@@ -1,12 +1,9 @@
 #include "address_display.h"
-
-address_display::address_display(QWidget *parent) :
-        text_display(parent)
-{
-}
-
+#include <QPainter>
 
 void address_display::paintEvent(QPaintEvent *event)
 {
-	
+	Q_UNUSED(event);
+	QPainter painter(this);
+	set_painter_font(painter);
 }

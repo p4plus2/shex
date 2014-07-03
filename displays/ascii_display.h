@@ -2,14 +2,16 @@
 #define ASCII_DISPLAY_H
 
 #include "text_display.h"
+#include <QSize>
 
 class ascii_display : public text_display
 {
 		Q_OBJECT
 	public:
-		explicit ascii_display(QWidget *parent = 0);
+		using text_display::text_display;
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
+		virtual QSize sizeHint () const;
 		
 	signals:
 		

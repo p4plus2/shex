@@ -7,7 +7,7 @@ class address_display : public text_display
 {
 		Q_OBJECT
 	public:
-		explicit address_display(QWidget *parent = 0);
+		using text_display::text_display;
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
 		
