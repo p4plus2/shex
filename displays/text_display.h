@@ -6,6 +6,7 @@
 #include "rom_buffer.h"
 
 class QPainter;
+class QTextStream;
 
 class text_display : public QWidget
 {
@@ -15,25 +16,32 @@ class text_display : public QWidget
 	protected:
 		const ROM_buffer *buffer;
 		
+		virtual void paintEvent(QPaintEvent *event);
 		void font_setup();
 		
 		int get_font_width() const;
 		int get_font_height() const;
-		int get_line_characters() const;
-		void set_line_characters(int characters);
+		int get_rows() const;
+		int get_columns() const;
 		
 		void set_painter_font(QPainter &painter);
 		
 		virtual void mouseMoveEvent(QMouseEvent *event);
+		
+		virtual void get_line(int start, int end, QTextStream &stream) = 0;
 	signals:
 		
 	public slots:
 		
 	private:		
 		//make these static at some point, no need to duplicate them
-		//rename to global once done
 		int font_width;
 		int font_height;
+		
+		//also make these static at some point
+		int rows = 32;
+		int columns = 16;
+		
 		QFont font;
 		
 };

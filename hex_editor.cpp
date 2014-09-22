@@ -443,13 +443,6 @@ void hex_editor::paintEvent(QPaintEvent *event)
 //	if(selection_active){
 //		paint_selection(painter);
 //	}
-
-//	painter.drawText(0, 0, offset_header);
-//	int byte_count = rows * columns + offset;
-//	for(int i = offset; i < byte_count; i += columns){
-//		QString line = buffer->get_line(i, columns);
-//		painter.drawText(0, column_height((i-offset)/columns)+font_height+vertical_offset, line);
-//	}
 	
 }
 

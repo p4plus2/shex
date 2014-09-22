@@ -12,6 +12,7 @@ class address_display : public text_display
 		virtual void paintEvent(QPaintEvent *event);
 		virtual QSize sizeHint () const;
 		
+		virtual void get_line(int start, int end, QTextStream &stream);
 	signals:
 		
 	public slots:
