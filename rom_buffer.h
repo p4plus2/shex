@@ -43,7 +43,6 @@ class ROM_buffer : public ROM_metadata
 		void delete_text(int start, int end = 0);
 		void update_nibble(char byte, int position, int delete_start = 0, int delete_end = 0);
 		virtual void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0);
-		QString get_line(int index, int length);
 		QString get_formatted_address(int address) const;
 		int count(QString find, bool mode);
 		int search(QString find, int position, bool direction, bool mode);

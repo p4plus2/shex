@@ -17,6 +17,9 @@ class ascii_display : public text_display
 		
 	public slots:
 		
+	private:
+		const int line_characters = 16;
+		
 };
 
 #endif // ASCII_DISPLAY_H

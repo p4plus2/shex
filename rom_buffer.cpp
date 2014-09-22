@@ -218,39 +218,6 @@ void ROM_buffer::update_byte(char byte, int position, int delete_start, int dele
 	undo_stack->endMacro();
 }
 
-QString ROM_buffer::get_line(int index, int length)
-{
-	QString line;
-	if(index >= buffer.size()){
-		return line;
-	}
-	QTextStream string_stream(&line);
-	string_stream << "$" << get_formatted_address(index) << ": ";
-	
-	int line_length = index+length;
-
-	if(line_length > buffer.size()){
-		line_length = buffer.size();
-	}
-
-	for(int i = index; i < line_length; i++){
-		string_stream << " " 
-		              << QString::number((unsigned char)buffer.at(i),16).rightJustified(2, '0').toUpper();
-	}
-	line = line.leftJustified(10 + length * 3);
-	string_stream << "    ";
-
-	for(int i = index; i < line_length; i++){
-		if(isprint(character_mapper::encode(buffer.at(i)))){
-			string_stream << (char)character_mapper::encode(buffer.at(i));
-		}else{
-			string_stream << ".";
-		}
-	}
-	line = line.leftJustified(14 + length * 4);
-	return line;
-}
-
 QString ROM_buffer::get_formatted_address(int address) const
 {
 	address = pc_to_snes(address);

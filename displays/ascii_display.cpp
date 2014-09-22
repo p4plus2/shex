@@ -4,6 +4,8 @@
 #include <QTextStream>
 #include <QStaticText>
 
+#include "debug.h"
+
 void ascii_display::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
@@ -33,12 +35,11 @@ void ascii_display::paintEvent(QPaintEvent *event)
 	}
 	
 	painter.drawStaticText(0,0, QStaticText(line));
-	//qDebug() << line;
 
 }
 
 
 QSize ascii_display::sizeHint () const
 {
-	return QSize(200, 200);
+	return QSize(get_font_width() * line_characters, 200);
 }

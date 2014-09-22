@@ -16,6 +16,12 @@ class text_display : public QWidget
 		const ROM_buffer *buffer;
 		
 		void font_setup();
+		
+		int get_font_width() const;
+		int get_font_height() const;
+		int get_line_characters() const;
+		void set_line_characters(int characters);
+		
 		void set_painter_font(QPainter &painter);
 		
 		virtual void mouseMoveEvent(QMouseEvent *event);
@@ -25,6 +31,7 @@ class text_display : public QWidget
 		
 	private:		
 		//make these static at some point, no need to duplicate them
+		//rename to global once done
 		int font_width;
 		int font_height;
 		QFont font;

@@ -10,10 +10,14 @@ class address_display : public text_display
 		using text_display::text_display;
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
+		virtual QSize sizeHint () const;
 		
 	signals:
 		
 	public slots:
+		
+	private:
+		const int line_characters = 10;
 		
 };
 

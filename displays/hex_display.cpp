@@ -31,10 +31,10 @@ void hex_display::paintEvent(QPaintEvent *event)
 	}
 	
 	painter.drawStaticText(0,0, QStaticText(line));
-	//qDebug() << line;
 }
 
 QSize hex_display::sizeHint () const
 {
-	return QSize(500, 200);
+	const int padding = 20;
+	return QSize(get_font_width() * line_characters + padding, 200);
 }

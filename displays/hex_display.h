@@ -17,6 +17,9 @@ class hex_display : public text_display
 		
 	public slots:
 		
+	private:
+		const int line_characters = 48;
+		
 };
 
 #endif // HEX_DISPLAY_H
