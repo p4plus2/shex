@@ -7,18 +7,19 @@ class address_display : public text_display
 {
 		Q_OBJECT
 	public:
-		using text_display::text_display;
+		address_display(const ROM_buffer *b, QWidget *parent);
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
 		virtual QSize sizeHint () const;
 		
+		virtual int get_line_characters(){ return line_characters; }
 		virtual void get_line(int start, int end, QTextStream &stream);
 	signals:
 		
 	public slots:
 		
 	private:
-		const int line_characters = 10;
+		const int line_characters = 9;
 		
 };
 

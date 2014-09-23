@@ -37,6 +37,12 @@ void text_display::paintEvent(QPaintEvent *event)
 		return;
 	}
 	
+	bool selection_active = false;
+	if(!selection_active){
+		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
+		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
+	}
+	
 	int byte_count = get_rows() * get_columns() + index;
 	for(int i = index, row = 0; i < byte_count; i += get_columns(), row++){
 		int line_end = i + get_columns();	
@@ -46,7 +52,7 @@ void text_display::paintEvent(QPaintEvent *event)
 		QString line;
 		QTextStream string_stream(&line);
 		get_line(i, line_end, string_stream);
-		painter.drawStaticText(0, row * get_font_height(), QStaticText(line));
+		painter.drawStaticText(0, row * font_height, QStaticText(line));
 	}
 	
 	if(cursor_state && display_cursor){
@@ -90,6 +96,11 @@ void text_display::set_cursor_position(int x, int y)
 {
 	cursor_position.setX(x);
 	cursor_position.setY(y);
+}
+
+void text_display::disable_cursor()
+{
+	display_cursor = false;
 }
 
 void text_display::mouseMoveEvent(QMouseEvent *event)

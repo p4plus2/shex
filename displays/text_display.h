@@ -25,9 +25,11 @@ class text_display : public QWidget
 		int get_columns() const;
 		
 		void set_cursor_position(int x, int y);
+		void disable_cursor();
 
 		virtual void mouseMoveEvent(QMouseEvent *event);
 		
+		virtual int get_line_characters() = 0;
 		virtual void get_line(int start, int end, QTextStream &stream) = 0;
 	signals:
 		

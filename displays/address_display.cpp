@@ -3,10 +3,15 @@
 #include <QPainter>
 #include <QTextStream>
 
+address_display::address_display(const ROM_buffer *b, QWidget *parent) : text_display(b, parent)
+{
+	setMaximumWidth(get_font_width() * line_characters);
+	disable_cursor();
+}
+
 void address_display::paintEvent(QPaintEvent *event)
 {
 	text_display::paintEvent(event);
-	setMaximumWidth(get_font_width() * line_characters);
 }
 
 

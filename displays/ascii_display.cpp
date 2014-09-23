@@ -2,6 +2,7 @@
 #include "character_mapper.h"
 #include <QPainter>
 #include <QTextStream>
+#include <QMouseEvent>
 
 #include "debug.h"
 
@@ -11,6 +12,12 @@ void ascii_display::paintEvent(QPaintEvent *event)
 
 }
 
+void ascii_display::mousePressEvent(QMouseEvent *event)
+{
+	QPoint position = map_to_byte(event->x(), event->y());
+	set_cursor_position(position.x(), position.y());
+	qDebug() << position;
+}
 
 QSize ascii_display::sizeHint () const
 {
@@ -27,4 +34,17 @@ void ascii_display::get_line(int start, int end, QTextStream &stream)
 			stream << ".";
 		}
 	}
+}
+
+QPoint ascii_display::map_to_byte(int x, int y)
+{
+	x -= x % get_font_width();
+	y -= y % get_font_height();
+	
+	int last_byte = (line_characters - 1)* get_font_width();
+	if(x > last_byte){
+		x = last_byte;
+	}
+	
+	return QPoint(x, y);
 }
