@@ -24,14 +24,15 @@ class text_display : public QWidget
 		int get_rows() const;
 		int get_columns() const;
 		
-		void set_painter_font(QPainter &painter);
-		
+		void set_cursor_position(int x, int y);
+
 		virtual void mouseMoveEvent(QMouseEvent *event);
 		
 		virtual void get_line(int start, int end, QTextStream &stream) = 0;
 	signals:
 		
 	public slots:
+		void update_cursor_state();
 		
 	private:		
 		//make these static at some point, no need to duplicate them
@@ -42,7 +43,12 @@ class text_display : public QWidget
 		int rows = 32;
 		int columns = 16;
 		
+		//this too
 		QFont font;
+		
+		bool display_cursor = true;
+		bool cursor_state = true;
+		QPoint cursor_position = {0,0};
 		
 };
 

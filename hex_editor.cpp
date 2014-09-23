@@ -25,9 +25,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 		update_save_state(1);
 	}
 	
-	QTimer *cursor_timer = new QTimer(this);
-	cursor_timer->start(1000);
-	connect(cursor_timer, SIGNAL(timeout()), this, SLOT(update_cursor_state()));
+	
 	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(auto_scroll_update()));
 	
 	vertical_shift = column_height(1);
@@ -432,12 +430,6 @@ void hex_editor::paintEvent(QPaintEvent *event)
 //		QRect active_line(hex_offset-1, cursor_position.y()-1+vertical_offset, 
 //		                  total_byte_column_width-font_width+2, font_height);
 //		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
-//		if(cursor_state){
-//			painter.fillRect(cursor_position.x(), cursor_position.y()-1+vertical_offset, 
-//			                 1, font_height, text);
-//			painter.fillRect(to_ascii_column(cursor_position.x()), cursor_position.y()-1+vertical_offset, 
-//			                 1, font_height, text);
-//		}
 //	}
 	
 //	if(selection_active){

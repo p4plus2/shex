@@ -19,6 +19,6 @@ QSize hex_display::sizeHint () const
 void hex_display::get_line(int start, int end, QTextStream &stream)
 {
 	for(int i = start; i < end; i++){
-		stream << " " << QString::number((unsigned char)buffer->at(i),16).rightJustified(2, '0').toUpper();
+		stream << QString::number((unsigned char)buffer->at(i),16).rightJustified(2, '0').toUpper() << " ";
 	}
 }

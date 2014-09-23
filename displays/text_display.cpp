@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QStaticText>
+#include <QTimer>
 
 #include "debug.h"
 
@@ -9,13 +10,27 @@ text_display::text_display(const ROM_buffer *b, QWidget *parent) :
         QWidget(parent), buffer(b)
 {
 	font_setup();
+	
+	QTimer *cursor_timer = new QTimer(this);
+	cursor_timer->start(QApplication::cursorFlashTime());
+	connect(cursor_timer, SIGNAL(timeout()), this, SLOT(update_cursor_state()));
+}
+
+void text_display::update_cursor_state()
+{
+	cursor_state = !cursor_state;
+	update();
 }
 
 void text_display::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
 	QPainter painter(this);
-	set_painter_font(painter);
+	QColor text = palette().color(QPalette::WindowText);
+	painter.setPen(text);
+	painter.setFont(font);
+	
+	//index is temporary
 	int index = 0;
 	
 	if(index >= buffer->size()){
@@ -32,6 +47,10 @@ void text_display::paintEvent(QPaintEvent *event)
 		QTextStream string_stream(&line);
 		get_line(i, line_end, string_stream);
 		painter.drawStaticText(0, row * get_font_height(), QStaticText(line));
+	}
+	
+	if(cursor_state && display_cursor){
+		painter.fillRect(cursor_position.x(), cursor_position.y(), 1, font_height, text);
 	}
 }
 
@@ -67,11 +86,10 @@ int text_display::get_columns() const
 	return columns;
 }
 
-void text_display::set_painter_font(QPainter &painter)
+void text_display::set_cursor_position(int x, int y)
 {
-	QColor text = palette().color(QPalette::WindowText);
-	painter.setPen(text);
-	painter.setFont(font);
+	cursor_position.setX(x);
+	cursor_position.setY(y);
 }
 
 void text_display::mouseMoveEvent(QMouseEvent *event)
