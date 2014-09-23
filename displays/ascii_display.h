@@ -12,6 +12,7 @@ class ascii_display : public text_display
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
 		virtual void mousePressEvent(QMouseEvent *event);
+		virtual void keyPressEvent(QKeyEvent *event);
 		virtual QSize sizeHint () const;
 		
 		virtual int get_line_characters(){ return line_characters; }

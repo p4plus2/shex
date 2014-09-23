@@ -7,7 +7,7 @@ class address_display : public text_display
 {
 		Q_OBJECT
 	public:
-		address_display(const ROM_buffer *b, QWidget *parent);
+		address_display(const ROM_buffer *b, hex_editor *parent);
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
 		virtual QSize sizeHint () const;

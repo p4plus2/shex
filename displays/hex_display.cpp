@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QTextStream>
 #include <QMouseEvent>
+#include <QKeyEvent>
 
 #include "debug.h"
 
@@ -15,6 +16,17 @@ void hex_display::mousePressEvent(QMouseEvent *event)
 	QPoint position = map_to_byte(event->x(), event->y(), true);
 	set_cursor_position(position.x(), position.y());
 	qDebug() << position;
+	update();
+}
+
+void hex_display::keyPressEvent(QKeyEvent *event)
+{
+	//		if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
+	//			handle_typed_character(event->key() - Qt::Key_0);
+	//		}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
+	//			handle_typed_character(event->key() - Qt::Key_A + 10);
+	//		}
+	qDebug() << "hex" << event;
 }
 
 QSize hex_display::sizeHint () const

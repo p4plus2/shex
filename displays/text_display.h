@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QFont>
 #include "rom_buffer.h"
+#include "hex_editor.h"
 
 class QPainter;
 class QTextStream;
@@ -12,7 +13,7 @@ class text_display : public QWidget
 {
 		Q_OBJECT
 	public:
-		explicit text_display(const ROM_buffer *b, QWidget *parent = 0);
+		explicit text_display(const ROM_buffer *b, hex_editor *parent = 0);
 	protected:
 		const ROM_buffer *buffer;
 		
@@ -23,6 +24,8 @@ class text_display : public QWidget
 		int get_font_height() const;
 		int get_rows() const;
 		int get_columns() const;
+		
+		inline int get_offset(){ return editor->get_offset(); }
 		
 		void set_cursor_position(int x, int y);
 		void disable_cursor();
@@ -47,6 +50,8 @@ class text_display : public QWidget
 		
 		//this too
 		QFont font;
+		
+		hex_editor *editor;
 		
 		bool display_cursor = true;
 		bool cursor_state = true;

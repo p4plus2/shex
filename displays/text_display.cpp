@@ -1,4 +1,5 @@
 #include "text_display.h"
+#include "hex_editor.h"
 #include <QPainter>
 #include <QMouseEvent>
 #include <QStaticText>
@@ -6,7 +7,7 @@
 
 #include "debug.h"
 
-text_display::text_display(const ROM_buffer *b, QWidget *parent) :
+text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)
 {
 	font_setup();
@@ -14,6 +15,9 @@ text_display::text_display(const ROM_buffer *b, QWidget *parent) :
 	QTimer *cursor_timer = new QTimer(this);
 	cursor_timer->start(QApplication::cursorFlashTime());
 	connect(cursor_timer, SIGNAL(timeout()), this, SLOT(update_cursor_state()));
+	
+	editor = parent;
+	setFocusPolicy(Qt::WheelFocus);
 }
 
 void text_display::update_cursor_state()
@@ -30,10 +34,7 @@ void text_display::paintEvent(QPaintEvent *event)
 	painter.setPen(text);
 	painter.setFont(font);
 	
-	//index is temporary
-	int index = 0;
-	
-	if(index >= buffer->size()){
+	if(get_offset() >= buffer->size()){
 		return;
 	}
 	
@@ -43,8 +44,8 @@ void text_display::paintEvent(QPaintEvent *event)
 		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
 	}
 	
-	int byte_count = get_rows() * get_columns() + index;
-	for(int i = index, row = 0; i < byte_count; i += get_columns(), row++){
+	int byte_count = get_rows() * get_columns() + get_offset();
+	for(int i = get_offset(), row = 0; i < byte_count; i += get_columns(), row++){
 		int line_end = i + get_columns();	
 		if(line_end > buffer->size()){
 			line_end = buffer->size();

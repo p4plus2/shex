@@ -1,5 +1,8 @@
 #include "hex_editor.h"
 #include "character_mapper.h"
+#include "displays/hex_display.h"
+#include "displays/ascii_display.h"
+#include "displays/address_display.h"
 #include "debug.h"
 
 #include <QPainter>
@@ -42,7 +45,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	QSize minimum = minimumSizeHint();
 	minimum.setHeight(rows/2*font_height+vertical_offset+vertical_shift);
 	setMinimumSize(minimum);
-	setFocusPolicy(Qt::WheelFocus);
 	
 	//can't initialize in header -- relies on buffer here to be const
 	address = new address_display(buffer, this);
@@ -54,12 +56,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	layout->addWidget(hex);
 	layout->addWidget(ascii);
 	setLayout(layout);
-}
-
-QSize hex_editor::minimumSizeHint() const
-{
-	return QSize(column_width(14 + columns * 4),
-	             rows*font_height+vertical_offset+vertical_shift);
 }
 
 void hex_editor::set_focus()
@@ -136,12 +132,6 @@ void hex_editor::control_auto_scroll(bool enabled)
 	}else{
 		scroll_timer->stop();
 	}
-}
-
-void hex_editor::update_cursor_state()
-{
-	cursor_state = !cursor_state;
-	update();
 }
 
 void hex_editor::update_undo_action(bool direction)
@@ -426,12 +416,6 @@ void hex_editor::paintEvent(QPaintEvent *event)
 //		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
 //	}
 	
-//	if(cursor_position.y() > 0 && cursor_position.y() < column_height(rows)+vertical_offset && !selection_active){
-//		QRect active_line(hex_offset-1, cursor_position.y()-1+vertical_offset, 
-//		                  total_byte_column_width-font_width+2, font_height);
-//		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
-//	}
-	
 //	if(selection_active){
 //		paint_selection(painter);
 //	}
@@ -469,70 +453,63 @@ bool hex_editor::event(QEvent *e)
 void hex_editor::keyPressEvent(QKeyEvent *event)
 {
 	
-	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
-		if(event->key() == Qt::Key_V){
-			paste(true);
-			update();
-		}
-	}
-	if(event->modifiers() == Qt::ControlModifier){
-		return;
-	}
+//	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
+//		if(event->key() == Qt::Key_V){
+//			paste(true);
+//			update();
+//		}
+//	}
+//	if(event->modifiers() == Qt::ControlModifier){
+//		return;
+//	}
 	
-	if(click_side){
-		if(event->key() >= Qt::Key_Space && event->key() <= Qt::Key_AsciiTilde){
-			char key = event->text().at(0).unicode();
-			handle_typed_character(character_mapper::decode(key), true);
-		}
-	}else{
-		if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
-			handle_typed_character(event->key() - Qt::Key_0);
-		}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
-			handle_typed_character(event->key() - Qt::Key_A + 10);
-		}
-	}
+//	if(click_side){
+
+//	}else{
+
+//	}
 	
-	switch(event->key()){
-		case Qt::Key_Backspace:
-			update_cursor_position(cursor_position.x()-byte_column_width, cursor_position.y(), false);
-			delete_text();
-		break;
+//	switch(event->key()){
+//		case Qt::Key_Backspace:
+//			update_cursor_position(cursor_position.x()-byte_column_width, cursor_position.y(), false);
+//			delete_text();
+//		break;
 			
-		case Qt::Key_Home:
-			update_cursor_position(hex_offset, cursor_position.y());
-		break;
-		case Qt::Key_End:
-				update_cursor_position(column_width(9+columns*3), cursor_position.y());
-		break;
-		case Qt::Key_Up:
-			if(selection_active){
-				update_selection_position(-columns);
-			}else{
-				update_cursor_position(cursor_position.x(), cursor_position.y() - font_height);
-			}
-		break;
-		case Qt::Key_Down:
-			if(selection_active){
-				update_selection_position(columns);
-			}else{
-				update_cursor_position(cursor_position.x(), cursor_position.y() + font_height);
-			}
-		break;
-		case Qt::Key_Right:
-			update_cursor_position(cursor_position.x()+column_width(1+click_side), cursor_position.y());
-		break;
-		case Qt::Key_Left:
-			update_cursor_position(cursor_position.x()-column_width(2+click_side), cursor_position.y());
-		break;
-		case Qt::Key_PageUp:
-			update_cursor_position(cursor_position.x(), cursor_position.y() - column_height(rows));
-		break;
-		case Qt::Key_PageDown:
-			update_cursor_position(cursor_position.x(), cursor_position.y() + column_height(rows));
-		break;
-		default:
-		break;
-	}
+//		case Qt::Key_Home:
+//			update_cursor_position(hex_offset, cursor_position.y());
+//		break;
+//		case Qt::Key_End:
+//				update_cursor_position(column_width(9+columns*3), cursor_position.y());
+//		break;
+//		case Qt::Key_Up:
+//			if(selection_active){
+//				update_selection_position(-columns);
+//			}else{
+//				update_cursor_position(cursor_position.x(), cursor_position.y() - font_height);
+//			}
+//		break;
+//		case Qt::Key_Down:
+//			if(selection_active){
+//				update_selection_position(columns);
+//			}else{
+//				update_cursor_position(cursor_position.x(), cursor_position.y() + font_height);
+//			}
+//		break;
+//		case Qt::Key_Right:
+//			update_cursor_position(cursor_position.x()+column_width(1+click_side), cursor_position.y());
+//		break;
+//		case Qt::Key_Left:
+//			update_cursor_position(cursor_position.x()-column_width(2+click_side), cursor_position.y());
+//		break;
+//		case Qt::Key_PageUp:
+//			update_cursor_position(cursor_position.x(), cursor_position.y() - column_height(rows));
+//		break;
+//		case Qt::Key_PageDown:
+//			update_cursor_position(cursor_position.x(), cursor_position.y() + column_height(rows));
+//		break;
+//		default:
+//		break;
+//	}
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)

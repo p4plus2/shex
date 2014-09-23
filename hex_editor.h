@@ -10,9 +10,9 @@
 #include <QFont>
 #include <QTimer>
 
-#include "displays/hex_display.h"
-#include "displays/ascii_display.h"
-#include "displays/address_display.h"
+class address_display;
+class ascii_display;
+class hex_display;
 
 class hex_editor : public QWidget
 {
@@ -22,13 +22,13 @@ class hex_editor : public QWidget
 		~hex_editor();
 		inline ROM_buffer *get_buffer(){ return buffer; }
 		inline int get_relative_position(int address){ return get_buffer_position(cursor_position) + address; }
-		virtual QSize minimumSizeHint() const;
 		void set_focus();
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
 		inline bool new_file(){ return is_new; }
 		inline QString load_error() { return ROM_error; }
 		QString get_file_name() { return buffer->get_file_name(); }
+		inline int get_offset(){ return offset; }
 
 	signals:
 		void update_slider(int position);
@@ -43,7 +43,6 @@ class hex_editor : public QWidget
 		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);
 
 	public slots:
-		void update_cursor_state();
 		void update_undo_action(bool direction);
 		void goto_offset(int address);
 		void select_range(int start, int end);

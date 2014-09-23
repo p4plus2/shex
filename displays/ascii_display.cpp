@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QTextStream>
 #include <QMouseEvent>
+#include <QKeyEvent>
 
 #include "debug.h"
 
@@ -17,6 +18,16 @@ void ascii_display::mousePressEvent(QMouseEvent *event)
 	QPoint position = map_to_byte(event->x(), event->y());
 	set_cursor_position(position.x(), position.y());
 	qDebug() << position;
+	update();
+}
+
+void ascii_display::keyPressEvent(QKeyEvent *event)
+{
+	//		if(event->key() >= Qt::Key_Space && event->key() <= Qt::Key_AsciiTilde){
+	//			char key = event->text().at(0).unicode();
+	//			handle_typed_character(character_mapper::decode(key), true);
+	//		}
+	qDebug() << "ascii" << event;
 }
 
 QSize ascii_display::sizeHint () const
