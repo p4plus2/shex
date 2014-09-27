@@ -20,6 +20,12 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	setFocusPolicy(Qt::WheelFocus);
 }
 
+void text_display::update_display()
+{
+	cursor_state = true;
+	update();
+}
+
 void text_display::update_cursor_state()
 {
 	cursor_state = !cursor_state;
@@ -37,7 +43,7 @@ void text_display::paintEvent(QPaintEvent *event)
 	if(get_offset() >= buffer->size()){
 		return;
 	}
-	
+	QPoint cursor_position = nibble_to_screen(get_cursor_nibble());
 	bool selection_active = false;
 	if(!selection_active){
 		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
@@ -91,12 +97,6 @@ int text_display::get_rows() const
 int text_display::get_columns() const
 {
 	return columns;
-}
-
-void text_display::set_cursor_position(int x, int y)
-{
-	cursor_position.setX(x);
-	cursor_position.setY(y);
 }
 
 void text_display::disable_cursor()

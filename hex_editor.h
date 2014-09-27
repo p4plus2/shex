@@ -1,6 +1,7 @@
 #ifndef HEX_EDITOR_H
 #define HEX_EDITOR_H
 
+#include "selection.h"
 #include "rom_buffer.h"
 
 #include <QWidget>
@@ -23,12 +24,22 @@ class hex_editor : public QWidget
 		inline ROM_buffer *get_buffer(){ return buffer; }
 		inline int get_relative_position(int address){ return get_buffer_position(cursor_position) + address; }
 		void set_focus();
+		void update_window();
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
 		inline bool new_file(){ return is_new; }
 		inline QString load_error() { return ROM_error; }
 		QString get_file_name() { return buffer->get_file_name(); }
+		
+		//refact inlines
 		inline int get_offset(){ return offset; }
+		inline void set_offset(int o){ offset = o; }
+		
+		inline int get_cursor_nibble(){ return cursor_nibble; }
+		inline void set_cursor_nibble(int byte){ cursor_nibble = byte; update_window(); }
+		
+		inline selection get_selection(){ return selection_bytes; }
+		inline void set_selection(selection s){ selection_bytes = s; update_window(); }
 
 	signals:
 		void update_slider(int position);
@@ -84,6 +95,11 @@ class hex_editor : public QWidget
 		hex_display *hex;
 		ascii_display *ascii;
 		
+		//refactor adds
+		int cursor_nibble = 0;
+		selection selection_bytes;
+		//end refactor adds
+		
 		ROM_buffer *buffer;
 		int columns = 16;
 		int rows = 32;
@@ -115,7 +131,6 @@ class hex_editor : public QWidget
 		bool is_new;
 		QString ROM_error = "";
 		
-		void font_setup();
 		QString get_status_text();
 		int get_selection_point(QPoint point);
 		bool get_selection_range(int &start, int &end);
@@ -123,11 +138,11 @@ class hex_editor : public QWidget
 		int get_buffer_position(int x, int y, bool byte_align = true);
 		int get_buffer_position(QPoint &point, bool byte_align = true);
 		QPoint get_byte_position(int address, bool byte_align = true);
+		void move_cursor_nibble(int delta);
 		void update_nibble(char byte);
 		void update_cursor_position(int x, int y, bool do_update = true);
 		void update_selection_position(int amount);
 		void update_selection(int x, int y);
-		void update_window();
 		void search_error(int error, QString find = "", QString replace_with = "");
 		
 		inline int column_width(int size) const { return size * font_width; }

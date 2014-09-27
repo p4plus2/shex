@@ -42,8 +42,8 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	font_width = 10; //stop refactor crashes
 	font_height = 10;
 	
-	QSize minimum = minimumSizeHint();
-	minimum.setHeight(rows/2*font_height+vertical_offset+vertical_shift);
+	QSize minimum(0, 0);
+	minimum.setHeight(rows*font_height);
 	setMinimumSize(minimum);
 	
 	//can't initialize in header -- relies on buffer here to be const
@@ -61,7 +61,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 void hex_editor::set_focus()
 {
 	emit update_status_text(get_status_text());
-	setFocus();
+	hex->setFocus();
 	buffer->set_active();
 	emit selection_toggled(selection_active);
 	emit focused(true);
@@ -452,64 +452,53 @@ bool hex_editor::event(QEvent *e)
 
 void hex_editor::keyPressEvent(QKeyEvent *event)
 {
+	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
+		if(event->key() == Qt::Key_V){
+			paste(true);
+		}
+	}
 	
-//	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
-//		if(event->key() == Qt::Key_V){
-//			paste(true);
-//			update();
-//		}
-//	}
-//	if(event->modifiers() == Qt::ControlModifier){
-//		return;
-//	}
-	
-//	if(click_side){
+	if(event->modifiers() == Qt::ControlModifier){
+		//more hotkeys here if needed
+		return;
+	}
 
-//	}else{
-
-//	}
-	
-//	switch(event->key()){
-//		case Qt::Key_Backspace:
-//			update_cursor_position(cursor_position.x()-byte_column_width, cursor_position.y(), false);
-//			delete_text();
-//		break;
-			
-//		case Qt::Key_Home:
-//			update_cursor_position(hex_offset, cursor_position.y());
-//		break;
-//		case Qt::Key_End:
-//				update_cursor_position(column_width(9+columns*3), cursor_position.y());
-//		break;
-//		case Qt::Key_Up:
-//			if(selection_active){
-//				update_selection_position(-columns);
-//			}else{
-//				update_cursor_position(cursor_position.x(), cursor_position.y() - font_height);
-//			}
-//		break;
-//		case Qt::Key_Down:
-//			if(selection_active){
-//				update_selection_position(columns);
-//			}else{
-//				update_cursor_position(cursor_position.x(), cursor_position.y() + font_height);
-//			}
-//		break;
-//		case Qt::Key_Right:
-//			update_cursor_position(cursor_position.x()+column_width(1+click_side), cursor_position.y());
-//		break;
-//		case Qt::Key_Left:
-//			update_cursor_position(cursor_position.x()-column_width(2+click_side), cursor_position.y());
-//		break;
-//		case Qt::Key_PageUp:
-//			update_cursor_position(cursor_position.x(), cursor_position.y() - column_height(rows));
-//		break;
-//		case Qt::Key_PageDown:
-//			update_cursor_position(cursor_position.x(), cursor_position.y() + column_height(rows));
-//		break;
-//		default:
-//		break;
-//	}
+	//TODO: handle hex vs ascii side
+	switch(event->key()){
+		case Qt::Key_Backspace:
+			move_cursor_nibble((cursor_nibble - 2) & ~1);
+			delete_text();
+		break;		
+		case Qt::Key_Home:
+			move_cursor_nibble(-cursor_nibble % (columns * 2));
+		break;
+		case Qt::Key_End:
+			move_cursor_nibble((columns * 2) - (cursor_nibble % (columns * 2)) - 2);
+		break;
+		case Qt::Key_Up:
+			move_cursor_nibble(-columns * 2);
+		break;
+		case Qt::Key_Down:
+			move_cursor_nibble(columns * 2);
+		break;
+		case Qt::Key_Right:
+			move_cursor_nibble(2);
+		break;
+		case Qt::Key_Left:
+			move_cursor_nibble(-2);
+		break;
+		case Qt::Key_PageUp:
+			move_cursor_nibble(-columns * 2 * rows);
+		break;
+		case Qt::Key_PageDown:
+			move_cursor_nibble(columns * 2 * rows);
+		break;
+		default:
+			return;
+		break;
+	}
+	selection_bytes.set_active(false);
+	update_window();
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
@@ -534,48 +523,19 @@ void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 void hex_editor::wheelEvent(QWheelEvent *event)
 {
 	int steps = event->delta() / 8 / 15;
-	if(selection_active){
-		update_selection_position(-steps * columns);
-	}else{
-		update_cursor_position(cursor_position.x(), cursor_position.y() + (-steps * font_height));
-	}
+	update_cursor_position(cursor_position.x(), cursor_position.y() + (-steps * font_height));
 }
 
 void hex_editor::mousePressEvent(QMouseEvent *event)
 {
-	if(event->button() == Qt::RightButton){
-		return;
-	}
-	
-	int x = event->x();
-	int y = event->y() - vertical_shift;
-	
-	if((event->x() > column_width(3*columns+14) && event->x() < column_width(4*columns+14))){
-		x = to_hex_column(x) + 1;
-		click_side = true;
-	}else{
-		click_side = false;
-	}
-	if(get_buffer_position(x, y) > buffer->size() || event->y() < vertical_offset+vertical_shift){
-		return;
-	}
-	
-	set_selection_active(false);
-	if(x > hex_offset && x < column_width(11+columns*3)-font_width){
-		update_cursor_position(x, y);
-		is_dragging = true;
-		selection_start = get_byte_position(get_buffer_position(x, y));
-		selection_current = selection_start;
-	}
+//	set_selection_active(false);
+//	is_dragging = true;
+//	selection_start = get_byte_position(get_buffer_position(x, y));
+//	selection_current = selection_start;
 }
 
 void hex_editor::mouseMoveEvent(QMouseEvent *event)
 {
-	mouse_position = event->pos();
-	if(click_side){
-		mouse_position.setX(to_hex_column(event->x()));
-	}
-	
 	if(is_dragging){
 		set_selection_active(true);
 		update_selection(mouse_position.x(), event->y());
@@ -593,11 +553,6 @@ void hex_editor::mouseMoveEvent(QMouseEvent *event)
 
 void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 {
-	mouse_position = event->pos();
-	if(click_side){
-		mouse_position.setX(to_hex_column(event->x()));
-	}
-	
 	is_dragging = false;
 	scroll_timer->stop();
 
@@ -709,6 +664,17 @@ QPoint hex_editor::get_byte_position(int address, bool byte_align)
 	              column_height(screen_relative / columns) + vertical_offset);
 }
 
+void hex_editor::move_cursor_nibble(int delta)
+{
+	cursor_nibble += delta;
+	if(cursor_nibble < 0){
+		cursor_nibble = 0;
+	}else if(cursor_nibble >= buffer->size() * 2){
+		cursor_nibble = buffer->size() * 2 - 1;  //last nibble
+	}
+	update_window();
+}
+
 void hex_editor::update_cursor_position(int x, int y, bool do_update)
 {
 	if(get_buffer_position(x, y) == buffer->size() && column_width(10+columns*3) == x){
@@ -790,7 +756,9 @@ void hex_editor::update_window()
 		emit update_range(height());
 	}
 	emit update_status_text(get_status_text());
-	cursor_state = true;
+	ascii->update_display();
+	hex->update_display();
+	address->update_display();
 	update();
 	emit selection_toggled(selection_active);
 }

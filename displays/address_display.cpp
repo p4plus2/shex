@@ -26,3 +26,10 @@ void address_display::get_line(int start, int end, QTextStream &stream)
 	Q_UNUSED(end);
 	stream << "$" << buffer->get_formatted_address(start) << ": ";
 }
+
+//We only need Y position here
+QPoint address_display::nibble_to_screen(int nibble)
+{
+	int y = nibble / (get_columns() * 2);
+	return QPoint(0, y * get_font_height());
+}

@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     displays/hex_display.cpp \
     displays/text_display.cpp \
     displays/ascii_display.cpp \
-    displays/address_display.cpp
+    displays/address_display.cpp \
+    selection.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -70,7 +71,8 @@ HEADERS  += main_window.h \
     displays/hex_display.h \
     displays/text_display.h \
     displays/ascii_display.h \
-    displays/address_display.h
+    displays/address_display.h \
+    selection.h
 
 OTHER_FILES += \
     version.sh

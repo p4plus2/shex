@@ -13,20 +13,28 @@ void hex_display::paintEvent(QPaintEvent *event)
 
 void hex_display::mousePressEvent(QMouseEvent *event)
 {
-	QPoint position = map_to_byte(event->x(), event->y(), true);
-	set_cursor_position(position.x(), position.y());
-	qDebug() << position;
-	update();
+	if(event->button() == Qt::RightButton){
+		return;
+	}
+	int nibble = screen_to_nibble(event->x(), event->y());
+	set_cursor_nibble(nibble);
+	qDebug() << nibble;
 }
 
 void hex_display::keyPressEvent(QKeyEvent *event)
 {
-	//		if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
-	//			handle_typed_character(event->key() - Qt::Key_0);
-	//		}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
-	//			handle_typed_character(event->key() - Qt::Key_A + 10);
-	//		}
-	qDebug() << "hex" << event;
+	//Let the editor handle hotkeys
+	if(event->modifiers() == Qt::ControlModifier){
+		event->ignore();
+		return;
+	}
+	if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
+		//handle_typed_character(event->key() - Qt::Key_0);
+	}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
+		//handle_typed_character(event->key() - Qt::Key_A + 10);
+	}else{
+		event->ignore();
+	}
 }
 
 QSize hex_display::sizeHint () const
@@ -43,23 +51,32 @@ void hex_display::get_line(int start, int end, QTextStream &stream)
 	}
 }
 
-QPoint hex_display::map_to_byte(int x, int y, bool byte_align)
+//possibly clean this up more
+int hex_display::screen_to_nibble(int x, int y, bool byte_align)
 {
 	int x_remainder = x % get_font_width();
-	x -= x_remainder;
-	y -= y % get_font_height();
-	if((x / get_font_width()) % 3 == 2){
-		x += get_font_width() * ((x_remainder - get_font_width() / 2) < 0 ? -1 : 1);
+	x /= get_font_width();
+	y /= get_font_height();
+	if(x % 3 == 2){
+		x += ((x_remainder - get_font_width() / 2) < 0 ? -1 : 1);
 	}
 	
-	int last_byte = (line_characters - 1) * get_font_width();
+	int last_byte = (line_characters - 1);
 	if(x > last_byte){
 		x = last_byte;
 	}
 	
-	if(byte_align && (x / get_font_width()) % 3 == 1){
-		x -= get_font_width();
+	if(byte_align && x % 3 == 1){
+		x -= 1;
 	}
-	
-	return QPoint(x, y);
+
+	return (x * 2) / 3 + (x % 3 == 1 && !byte_align) + y * get_columns() * 2;
+}
+
+QPoint hex_display::nibble_to_screen(int nibble)
+{
+	int y = nibble / (get_columns() * 2);
+	int x = nibble % (get_columns() * 2);
+	x = ((x / 2 * 3) + (x & 1));
+	return QPoint(x * get_font_width(), y * get_font_height());
 }
