@@ -31,7 +31,7 @@ void ascii_display::keyPressEvent(QKeyEvent *event)
 	}
 	if(event->key() >= Qt::Key_Space && event->key() <= Qt::Key_AsciiTilde){
 		char key = event->text().at(0).unicode();
-		//handle_typed_character(character_mapper::decode(key), true);
+		emit character_typed(character_mapper::decode(key), true);
 	}else{
 		event->ignore();
 	}

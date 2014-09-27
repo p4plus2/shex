@@ -54,6 +54,7 @@ class hex_editor : public QWidget
 		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);
 
 	public slots:
+		void handle_typed_character(unsigned char key, bool update_byte = false);
 		void update_undo_action(bool direction);
 		void goto_offset(int address);
 		void select_range(int start, int end);
@@ -81,9 +82,7 @@ class hex_editor : public QWidget
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
 		virtual void paint_selection(QPainter &painter);
-		virtual bool event(QEvent *e);
 		virtual void keyPressEvent(QKeyEvent *event);
-		virtual void handle_typed_character(unsigned char key, bool update_byte = false);
 		virtual void wheelEvent(QWheelEvent *event);
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);

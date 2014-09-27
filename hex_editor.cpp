@@ -51,6 +51,11 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	hex = new hex_display(buffer, this);
 	ascii = new ascii_display(buffer, this);
 	
+	connect(hex, SIGNAL(character_typed(unsigned char, bool)), 
+	        this, SLOT(handle_typed_character(unsigned char, bool)));
+	connect(ascii, SIGNAL(character_typed(unsigned char, bool)), 
+	        this, SLOT(handle_typed_character(unsigned char, bool)));
+	
 	QHBoxLayout *layout = new QHBoxLayout();
 	layout->addWidget(address);
 	layout->addWidget(hex);
@@ -132,6 +137,27 @@ void hex_editor::control_auto_scroll(bool enabled)
 	}else{
 		scroll_timer->stop();
 	}
+}
+
+void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
+{
+	int start, end;
+//	if(get_selection_range(start, end)){
+//		selection_active = false;
+//		cursor_position = selection_start;
+//	}else{
+//		end = 0;
+//	}
+	
+	end = 0;
+	if(update_byte){
+		buffer->update_byte(key, cursor_nibble/2, start, end);
+	}else{
+		buffer->update_nibble(key, cursor_nibble, start, end);
+	}
+	move_cursor_nibble(update_byte ? 2 : 1);
+	update_window();
+	update_save_state(1);
 }
 
 void hex_editor::update_undo_action(bool direction)
@@ -441,15 +467,6 @@ void hex_editor::paint_selection(QPainter &painter)
 	                 palette().color(QPalette::Base));
 }
 
-bool hex_editor::event(QEvent *e)
-{
-	if(e->type() == QEvent::KeyPress && static_cast<QKeyEvent *>(e)->key() == Qt::Key_Tab){
-		click_side = !click_side;
-		return true;
-	}
-	return QWidget::event(e);
-}
-
 void hex_editor::keyPressEvent(QKeyEvent *event)
 {
 	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
@@ -501,29 +518,10 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	update_window();
 }
 
-void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
-{
-	int start, end;
-	if(get_selection_range(start, end)){
-		selection_active = false;
-		cursor_position = selection_start;
-	}else{
-		end = 0;
-	}
-	if(update_byte){
-		buffer->update_byte(key, get_buffer_position(cursor_position), start, end);
-	}else{
-		buffer->update_nibble(key, get_buffer_position(cursor_position, false), start, end);
-	}
-	update_cursor_position(cursor_position.x()+font_width*(2 * update_byte ? 2 : 1), cursor_position.y(), false);
-	update_window();
-	update_save_state(1);
-}
-
 void hex_editor::wheelEvent(QWheelEvent *event)
 {
-	int steps = event->delta() / 8 / 15;
-	update_cursor_position(cursor_position.x(), cursor_position.y() + (-steps * font_height));
+	int steps = -event->delta() / 8 / 15;
+	move_cursor_nibble(columns * 2 * steps);
 }
 
 void hex_editor::mousePressEvent(QMouseEvent *event)
@@ -565,7 +563,7 @@ void hex_editor::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
 
-	rows = (size().height() - vertical_shift)/ font_height;
+	//rows = (size().height() - vertical_shift)/ font_height;
 	update_window();
 }
 
@@ -672,39 +670,20 @@ void hex_editor::move_cursor_nibble(int delta)
 	}else if(cursor_nibble >= buffer->size() * 2){
 		cursor_nibble = buffer->size() * 2 - 1;  //last nibble
 	}
+	
+	//TODO optimize
+	while(cursor_nibble/2 >= offset + rows * columns){
+		offset += columns;
+	}
+	while(cursor_nibble/2 < offset){
+		offset -= columns;
+	}
+	
 	update_window();
 }
 
 void hex_editor::update_cursor_position(int x, int y, bool do_update)
 {
-	if(get_buffer_position(x, y) == buffer->size() && column_width(10+columns*3) == x){
-		cursor_position.setX(x);
-	}else if(x == column_width(11+columns*3)){
-		cursor_position.setX(column_width(12));
-		if(y + font_height > column_height(rows)){
-			offset += columns;
-		}else{
-			cursor_position.setY(y + font_height);
-		}
-	}else{
-		int position = get_buffer_position(x, y, false);
-		if(position < 0){
-			position = 0;
-		}else if(position/2 > buffer->size()){
-			position = buffer->size()*2-1;
-		}
-		while(position/2 >= offset + rows * columns){
-			offset += columns;
-		}
-		while(position/2 < offset){
-			offset -= columns;
-		}
-		cursor_position = get_byte_position(position, false);
-	}
-	
-	if(do_update){
-		update_window();
-	}
 }
 
 void hex_editor::update_selection_position(int amount)

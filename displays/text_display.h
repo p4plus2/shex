@@ -43,6 +43,7 @@ class text_display : public QWidget
 		virtual int get_line_characters() = 0;
 		virtual void get_line(int start, int end, QTextStream &stream) = 0;
 	signals:
+		void character_typed(unsigned char key, bool update_byte);
 		
 	public slots:
 		void update_cursor_state();

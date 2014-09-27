@@ -29,9 +29,9 @@ void hex_display::keyPressEvent(QKeyEvent *event)
 		return;
 	}
 	if(event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9){
-		//handle_typed_character(event->key() - Qt::Key_0);
+		emit character_typed(event->key() - Qt::Key_0, false);
 	}else if(event->key() >= Qt::Key_A && event->key() <= Qt::Key_F){
-		//handle_typed_character(event->key() - Qt::Key_A + 10);
+		emit character_typed(event->key() - Qt::Key_A + 10, false);
 	}else{
 		event->ignore();
 	}
