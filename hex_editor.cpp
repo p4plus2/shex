@@ -524,41 +524,6 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 	move_cursor_nibble(columns * 2 * steps);
 }
 
-void hex_editor::mousePressEvent(QMouseEvent *event)
-{
-//	set_selection_active(false);
-//	is_dragging = true;
-//	selection_start = get_byte_position(get_buffer_position(x, y));
-//	selection_current = selection_start;
-}
-
-void hex_editor::mouseMoveEvent(QMouseEvent *event)
-{
-	if(is_dragging){
-		set_selection_active(true);
-		update_selection(mouse_position.x(), event->y());
-		if(event->y() > column_height(rows)){
-			scroll_timer->start(20);
-			scroll_direction = true;
-		}else if(event->y() < vertical_shift){
-			scroll_timer->start(20);
-			scroll_direction = false;
-		}else{
-			scroll_timer->stop();
-		}
-	}
-}
-
-void hex_editor::mouseReleaseEvent(QMouseEvent *event)
-{
-	is_dragging = false;
-	scroll_timer->stop();
-
-	if(is_dragging){
-		update_selection(mouse_position.x(), event->y());
-	}
-}
-
 QString hex_editor::get_status_text()
 {
 	QString text;

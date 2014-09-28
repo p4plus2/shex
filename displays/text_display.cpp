@@ -134,6 +134,16 @@ void text_display::mouseMoveEvent(QMouseEvent *event)
 		selection_area.set_dragging(true);
 		set_selection(selection_area);
 	}
+	
+//	if(event->y() > column_height(rows)){
+//		scroll_timer->start(20);
+//		scroll_direction = true;
+//	}else if(event->y() < vertical_shift){
+//		scroll_timer->start(20);
+//		scroll_direction = false;
+//	}else{
+//		scroll_timer->stop();
+//	}
 }
 
 void text_display::mouseReleaseEvent(QMouseEvent *event)
@@ -149,6 +159,7 @@ void text_display::mouseReleaseEvent(QMouseEvent *event)
 	selection_area.set_dragging(false);
 	set_selection(selection_area);
 	
+	//scroll_timer->stop();
 	qDebug() << selection_area.start << selection_area.end;
 }
 
