@@ -13,15 +13,6 @@ void ascii_display::paintEvent(QPaintEvent *event)
 
 }
 
-void ascii_display::mousePressEvent(QMouseEvent *event)
-{
-	if(event->button() == Qt::RightButton){
-		return;
-	}
-	int nibble = screen_to_nibble(event->x(), event->y());
-	set_cursor_nibble(nibble);
-}
-
 void ascii_display::keyPressEvent(QKeyEvent *event)
 {
 	//Let the editor handle hotkeys
@@ -54,8 +45,9 @@ void ascii_display::get_line(int start, int end, QTextStream &stream)
 	}
 }
 
-int ascii_display::screen_to_nibble(int x, int y)
+int ascii_display::screen_to_nibble(int x, int y, bool byte_align)
 {
+	Q_UNUSED(byte_align); //ascii is already byte aligned
 	x /= get_font_width();
 	y /= get_font_height();
 	
@@ -64,11 +56,12 @@ int ascii_display::screen_to_nibble(int x, int y)
 		x = last_byte;
 	}
 	
-	return (x + y * line_characters) * 2;
+	return (x + y * line_characters + get_offset()) * 2;
 }
 
 QPoint ascii_display::nibble_to_screen(int nibble)
 {
+	nibble -= get_offset() * 2;
 	int y = nibble / (get_columns() * 2);
 	int x = nibble % (get_columns() * 2);
 	x /= 2;

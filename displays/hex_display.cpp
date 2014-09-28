@@ -11,16 +11,6 @@ void hex_display::paintEvent(QPaintEvent *event)
 	text_display::paintEvent(event);
 }
 
-void hex_display::mousePressEvent(QMouseEvent *event)
-{
-	if(event->button() == Qt::RightButton){
-		return;
-	}
-	int nibble = screen_to_nibble(event->x(), event->y());
-	set_cursor_nibble(nibble);
-	qDebug() << nibble;
-}
-
 void hex_display::keyPressEvent(QKeyEvent *event)
 {
 	//Let the editor handle hotkeys
@@ -70,11 +60,12 @@ int hex_display::screen_to_nibble(int x, int y, bool byte_align)
 		x -= 1;
 	}
 
-	return (x * 2) / 3 + (x % 3 == 1 && !byte_align) + y * get_columns() * 2;
+	return (x * 2) / 3 + (x % 3 == 1 && !byte_align) + y * get_columns() * 2 + get_offset() * 2;
 }
 
 QPoint hex_display::nibble_to_screen(int nibble)
 {
+	nibble -= get_offset() * 2;
 	int y = nibble / (get_columns() * 2);
 	int x = nibble % (get_columns() * 2);
 	x = ((x / 2 * 3) + (x & 1));

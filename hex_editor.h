@@ -87,7 +87,6 @@ class hex_editor : public QWidget
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);
 		virtual void mouseReleaseEvent(QMouseEvent *event);
-		virtual void resizeEvent(QResizeEvent *event);
 
 	private:
 		address_display *address;
@@ -139,7 +138,6 @@ class hex_editor : public QWidget
 		QPoint get_byte_position(int address, bool byte_align = true);
 		void move_cursor_nibble(int delta);
 		void update_nibble(char byte);
-		void update_cursor_position(int x, int y, bool do_update = true);
 		void update_selection_position(int amount);
 		void update_selection(int x, int y);
 		void search_error(int error, QString find = "", QString replace_with = "");

@@ -15,7 +15,8 @@ class address_display : public text_display
 		virtual int get_line_characters(){ return line_characters; }
 		virtual void get_line(int start, int end, QTextStream &stream);
 		
-		QPoint nibble_to_screen(int nibble);
+		virtual int screen_to_nibble(int x, int y, bool byte_align = false);
+		virtual QPoint nibble_to_screen(int nibble);
 	signals:
 		
 	public slots:

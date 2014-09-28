@@ -31,3 +31,13 @@ void selection::set_active(bool a)
 {
 	active = a;
 }
+
+bool selection::is_dragging()
+{
+	return dragging;
+}
+
+void selection::set_dragging(bool d)
+{
+	dragging = d;
+}

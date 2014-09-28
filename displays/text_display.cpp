@@ -104,7 +104,57 @@ void text_display::disable_cursor()
 	display_cursor = false;
 }
 
+void text_display::mousePressEvent(QMouseEvent *event)
+{
+	if(event->button() == Qt::RightButton || focusPolicy() == Qt::NoFocus){
+		return;
+	}
+	int nibble = screen_to_nibble(event->x(), event->y());
+	set_cursor_nibble(nibble);
+	
+	selection selection_area = get_selection();
+	selection_area.set(nibble, nibble);
+	selection_area.set_active(false);
+	selection_area.set_dragging(false);
+	set_selection(selection_area);
+}
+
 void text_display::mouseMoveEvent(QMouseEvent *event)
 {
-	qDebug() << event->y();
+	if(focusPolicy() == Qt::NoFocus){
+		return;
+	}
+	int nibble = screen_to_nibble(event->x(), event->y());
+	set_cursor_nibble(nibble);
+	
+	selection selection_area = get_selection();
+	if(selection_area.is_active()){
+		selection_area.set(selection_area.start, nibble);
+		selection_area.set_active(true);
+		selection_area.set_dragging(true);
+		set_selection(selection_area);
+	}
+}
+
+void text_display::mouseReleaseEvent(QMouseEvent *event)
+{
+	if(focusPolicy() == Qt::NoFocus){
+		return;
+	}
+	int nibble = screen_to_nibble(event->x(), event->y());
+	set_cursor_nibble(nibble);
+	
+	selection selection_area = get_selection();
+	selection_area.set(selection_area.start, nibble);
+	selection_area.set_dragging(false);
+	set_selection(selection_area);
+	
+	qDebug() << selection_area.start << selection_area.end;
+}
+
+void text_display::resizeEvent(QResizeEvent *event)
+{
+	Q_UNUSED(event);
+
+	rows = size().height() / font_height; 
 }

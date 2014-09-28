@@ -121,9 +121,9 @@ void hex_editor::auto_scroll_update()
 	}
 	for(int i = 0; i < scroll_factor; i++){
 		if(!scroll_direction){
-			update_cursor_position(cursor_position.x(), cursor_position.y() - font_height, false);
+			move_cursor_nibble(-columns * 2);
 		}else{
-			update_cursor_position(cursor_position.x(), cursor_position.y() + font_height, false);
+			move_cursor_nibble(columns * 2);
 		}
 	}
 	update();
@@ -559,14 +559,6 @@ void hex_editor::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
-void hex_editor::resizeEvent(QResizeEvent *event)
-{
-	Q_UNUSED(event);
-
-	//rows = (size().height() - vertical_shift)/ font_height;
-	update_window();
-}
-
 QString hex_editor::get_status_text()
 {
 	QString text;
@@ -682,10 +674,6 @@ void hex_editor::move_cursor_nibble(int delta)
 	update_window();
 }
 
-void hex_editor::update_cursor_position(int x, int y, bool do_update)
-{
-}
-
 void hex_editor::update_selection_position(int amount)
 {
 	int new_offset = offset + amount;
@@ -699,31 +687,31 @@ void hex_editor::update_selection_position(int amount)
 
 void hex_editor::update_selection(int x, int y)
 {
-	int old_offset = offset;
-	QPoint last_byte = get_byte_position(buffer->size()-1);
-	if(x < hex_offset){
-		x = hex_offset;
-	}else if(x >= column_width(10+columns*3)-font_width){
-		x = column_width(10+columns*3)-font_width*2;
-	}else if(x >= last_byte.x()-font_width && y-font_height >= last_byte.y()){
-		x = last_byte.x()-font_width*2;
-	}
-	x -= font_width;
+//	int old_offset = offset;
+//	QPoint last_byte = get_byte_position(buffer->size()-1);
+//	if(x < hex_offset){
+//		x = hex_offset;
+//	}else if(x >= column_width(10+columns*3)-font_width){
+//		x = column_width(10+columns*3)-font_width*2;
+//	}else if(x >= last_byte.x()-font_width && y-font_height >= last_byte.y()){
+//		x = last_byte.x()-font_width*2;
+//	}
+//	x -= font_width;
 	
-	if(y < vertical_offset && !offset){
-		y = vertical_offset;
-	}else if(y > vertical_offset + column_height(rows) && offset == buffer->size()-rows*columns){
-		y = vertical_offset + column_height(rows);
-	}
+//	if(y < vertical_offset && !offset){
+//		y = vertical_offset;
+//	}else if(y > vertical_offset + column_height(rows) && offset == buffer->size()-rows*columns){
+//		y = vertical_offset + column_height(rows);
+//	}
 	
-	QPoint position = get_byte_position(get_buffer_position(x+font_width, y-vertical_shift));
-	update_cursor_position(position.x(), position.y(), false);
+//	QPoint position = get_byte_position(get_buffer_position(x+font_width, y-vertical_shift));
+//	update_cursor_position(position.x(), position.y(), false);
 	
-	if(old_offset != offset){
-		selection_start.setY(selection_start.y() - (offset - old_offset));
-	}
-	selection_current = cursor_position;
-	update_window();
+//	if(old_offset != offset){
+//		selection_start.setY(selection_start.y() - (offset - old_offset));
+//	}
+//	selection_current = cursor_position;
+//	update_window();
 }
 
 void hex_editor::update_window()

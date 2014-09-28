@@ -14,10 +14,13 @@ class selection{
 		int range() const;
 		bool is_active();
 		void set_active(bool a);
+		bool is_dragging();
+		void set_dragging(bool d);
 	private:
 		int _start = 0;
 		int _end = 0;
 		bool active = false;
+		bool dragging = false;
 };
 
 #endif // SELECTION_H
