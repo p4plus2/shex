@@ -38,8 +38,8 @@ class hex_editor : public QWidget
 		inline int get_cursor_nibble(){ return cursor_nibble; }
 		inline void set_cursor_nibble(int byte){ cursor_nibble = byte; update_window(); }
 		
-		inline selection get_selection(){ return selection_bytes; }
-		inline void set_selection(selection s){ selection_bytes = s; update_window(); }
+		inline selection get_selection(){ return selection_area; }
+		inline void set_selection(selection s){ selection_area = s; update_window(); }
 
 	signals:
 		void update_slider(int position);
@@ -60,7 +60,6 @@ class hex_editor : public QWidget
 		void select_range(int start, int end);
 		void slider_update(int position);
 		void scroll_mode_changed();
-		void auto_scroll_update();
 		void control_auto_scroll(bool enabled);
 		void context_menu(const QPoint& position);
 		void cut();
@@ -81,7 +80,6 @@ class hex_editor : public QWidget
 
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
-		virtual void paint_selection(QPainter &painter);
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void wheelEvent(QWheelEvent *event);
 
@@ -92,7 +90,7 @@ class hex_editor : public QWidget
 		
 		//refactor adds
 		int cursor_nibble = 0;
-		selection selection_bytes;
+		selection selection_area;
 		//end refactor adds
 		
 		ROM_buffer *buffer;

@@ -17,14 +17,15 @@ class text_display : public QWidget
 		void update_display();
 	protected:
 		const ROM_buffer *buffer;
-		
-		virtual void paintEvent(QPaintEvent *event);
 		void font_setup();
 		
 		int get_font_width() const;
 		int get_font_height() const;
 		int get_rows() const;
 		int get_columns() const;
+
+		int clip_x(int x);
+		int clip_y(int y);
 		
 		inline int get_offset(){ return editor->get_offset(); }
 		inline void set_offset(int o){ editor->set_offset(o); }
@@ -34,13 +35,14 @@ class text_display : public QWidget
 		
 		inline selection get_selection(){ return editor->get_selection(); }
 		inline void set_selection(selection s){ editor->set_selection(s); }
-	
-		void disable_cursor();
-
+		
+		virtual void paintEvent(QPaintEvent *event);
+		virtual void paint_selection(QPainter &painter, selection &selection_area);
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);
 		virtual void mouseReleaseEvent(QMouseEvent *event);
 		virtual void resizeEvent(QResizeEvent *event);
+		virtual void timerEvent(QTimerEvent *event);
 		
 		virtual int screen_to_nibble(int x, int y, bool byte_align = false) = 0;
 		virtual QPoint nibble_to_screen(int nibble) = 0;
@@ -48,9 +50,6 @@ class text_display : public QWidget
 		virtual void get_line(int start, int end, QTextStream &stream) = 0;
 	signals:
 		void character_typed(unsigned char key, bool update_byte);
-		
-	public slots:
-		void update_cursor_state();
 		
 	private:		
 		//make these static at some point, no need to duplicate them
@@ -66,8 +65,9 @@ class text_display : public QWidget
 		
 		hex_editor *editor;
 		
-		bool display_cursor = true;
 		bool cursor_state = true;
+		int scroll_timer_id = 0;
+		int cursor_timer_id = 0;
 };
 
 #endif // TEXT_DISPLAY_H

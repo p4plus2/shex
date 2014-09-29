@@ -1,23 +1,40 @@
 #include "selection.h"
+#include "debug.h"
 #include <QtAlgorithms>
 
-selection &selection::operator= (const selection &s)
+void selection::set_start(int s)
 {
-	_start = s._start;
-	_end = s._end;
-	return *this;
+	start = s;
 }
 
-void selection::set(int s, int e)
+void selection::set_end(int e)
 {
-	if(s > e){
-		qSwap(s, e);
-	}
-	_start = s;
-	_end = e;
+	end = e;
+	qDebug() << "set" << end;
 }
 
-int selection::range() const
+int selection::get_start()
+{
+	return start > end ? end : start;
+}
+
+int selection::get_end()
+{
+	return start < end ? end : start;
+}
+
+void selection::move_end(int amount)
+{
+	end += amount;
+	qDebug() << "move" << end;
+}
+
+int selection::drag_direction()
+{
+	return end - start;
+}
+
+int selection::range()
 {
 	return end - start + 1; //selections are inclusive of the last byte
 }

@@ -28,9 +28,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 		update_save_state(1);
 	}
 	
-	
-	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(auto_scroll_update()));
-	
 	vertical_shift = column_height(1);
 	cursor_position = get_byte_position(0);
 	
@@ -108,27 +105,6 @@ void hex_editor::scroll_mode_changed()
 	update_window();
 	emit toggle_scroll_mode(scroll_mode);
 }
-
-void hex_editor::auto_scroll_update()
-{
-	if(is_dragging){
-		update_selection(mouse_position.x(), mouse_position.y());
-		return;
-	}
-	int scroll_factor = 1;
-	if(scroll_speed < 5){
-		scroll_factor = qAbs(scroll_speed - 20);
-	}
-	for(int i = 0; i < scroll_factor; i++){
-		if(!scroll_direction){
-			move_cursor_nibble(-columns * 2);
-		}else{
-			move_cursor_nibble(columns * 2);
-		}
-	}
-	update();
-}
-
 void hex_editor::control_auto_scroll(bool enabled)
 {
 	auto_scrolling = enabled;
@@ -141,15 +117,12 @@ void hex_editor::control_auto_scroll(bool enabled)
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 {
-	int start, end;
-//	if(get_selection_range(start, end)){
-//		selection_active = false;
-//		cursor_position = selection_start;
-//	}else{
-//		end = 0;
-//	}
+	int start = selection_area.get_start();
+	int end = selection_area.get_end();
+	if(!selection_area.is_active()){
+		end = 0;
+	}
 	
-	end = 0;
 	if(update_byte){
 		buffer->update_byte(key, cursor_nibble/2, start, end);
 	}else{
@@ -448,25 +421,6 @@ void hex_editor::paintEvent(QPaintEvent *event)
 	
 }
 
-void hex_editor::paint_selection(QPainter &painter)
-{		
-	int start = get_selection_point(selection_start);
-	int end = get_selection_point(selection_current);
-	if(start > end){
-		qSwap(start, end);
-	}
-	for(; start < end+1 && end != offset; start++){
-		QPoint position = get_byte_position(start);
-		painter.fillRect(position.x()-1, position.y(), font_width*3, font_height+4, 
-		                 palette().color(QPalette::Active, QPalette::Highlight));
-		painter.fillRect(to_ascii_column(position.x()), position.y(), font_width, font_height+4, 
-		                 palette().color(QPalette::Active, QPalette::Highlight));
-	}
-	
-	painter.fillRect(column_width(10+columns*3)+1, 0, font_width, column_height(rows+1), 
-	                 palette().color(QPalette::Base));
-}
-
 void hex_editor::keyPressEvent(QKeyEvent *event)
 {
 	if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)){
@@ -514,7 +468,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			return;
 		break;
 	}
-	selection_bytes.set_active(false);
+	selection_area.set_active(false);
 	update_window();
 }
 
@@ -652,31 +606,6 @@ void hex_editor::update_selection_position(int amount)
 
 void hex_editor::update_selection(int x, int y)
 {
-//	int old_offset = offset;
-//	QPoint last_byte = get_byte_position(buffer->size()-1);
-//	if(x < hex_offset){
-//		x = hex_offset;
-//	}else if(x >= column_width(10+columns*3)-font_width){
-//		x = column_width(10+columns*3)-font_width*2;
-//	}else if(x >= last_byte.x()-font_width && y-font_height >= last_byte.y()){
-//		x = last_byte.x()-font_width*2;
-//	}
-//	x -= font_width;
-	
-//	if(y < vertical_offset && !offset){
-//		y = vertical_offset;
-//	}else if(y > vertical_offset + column_height(rows) && offset == buffer->size()-rows*columns){
-//		y = vertical_offset + column_height(rows);
-//	}
-	
-//	QPoint position = get_byte_position(get_buffer_position(x+font_width, y-vertical_shift));
-//	update_cursor_position(position.x(), position.y(), false);
-	
-//	if(old_offset != offset){
-//		selection_start.setY(selection_start.y() - (offset - old_offset));
-//	}
-//	selection_current = cursor_position;
-//	update_window();
 }
 
 void hex_editor::update_window()
