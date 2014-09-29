@@ -47,6 +47,9 @@ bool selection::is_active()
 void selection::set_active(bool a)
 {
 	active = a;
+	if(!active){
+		dragging = false;
+	}
 }
 
 bool selection::is_dragging()

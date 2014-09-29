@@ -22,7 +22,7 @@ class hex_editor : public QWidget
 		explicit hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file = false);
 		~hex_editor();
 		inline ROM_buffer *get_buffer(){ return buffer; }
-		inline int get_relative_position(int address){ return get_buffer_position(cursor_position) + address; }
+		inline int get_relative_position(int address){ return cursor_nibble / 2 + address; }
 		void set_focus();
 		void update_window();
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
@@ -79,7 +79,6 @@ class hex_editor : public QWidget
 		inline void clipboard_changed(){ emit clipboard_usable(buffer->check_paste_data()); }
 
 	protected:
-		virtual void paintEvent(QPaintEvent *event);
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void wheelEvent(QWheelEvent *event);
 
@@ -97,52 +96,27 @@ class hex_editor : public QWidget
 		int columns = 16;
 		int rows = 32;
 		int offset = 0;
-		QPoint cursor_position;
-		QPoint selection_start;
-		QPoint selection_current;
-		bool cursor_state = false;
-		bool is_dragging = false;
-		bool selection_active = false;
 		bool click_side = false;
 		bool is_active = true;
 		int font_width; //needs removed
 		int font_height;
-		int vertical_offset = 6;
-		int vertical_shift;
 
-		int byte_column_width;
-		int total_byte_column_width;
 		bool scroll_mode = false;
 		bool auto_scrolling;
 		QTimer *scroll_timer = new QTimer(this);
-		int hex_offset;
-		int ascii_offset;
 		int scroll_speed;
 		bool scroll_direction;
-		QPoint mouse_position;
 		int save_state = 0;
 		bool is_new;
 		QString ROM_error = "";
 		
 		QString get_status_text();
-		int get_selection_point(QPoint point);
-		bool get_selection_range(int &start, int &end);
 		bool follow_selection(bool type);
-		int get_buffer_position(int x, int y, bool byte_align = true);
-		int get_buffer_position(QPoint &point, bool byte_align = true);
-		QPoint get_byte_position(int address, bool byte_align = true);
 		void move_cursor_nibble(int delta);
 		void update_nibble(char byte);
-		void update_selection_position(int amount);
-		void update_selection(int x, int y);
 		void search_error(int error, QString find = "", QString replace_with = "");
-		
-		inline int column_width(int size) const { return size * font_width; }
-		inline int column_height(int size) const { return size * font_height; }
-		inline int to_ascii_column(int x){ return column_width(14+columns*3+(x-font_width*11)/font_width/3); }
-		inline int to_hex_column(int x){ return column_width(11+(x-font_width*(14+columns*3))/font_width*3); }
+	
 		inline int get_max_lines(){ return buffer->size() / columns - rows; }
-		inline void set_selection_active(bool s){ selection_active = s; emit selection_toggled(s); }
 		inline void update_save_state(int direction){ save_state += direction; emit can_save(!save_state); }
 		
 		static const QString offset_header;

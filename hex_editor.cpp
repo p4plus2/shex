@@ -28,9 +28,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 		update_save_state(1);
 	}
 	
-	vertical_shift = column_height(1);
-	cursor_position = get_byte_position(0);
-	
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 	        this, SLOT(context_menu(const QPoint&)));
@@ -65,7 +62,7 @@ void hex_editor::set_focus()
 	emit update_status_text(get_status_text());
 	hex->setFocus();
 	buffer->set_active();
-	emit selection_toggled(selection_active);
+	emit selection_toggled(selection_area.is_active());
 	emit focused(true);
 	emit update_save_state(0);
 	clipboard_changed();
@@ -73,14 +70,10 @@ void hex_editor::set_focus()
 
 void hex_editor::slider_update(int position)
 {
+	//TODO check this
 	if(!scroll_mode){
-		cursor_position.setY(cursor_position.y() + (offset - position * columns));
-		int old_offset = offset;
+		move_cursor_nibble(offset - position * columns);
 		offset = position * columns;
-		if(selection_active){
-			selection_start.setY(selection_start.y()  - (offset - old_offset));
-			selection_current.setY(selection_current.y()  - (offset - old_offset));
-		}
 		update();
 	}else{
 		position -= height() / 2;
@@ -139,11 +132,10 @@ void hex_editor::update_undo_action(bool direction)
 		return;
 	}
 	update_save_state((direction << 1) + -1);
-	if(get_buffer_position(cursor_position) > buffer->size()){
-		cursor_position = get_byte_position(buffer->size());
+	if(cursor_nibble / 2 > buffer->size()){
+		cursor_nibble = buffer->size() * 2 - 1;
 	}
-	set_selection_active(false);
-	is_dragging = false;
+	selection_area.set_active(false);
 	update_window();
 }
 
@@ -161,8 +153,8 @@ void hex_editor::goto_offset(int address)
 	}else if(offset > buffer->size() - rows * columns){
 		offset = buffer->size() - rows * columns;
 	}
-	cursor_position = get_byte_position(address);
-	set_selection_active(false);
+	cursor_nibble = address * 2;
+	selection_area.set_active(false);
 	update_window();
 }
 
@@ -181,19 +173,20 @@ void hex_editor::select_range(int start, int end)
 	}else if(offset > buffer->size() - rows * columns){
 		offset = buffer->size() - rows * columns;
 	}
-	selection_start = get_byte_position(start);
-	selection_current = get_byte_position(end);
-	set_selection_active(true);
+	selection_area.set_start(start);
+	selection_area.set_end(end);
+	selection_area.set_active(true);
 	update_window();
 }
 
 void hex_editor::context_menu(const QPoint& position)
 {	
 	QMenu menu;
-	menu.addAction("Cut", this, SLOT(cut()), QKeySequence::Cut)->setEnabled(selection_active);
-	menu.addAction("Copy", this, SLOT(copy()), QKeySequence::Copy)->setEnabled(selection_active);
+	menu.addAction("Cut", this, SLOT(cut()), QKeySequence::Cut)->setEnabled(selection_area.is_active());
+	menu.addAction("Copy", this, SLOT(copy()), QKeySequence::Copy)->setEnabled(selection_area.is_active());
 	menu.addAction("Paste", this, SLOT(paste()), QKeySequence::Paste)->setEnabled(buffer->check_paste_data());
-	menu.addAction("Delete", this, SLOT(delete_text()), QKeySequence::Delete)->setEnabled(selection_active);
+	menu.addAction("Delete", this, SLOT(delete_text()), 
+	               QKeySequence::Delete)->setEnabled(selection_area.is_active());
 	menu.addSeparator();
 	menu.addAction("Select all", this, SLOT(select_all()), QKeySequence::SelectAll);
 	menu.addSeparator();
@@ -202,38 +195,35 @@ void hex_editor::context_menu(const QPoint& position)
 	menu.addAction("Follow jump", this, 
 	               SLOT(jump()), QKeySequence("Ctrl+j"))->setEnabled(follow_selection(false));
 	menu.addAction("Disassemble", this, 
-	               SLOT(disassemble()), QKeySequence("Ctrl+d"))->setEnabled(selection_active);
+	               SLOT(disassemble()), QKeySequence("Ctrl+d"))->setEnabled(selection_area.is_active());
 	menu.addSeparator();
 	menu.addAction("Bookmark", this, 
-	               SLOT(create_bookmark()), QKeySequence("Ctrl+b"))->setEnabled(selection_active);
+	               SLOT(create_bookmark()), QKeySequence("Ctrl+b"))->setEnabled(selection_area.is_active());
 	
 	menu.exec(mapToGlobal(position));
 }
 
 void hex_editor::cut()
 {
-	int start, end;
-	if(!buffer->is_active() || !get_selection_range(start, end)){
+	if(!buffer->is_active() || !selection_area.is_active()){
 		return;
 	}
 	
-	buffer->cut(start, end, click_side);
-	cursor_position = selection_start;
-	set_selection_active(false);
+	buffer->cut(selection_area.get_start(), selection_area.get_end(), click_side);
+	cursor_nibble = selection_area.get_start();
+	selection_area.set_active(false);
 	update_window();
 	update_save_state(1);
 }
 
 void hex_editor::copy()
 {
-	int start, end;
-	if(!buffer->is_active() || !get_selection_range(start, end)){
+	if(!buffer->is_active() || !selection_area.is_active()){
 		return;
 	}
 	
-	buffer->copy(start, end, click_side);
+	buffer->copy(selection_area.get_start(), selection_area.get_end(), click_side);
 	update_window();
-	update_save_state(1);
 }
 
 void hex_editor::paste(bool raw)
@@ -241,13 +231,12 @@ void hex_editor::paste(bool raw)
 	if(!buffer->is_active()){
 		return;
 	}
-	int start, end;
-	if(get_selection_range(start, end)){
-		buffer->paste(start, end, raw);
+	if(!selection_area.is_active()){
+		buffer->paste(selection_area.get_start(), selection_area.get_end(), raw);
 	}else{
-		int size = buffer->paste(get_buffer_position(cursor_position), 0, raw);
-		cursor_position = get_byte_position(get_buffer_position(cursor_position)+size);
-		set_selection_active(false);
+		int size = buffer->paste(cursor_nibble, 0, raw);
+		cursor_nibble = cursor_nibble + size;
+		selection_area.set_active(false);
 	}
 	update_window();
 	update_save_state(1);
@@ -258,13 +247,12 @@ void hex_editor::delete_text()
 	if(!buffer->is_active()){
 		return;
 	}
-	int start, end;
-	if(!get_selection_range(start, end)){
-		buffer->delete_text(get_buffer_position(cursor_position));
+	if(!selection_area.is_active()){
+		buffer->delete_text(cursor_nibble);
 	}else{
-		buffer->delete_text(start, end);	
-		set_selection_active(false);
-		cursor_position = selection_start;
+		buffer->delete_text(selection_area.get_start(), selection_area.get_end());	
+		selection_area.set_active(false);
+		cursor_nibble = selection_area.get_start();
 	}
 	update_window();
 	update_save_state(1);
@@ -275,57 +263,47 @@ void hex_editor::select_all()
 	if(!buffer->is_active()){
 		return;
 	}
-	selection_start = get_byte_position(0);
-	selection_current = get_byte_position(buffer->size());
-	set_selection_active(true);
+	selection_area.set_start(0);
+	selection_area.set_end(buffer->size()*2);
+	selection_area.set_active(true);
 	emit update_status_text(get_status_text());
-	update();
+	update_window();
 }
 
 void hex_editor::branch()
 {
-	int start, end;
-	if(!buffer->is_active() || !get_selection_range(start, end)){
+	if(!buffer->is_active() || !selection_area.is_active()){
 		return;
 	}
-	QString text = "selected bytes: ";
-	text.append(QString::number(buffer->branch_address(end, 
-	            buffer->to_little_endian(buffer->range(start, end))), 16));
-	
-	goto_offset(buffer->branch_address(end, 
-	            buffer->to_little_endian(buffer->range(start, end))));
+
+	goto_offset(buffer->branch_address(selection_area.get_end(), 
+	            buffer->to_little_endian(buffer->range(selection_area.get_start(), selection_area.get_end()))));
 }
 
 void hex_editor::jump()
 {
-	int start, end;
-	if(!buffer->is_active() || !get_selection_range(start, end)){
+	if(!buffer->is_active() || !selection_area.is_active()){
 		return;
 	}
-	QString text = "selected bytes: ";
-	text.append(QString::number(buffer->jump_address(end, 
-	            buffer->to_little_endian(buffer->range(start, end))), 16));
 	
-	goto_offset(buffer->jump_address(end, 
-	            buffer->to_little_endian(buffer->range(start, end))));
+	goto_offset(buffer->jump_address(selection_area.get_end(), 
+	            buffer->to_little_endian(buffer->range(selection_area.get_start(), selection_area.get_end()))));
 }
 
 void hex_editor::disassemble()
 {
-	int start, end;
-	if(!buffer->is_active() || !get_selection_range(start, end)){
+	if(!buffer->is_active() || !selection_area.is_active()){
 		return;
 	}
-	emit send_disassemble_data(start, end, buffer);
+	emit send_disassemble_data(selection_area.get_start(), selection_area.get_end(), buffer);
 }
 
 void hex_editor::create_bookmark()
 {
-	int start, end;
-	if(!buffer->is_active() || !get_selection_range(start, end)){
+	if(!buffer->is_active() || !selection_area.is_active()){
 		return;
 	}
-	emit send_bookmark_data(start, end, buffer);
+	emit send_bookmark_data(selection_area.get_start(), selection_area.get_end(), buffer);
 }
 
 void hex_editor::count(QString find, bool mode)
@@ -344,13 +322,14 @@ void hex_editor::count(QString find, bool mode)
 
 void hex_editor::search(QString find, bool direction, bool mode)
 {	
+	//TODO FIX
 	if(!buffer->is_active()){
 		return;
 	}
-	
 	int start, end;
-	if(!get_selection_range(start, end)){
-		end = get_buffer_position(cursor_position);
+	start = 0;
+	if(!selection_area.is_active()){
+		end = cursor_nibble;
 	}else if(!direction){
 		end = start - 1;
 	}
@@ -375,7 +354,7 @@ void hex_editor::replace(QString find, QString replace, bool direction, bool mod
 	if(!buffer->is_active()){
 		return;
 	}
-	int position = get_buffer_position(cursor_position);
+	int position = cursor_nibble;
 	int result = buffer->replace(find, replace, position, direction, mode);
 	if(result < 0){
 		search_error(result, find, replace);
@@ -405,20 +384,6 @@ void hex_editor::replace_all(QString find, QString replace, bool mode)
 		update_status_text(QString::number(result) + " Results found for " + find);
 	}
 	update_save_state(1);
-}
-
-void hex_editor::paintEvent(QPaintEvent *event)
-{
-	Q_UNUSED(event);
-//	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += byte_column_width * 2){
-//		painter.fillRect(i-1, 0, column_width(2)+2, 
-//		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
-//	}
-	
-//	if(selection_active){
-//		paint_selection(painter);
-//	}
-	
 }
 
 void hex_editor::keyPressEvent(QKeyEvent *event)
@@ -482,20 +447,11 @@ QString hex_editor::get_status_text()
 {
 	QString text;
 	QTextStream string_stream(&text);
-	if(selection_active){
-		int position1 = get_buffer_position(selection_start);
-		int position2 = get_buffer_position(selection_current);
-		if(position1 > position2){
-			qSwap(position1, position2);
-		}
-		if(position1 < 0){
-			position1 += offset;
-		}
-		
-		string_stream << "Selection range: $" << buffer->get_formatted_address(position1)
-		              << " to $" << buffer->get_formatted_address(position2);
+	if(selection_area.is_active()){
+		string_stream << "Selection range: $" << buffer->get_formatted_address(selection_area.get_start() / 2)
+		              << " to $" << buffer->get_formatted_address(selection_area.get_end() / 2);
 	}else{
-		int position = get_buffer_position(cursor_position);
+		int position = cursor_nibble / 2;
 		unsigned char byte = buffer->at(position);
 		
 		string_stream << "Current offset: $" << buffer->get_formatted_address(position)
@@ -506,71 +462,21 @@ QString hex_editor::get_status_text()
 	return text;
 }
 
-int hex_editor::get_selection_point(QPoint point)
-{
-	if(point.y() < 0){
-		point.setY(vertical_offset);
-		point.setX(hex_offset);
-	}else if(point.y() > column_height(rows)+vertical_offset - font_height){
-		point.setY(column_height(rows)+vertical_offset -font_height);
-		point.setX(column_width(11+columns*3)-font_width);
-	}
-	return get_buffer_position(point);
-}
-
-bool hex_editor::get_selection_range(int &start, int &end)
-{
-	start = get_buffer_position(selection_start);
-	end = get_buffer_position(selection_current);
-	if(start > end){
-		qSwap(start, end);
-		qSwap(selection_start, selection_current);
-	}
-	end++;
-	return selection_active;
-}
-
 bool hex_editor::follow_selection(bool type)
 {
-	int start, end;
-	if(get_selection_range(start, end)){
-		int range = end-start;
+	if(selection_area.is_active()){
+		int range = selection_area.get_end() - selection_area.get_start();
 		if(type && (range == 1 || range == 2)){
 			return true;
 		}else if(!type && (range == 2 || range == 3)){
-			if(buffer->validate_address(buffer->jump_address(end,
-			   buffer->to_little_endian(buffer->range(start, end))), false)){
+			if(buffer->validate_address(buffer->jump_address(selection_area.get_end(),
+			   buffer->to_little_endian(buffer->range(selection_area.get_start(), 
+			   selection_area.get_end()))), false)){
 				return true;                
 			}
 		}
 	}
 	return false;
-}
-
-int hex_editor::get_buffer_position(QPoint &point, bool byte_align)
-{
-	return get_buffer_position(point.x(), point.y(), byte_align);
-}
-
-int hex_editor::get_buffer_position(int x, int y, bool byte_align)
-{
-	int position = (x - hex_offset) / font_width;
-	position -= position / 3;
-	position = ((y-vertical_offset)/font_height)*columns*2+position+offset*2;
-	return byte_align ? position/2 : position;
-	
-}
-
-QPoint hex_editor::get_byte_position(int address, bool byte_align)
-{
-	int nibble_offset = 0;
-	if(!byte_align){
-		nibble_offset += (address & 1) * font_width;
-		address /= 2;
-	}
-	int screen_relative = address - offset;
-	return QPoint(column_width((screen_relative % columns)*3+11)+nibble_offset, 
-	              column_height(screen_relative / columns) + vertical_offset);
 }
 
 void hex_editor::move_cursor_nibble(int delta)
@@ -593,21 +499,6 @@ void hex_editor::move_cursor_nibble(int delta)
 	update_window();
 }
 
-void hex_editor::update_selection_position(int amount)
-{
-	int new_offset = offset + amount;
-	if(new_offset > 0 && new_offset < buffer->size()){
-		offset = new_offset;
-		selection_start -= QPoint(0, amount);
-		selection_current -= QPoint(0, amount);
-	}
-	update();
-}
-
-void hex_editor::update_selection(int x, int y)
-{
-}
-
 void hex_editor::update_window()
 {
 	if(!scroll_mode){
@@ -621,7 +512,7 @@ void hex_editor::update_window()
 	hex->update_display();
 	address->update_display();
 	update();
-	emit selection_toggled(selection_active);
+	emit selection_toggled(selection_area.is_active());
 }
 
 void hex_editor::search_error(int error, QString find, QString replace_with)

@@ -77,9 +77,11 @@ void text_display::paintEvent(QPaintEvent *event)
 	painter.setPen(text);
 	painter.setFont(font);
 	
-	if(get_offset() >= buffer->size()){
-		return;
-	}
+//	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += byte_column_width * 2){
+//		painter.fillRect(i-1, 0, column_width(2)+2, 
+//		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
+//	}
+	
 	QPoint cursor_position = nibble_to_screen(get_cursor_nibble());
 	
 	selection selection_area = get_selection();

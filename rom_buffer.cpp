@@ -62,6 +62,8 @@ void ROM_buffer::cut(int start, int end, bool ascii_mode)
 
 void ROM_buffer::copy(int start, int end, bool ascii_mode)
 {	
+	start /= 2;
+	end = end / 2 + 1;
 	if(ascii_mode){
 		QByteArray text_data = character_mapper::encode(buffer.mid(start, end-start));
 		for(int i = 0; i < text_data.length(); i++){
@@ -139,7 +141,8 @@ void ROM_buffer::copy(int start, int end, bool ascii_mode)
 
 int ROM_buffer::paste(int start, int end, bool raw)
 {
-	qDebug() << start;
+	start /= 2;
+	end = end / 2 + 1;
 	if(!check_paste_data()){
 		return 0;
 	}
@@ -170,6 +173,8 @@ int ROM_buffer::paste(int start, int end, bool raw)
 
 void ROM_buffer::delete_text(int start, int end)
 {
+	start /= 2;
+	end = end / 2 + 1;
 	if(!end){
 		end = start + 1;
 	}
@@ -242,6 +247,7 @@ int ROM_buffer::count(QString find, bool mode)
 
 int ROM_buffer::search(QString find, int position, bool direction, bool mode)
 {	
+	position /= 2;
 	QByteArray search_for = input_to_byte_array(find, mode);
 	if(search_for.isEmpty()){
 		return INVALID_FIND;
@@ -261,6 +267,7 @@ int ROM_buffer::search(QString find, int position, bool direction, bool mode)
 
 int ROM_buffer::replace(QString find, QString replace, int position, bool direction, bool mode)
 {
+	position /= 2;
 	int result = search(find, position, direction, mode);
 	if(result < 0){
 		return result;
