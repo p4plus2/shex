@@ -145,15 +145,18 @@ void text_display::mouseMoveEvent(QMouseEvent *event)
 	}
 	int nibble = screen_to_nibble(clip_x(event->x()), clip_y(event->y()));
 	set_cursor_nibble(nibble);
-	
+	//TODO more proper later but works wellish
 	selection selection_area = get_selection();
-	selection_area.set_end(nibble);
+	if(!scroll_timer_id){
+		selection_area.set_end(nibble);
+	}
 	selection_area.set_active(true);
 	selection_area.set_dragging(true);
 	set_selection(selection_area);
 	
 	if((event->y() > height() || event->y() < 0) && !scroll_timer_id){
 		scroll_timer_id = startTimer(20);
+		scroll_direction = event->y() > 0 ? 1 : -1;
 	}else if(!(event->y() > height() || event->y() < 0) && scroll_timer_id){
 		killTimer(scroll_timer_id);
 		scroll_timer_id = 0;
@@ -193,13 +196,11 @@ void text_display::timerEvent(QTimerEvent *event)
 		cursor_state = !cursor_state;
 	}else if(event->timerId() == scroll_timer_id){
 		selection selection_area = get_selection();
-		//TODO
-		//scroll direction also clip to region
-		set_offset(get_offset() + columns);
+		//TODO clamp
+		set_offset(get_offset() + columns * scroll_direction);
 		if(selection_area.is_dragging()){
-			selection_area.move_end(columns * 2);
+			selection_area.move_end(columns * 2 * scroll_direction);
 		}
-		qDebug() << "offset" << get_offset();
 		set_selection(selection_area);
 	}
 	update();

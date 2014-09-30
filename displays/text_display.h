@@ -68,6 +68,7 @@ class text_display : public QWidget
 		bool cursor_state = true;
 		int scroll_timer_id = 0;
 		int cursor_timer_id = 0;
+		int scroll_direction = 1;
 };
 
 #endif // TEXT_DISPLAY_H

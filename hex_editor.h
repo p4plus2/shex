@@ -31,9 +31,9 @@ class hex_editor : public QWidget
 		inline QString load_error() { return ROM_error; }
 		QString get_file_name() { return buffer->get_file_name(); }
 		
-		//refact inlines
+		//refact adds
 		inline int get_offset(){ return offset; }
-		inline void set_offset(int o){ offset = o; }
+		void set_offset(int o);
 		
 		inline int get_cursor_nibble(){ return cursor_nibble; }
 		inline void set_cursor_nibble(int byte){ cursor_nibble = byte; update_window(); }

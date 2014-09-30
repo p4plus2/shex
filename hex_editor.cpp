@@ -399,7 +399,6 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		return;
 	}
 
-	//TODO: handle hex vs ascii side
 	switch(event->key()){
 		case Qt::Key_Backspace:
 			move_cursor_nibble((cursor_nibble - 2) & ~1);
@@ -418,10 +417,10 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			move_cursor_nibble(columns * 2);
 		break;
 		case Qt::Key_Right:
-			move_cursor_nibble(2);
+			move_cursor_nibble(1 + ascii->hasFocus());
 		break;
 		case Qt::Key_Left:
-			move_cursor_nibble(-2);
+			move_cursor_nibble(-1 - ascii->hasFocus());
 		break;
 		case Qt::Key_PageUp:
 			move_cursor_nibble(-columns * 2 * rows);
@@ -465,7 +464,7 @@ QString hex_editor::get_status_text()
 bool hex_editor::follow_selection(bool type)
 {
 	if(selection_area.is_active()){
-		int range = selection_area.get_end() - selection_area.get_start();
+		int range = selection_area.range();
 		if(type && (range == 1 || range == 2)){
 			return true;
 		}else if(!type && (range == 2 || range == 3)){
@@ -513,6 +512,17 @@ void hex_editor::update_window()
 	address->update_display();
 	update();
 	emit selection_toggled(selection_area.is_active());
+}
+
+void hex_editor::set_offset(int o)
+{
+	if(o < 0){
+		o = 0;
+	}else if(o > buffer->size()){
+		o = buffer->size();
+	}
+
+	offset = o;
 }
 
 void hex_editor::search_error(int error, QString find, QString replace_with)

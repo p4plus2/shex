@@ -10,7 +10,6 @@ void selection::set_start(int s)
 void selection::set_end(int e)
 {
 	end = e;
-	qDebug() << "set" << end;
 }
 
 int selection::get_start()
@@ -26,12 +25,6 @@ int selection::get_end()
 void selection::move_end(int amount)
 {
 	end += amount;
-	qDebug() << "move" << end;
-}
-
-int selection::drag_direction()
-{
-	return end - start;
 }
 
 int selection::range()
