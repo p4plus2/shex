@@ -11,7 +11,9 @@
 text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)
 {
-	font_setup();
+	if(!font_height){
+		font_setup();
+	}
 	
 	cursor_timer_id = startTimer(QApplication::cursorFlashTime());
 	
@@ -29,7 +31,7 @@ void text_display::update_display()
 	update();
 }
 
-void text_display::font_setup()
+QFont text_display::font_setup()
 {
 	font.setFamily("Courier");
 	font.setStyleHint(QFont::TypeWriter);
@@ -39,26 +41,7 @@ void text_display::font_setup()
 	QFontMetrics font_info(font);
 	font_width = font_info.averageCharWidth();
 	font_height = font_info.height();
-}
-
-int text_display::get_font_width() const
-{
-	return font_width;
-}
-
-int text_display::get_font_height() const
-{
-	return font_height;
-}
-
-int text_display::get_rows() const
-{
-	return rows;
-}
-
-int text_display::get_columns() const
-{
-	return columns;
+	return font;
 }
 
 QPoint text_display::clip_mouse(int x, int y)
@@ -154,7 +137,7 @@ void text_display::mouseMoveEvent(QMouseEvent *event)
 	}
 	int nibble = screen_to_nibble(clip_mouse(event->x(), event->y()));
 	set_cursor_nibble(nibble);
-	//TODO more proper later but works wellish
+
 	selection selection_area = get_selection();
 	if(!scroll_timer_id){
 		selection_area.set_end(nibble);
@@ -205,7 +188,6 @@ void text_display::timerEvent(QTimerEvent *event)
 		cursor_state = !cursor_state;
 	}else if(event->timerId() == scroll_timer_id){
 		selection selection_area = get_selection();
-		//TODO clamp
 		set_offset(get_offset() + columns * scroll_direction);
 		if(selection_area.is_dragging()){
 			selection_area.move_end(columns * 2 * scroll_direction);
@@ -214,3 +196,9 @@ void text_display::timerEvent(QTimerEvent *event)
 	}
 	update();
 }
+
+int text_display::columns = 16;
+int text_display::rows = 32;
+int text_display::font_height = 0;
+int text_display::font_width = 0;
+QFont text_display::font;

@@ -65,8 +65,8 @@ void hex_editor::slider_update(int position)
 {
 	//TODO check this
 	if(!scroll_mode){
-		move_cursor_nibble(offset - position * columns);
-		offset = position * columns;
+		move_cursor_nibble(offset - position * text_display::get_columns());
+		offset = position * text_display::get_columns();
 	}else{
 		position -= height() / 2;
 		if(position < 0){
@@ -138,12 +138,12 @@ void hex_editor::goto_offset(int address)
 	}
 
 	address = buffer->snes_to_pc(address);
-	offset = address - (rows / 2) * columns;
-	offset -= offset % columns;
+	offset = address - (text_display::get_rows() / 2) * text_display::get_columns();
+	offset -= offset % text_display::get_columns();
 	if(offset < 0){
 		offset = 0;
-	}else if(offset > buffer->size() - rows * columns){
-		offset = buffer->size() - rows * columns;
+	}else if(offset > buffer->size() - text_display::get_rows() * text_display::get_columns()){
+		offset = buffer->size() - text_display::get_rows() * text_display::get_columns();
 	}
 	cursor_nibble = address * 2;
 	selection_area.set_active(false);
@@ -158,15 +158,15 @@ void hex_editor::select_range(int start, int end)
 	start = buffer->snes_to_pc(start);
 	end = buffer->snes_to_pc(end);
 
-	offset = start - (rows / 2) * columns;
-	offset -= offset % columns;
+	offset = start - (text_display::get_rows() / 2) * text_display::get_columns();
+	offset -= offset % text_display::get_columns();
 	if(offset < 0){
 		offset = 0;
-	}else if(offset > buffer->size() - rows * columns){
-		offset = buffer->size() - rows * columns;
+	}else if(offset > buffer->size() - text_display::get_rows() * text_display::get_columns()){
+		offset = buffer->size() - text_display::get_rows() * text_display::get_columns();
 	}
-	selection_area.set_start(start);
-	selection_area.set_end(end);
+	selection_area.set_start(start * 2);
+	selection_area.set_end(end * 2);
 	selection_area.set_active(true);
 	update_window();
 }
@@ -314,30 +314,20 @@ void hex_editor::count(QString find, bool mode)
 
 void hex_editor::search(QString find, bool direction, bool mode)
 {	
-	//TODO FIX
 	if(!buffer->is_active()){
 		return;
 	}
-	int start, end;
-	start = 0;
+	int end = selection_area.get_end();
 	if(!selection_area.is_active()){
 		end = cursor_nibble;
 	}else if(!direction){
-		end = start - 1;
+		end = selection_area.get_start() - 1;
 	}
 	int result = buffer->search(find, end, direction, mode);
 	if(result < 0){
 		search_error(result, find);
 	}else{
-		int start = buffer->pc_to_snes(result);
-		int end = 0;
-		if(mode){
-			end = buffer->pc_to_snes(result + buffer->to_hex(find).length()/2 - 1);
-		}else{
-			end = buffer->pc_to_snes(result + find.length() - 1);
-		}
-		goto_offset(end);
-		select_range(start, end);
+		handle_search_result(find, result, mode);
 	}
 }
 
@@ -351,15 +341,7 @@ void hex_editor::replace(QString find, QString replace, bool direction, bool mod
 	if(result < 0){
 		search_error(result, find, replace);
 	}else{
-		int start = buffer->pc_to_snes(result);
-		int end = 0;
-		if(mode){
-			end = buffer->pc_to_snes(result + buffer->to_hex(replace).length()/2 - 1);
-		}else{
-			end = buffer->pc_to_snes(result + replace.length() - 1);
-		}
-		goto_offset(end);
-		select_range(start, end);
+		handle_search_result(replace, result, mode);
 	}
 	update_save_state(1);
 }
@@ -397,16 +379,17 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			delete_text();
 		break;		
 		case Qt::Key_Home:
-			move_cursor_nibble(-cursor_nibble % (columns * 2));
+			move_cursor_nibble(-cursor_nibble % (text_display::get_columns() * 2));
 		break;
 		case Qt::Key_End:
-			move_cursor_nibble((columns * 2) - (cursor_nibble % (columns * 2)) - 2);
+			move_cursor_nibble((text_display::get_columns() * 2) - 
+			                   (cursor_nibble % (text_display::get_columns() * 2)) - 2);
 		break;
 		case Qt::Key_Up:
-			move_cursor_nibble(-columns * 2);
+			move_cursor_nibble(-text_display::get_columns() * 2);
 		break;
 		case Qt::Key_Down:
-			move_cursor_nibble(columns * 2);
+			move_cursor_nibble(text_display::get_columns() * 2);
 		break;
 		case Qt::Key_Right:
 			move_cursor_nibble(1 + ascii->hasFocus());
@@ -415,10 +398,10 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			move_cursor_nibble(-1 - ascii->hasFocus());
 		break;
 		case Qt::Key_PageUp:
-			move_cursor_nibble(-columns * 2 * rows);
+			move_cursor_nibble(-text_display::get_columns() * 2 * text_display::get_rows());
 		break;
 		case Qt::Key_PageDown:
-			move_cursor_nibble(columns * 2 * rows);
+			move_cursor_nibble(text_display::get_columns() * 2 * text_display::get_rows());
 		break;
 		default:
 			return;
@@ -431,7 +414,19 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 void hex_editor::wheelEvent(QWheelEvent *event)
 {
 	int steps = -event->delta() / 8 / 15;
-	move_cursor_nibble(columns * 2 * steps);
+	move_cursor_nibble(text_display::get_columns() * 2 * steps);
+}
+
+void hex_editor::handle_search_result(QString target, int result, bool mode)
+{
+	int start = buffer->pc_to_snes(result);
+	if(mode){
+		result += buffer->to_hex(target).length()/2 - 1;
+	}else{
+		result += target.length() - 1;
+	}
+	goto_offset(buffer->pc_to_snes(result)); //offsets are byte aligned
+	select_range(start, buffer->pc_to_snes(result));
 }
 
 QString hex_editor::get_status_text()
@@ -480,11 +475,11 @@ void hex_editor::move_cursor_nibble(int delta)
 	}
 	
 	//TODO optimize
-	while(cursor_nibble/2 >= offset + rows * columns){
-		offset += columns;
+	while(cursor_nibble/2 >= offset + text_display::get_rows() * text_display::get_columns()){
+		offset += text_display::get_columns();
 	}
 	while(cursor_nibble/2 < offset){
-		offset -= columns;
+		offset -= text_display::get_columns();
 	}
 	
 	update_window();
@@ -493,7 +488,7 @@ void hex_editor::move_cursor_nibble(int delta)
 void hex_editor::update_window()
 {
 	if(!scroll_mode){
-		emit update_slider(offset / columns);
+		emit update_slider(offset / text_display::get_columns());
 		emit update_range(get_max_lines()+1);
 	}else{
 		emit update_range(height());
@@ -525,6 +520,11 @@ void hex_editor::search_error(int error, QString find, QString replace_with)
 	}else if(error == ROM_buffer::NOT_FOUND){
 		update_status_text("Error: String " + find + " not found.");
 	}
+}
+
+int hex_editor::get_max_lines()
+{
+	return buffer->size() / text_display::get_columns() - text_display::get_rows();
 }
 
 hex_editor::~hex_editor()

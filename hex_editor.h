@@ -93,8 +93,6 @@ class hex_editor : public QWidget
 		//end refactor adds
 		
 		ROM_buffer *buffer;
-		int columns = 16;
-		int rows = 32;
 		int offset = 0;
 		bool is_active = true;
 
@@ -103,13 +101,14 @@ class hex_editor : public QWidget
 		bool is_new;
 		QString ROM_error = "";
 		
+		void handle_search_result(QString target, int result, bool mode);
 		QString get_status_text();
 		bool follow_selection(bool type);
 		void move_cursor_nibble(int delta);
 		void update_nibble(char byte);
 		void search_error(int error, QString find = "", QString replace_with = "");
+		int get_max_lines();
 	
-		inline int get_max_lines(){ return buffer->size() / columns - rows; }
 		inline void update_save_state(int direction){ save_state += direction; emit can_save(!save_state); }
 		
 		static const QString offset_header;

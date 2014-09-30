@@ -15,14 +15,15 @@ class text_display : public QWidget
 	public:
 		explicit text_display(const ROM_buffer *b, hex_editor *parent = 0);
 		void update_display();
+		static int get_rows(){ return rows; }
+		static int get_columns(){ return columns; }
+		
 	protected:
 		const ROM_buffer *buffer;
-		void font_setup();
+		QFont font_setup();
 		
-		int get_font_width() const;
-		int get_font_height() const;
-		int get_rows() const;
-		int get_columns() const;
+		static int get_font_width(){ return font_width; }
+		static int get_font_height(){ return font_height; }
 
 		QPoint clip_mouse(int x, int y);
 		QPoint clip_screen(QPoint position){ return clip_mouse(position.x(), position.y()); }
@@ -53,15 +54,13 @@ class text_display : public QWidget
 		
 	private:		
 		//make these static at some point, no need to duplicate them
-		int font_width;
-		int font_height;
+		static int font_width;
+		static int font_height;
+		static QFont font;
 		
 		//also make these static at some point
-		int rows = 32;
-		int columns = 16;
-		
-		//this too
-		QFont font;
+		static int rows;
+		static int columns;
 		
 		hex_editor *editor;
 		
