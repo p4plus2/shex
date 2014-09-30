@@ -33,13 +33,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	        this, SLOT(context_menu(const QPoint&)));
 	connect(qApp->clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboard_changed()));
 	
-	font_width = 10; //stop refactor crashes
-	font_height = 10;
-	
-	QSize minimum(0, 0);
-	minimum.setHeight(rows*font_height);
-	setMinimumSize(minimum);
-	
 	//can't initialize in header -- relies on buffer here to be const
 	address = new address_display(buffer, this);
 	hex = new hex_display(buffer, this);
@@ -74,21 +67,20 @@ void hex_editor::slider_update(int position)
 	if(!scroll_mode){
 		move_cursor_nibble(offset - position * columns);
 		offset = position * columns;
-		update();
 	}else{
 		position -= height() / 2;
 		if(position < 0){
-			scroll_direction = false;
+	//		scroll_direction = false;
 			position = -position;
 		}else if(position > 0){
-			scroll_direction = true;
+	//		scroll_direction = true;
 		}else{
-			scroll_speed = INT_MAX;
-			scroll_timer->setInterval(scroll_speed);
+	//		scroll_speed = INT_MAX;
+	//		scroll_timer->setInterval(scroll_speed);
 			return;
 		}
-		scroll_speed = qAbs(((position - (height() /2))-1) / 15);
-		scroll_timer->setInterval(scroll_speed);
+	//	scroll_speed = qAbs(((position - (height() /2))-1) / 15);
+	//	scroll_timer->setInterval(scroll_speed);
 	}
 }
 
@@ -100,12 +92,12 @@ void hex_editor::scroll_mode_changed()
 }
 void hex_editor::control_auto_scroll(bool enabled)
 {
-	auto_scrolling = enabled;
-	if(auto_scrolling){
-		scroll_timer->start(scroll_speed);
-	}else{
-		scroll_timer->stop();
-	}
+	//auto_scrolling = enabled;
+	//if(auto_scrolling){
+	//	scroll_timer->start(scroll_speed);
+	//}else{
+	//	scroll_timer->stop();
+	//}
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
@@ -209,7 +201,7 @@ void hex_editor::cut()
 		return;
 	}
 	
-	buffer->cut(selection_area.get_start(), selection_area.get_end(), click_side);
+	buffer->cut(selection_area.get_start(), selection_area.get_end(), ascii->hasFocus());
 	cursor_nibble = selection_area.get_start();
 	selection_area.set_active(false);
 	update_window();
@@ -222,7 +214,7 @@ void hex_editor::copy()
 		return;
 	}
 	
-	buffer->copy(selection_area.get_start(), selection_area.get_end(), click_side);
+	buffer->copy(selection_area.get_start(), selection_area.get_end(), ascii->hasFocus());
 	update_window();
 }
 
@@ -510,7 +502,6 @@ void hex_editor::update_window()
 	ascii->update_display();
 	hex->update_display();
 	address->update_display();
-	update();
 	emit selection_toggled(selection_area.is_active());
 }
 

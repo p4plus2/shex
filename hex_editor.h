@@ -96,16 +96,9 @@ class hex_editor : public QWidget
 		int columns = 16;
 		int rows = 32;
 		int offset = 0;
-		bool click_side = false;
 		bool is_active = true;
-		int font_width; //needs removed
-		int font_height;
 
 		bool scroll_mode = false;
-		bool auto_scrolling;
-		QTimer *scroll_timer = new QTimer(this);
-		int scroll_speed;
-		bool scroll_direction;
 		int save_state = 0;
 		bool is_new;
 		QString ROM_error = "";

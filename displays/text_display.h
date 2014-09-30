@@ -24,8 +24,8 @@ class text_display : public QWidget
 		int get_rows() const;
 		int get_columns() const;
 
-		int clip_x(int x);
-		int clip_y(int y);
+		QPoint clip_mouse(int x, int y);
+		QPoint clip_screen(QPoint position){ return clip_mouse(position.x(), position.y()); }
 		
 		inline int get_offset(){ return editor->get_offset(); }
 		inline void set_offset(int o){ editor->set_offset(o); }
@@ -44,7 +44,7 @@ class text_display : public QWidget
 		virtual void resizeEvent(QResizeEvent *event);
 		virtual void timerEvent(QTimerEvent *event);
 		
-		virtual int screen_to_nibble(int x, int y, bool byte_align = false) = 0;
+		virtual int screen_to_nibble(QPoint position, bool byte_align = false) = 0;
 		virtual QPoint nibble_to_screen(int nibble) = 0;
 		virtual int get_line_characters() = 0;
 		virtual void get_line(int start, int end, QTextStream &stream) = 0;

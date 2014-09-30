@@ -17,6 +17,10 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	
 	editor = parent;
 	setFocusPolicy(Qt::WheelFocus);
+	
+	QSize minimum(0, 0);
+	minimum.setHeight(rows*font_height);
+	setMinimumSize(minimum);
 }
 
 void text_display::update_display()
@@ -57,16 +61,13 @@ int text_display::get_columns() const
 	return columns;
 }
 
-int text_display::clip_x(int x)
+QPoint text_display::clip_mouse(int x, int y)
 {
-	x = x < 0 ? 0 : x;
-	return x > width() ? width() : x;
-}
-
-int text_display::clip_y(int y)
-{
+	x = (x < 0 || y < 0) ? 0 : x;
+	x = (x > width() || y > height()) ? width() : x;
 	y = y < 0 ? 0 : y;
-	return y > height() ? height() : y;
+	y = y > height() ? height() : y;
+	return QPoint(x, y);
 }
 
 void text_display::paintEvent(QPaintEvent *event)
@@ -114,13 +115,21 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area)
 	if(focusPolicy() == Qt::NoFocus){
 		return;  //Anything which doesn't accept focus can't be highlighted
 	}
-	int start = selection_area.get_start();
-	int end = selection_area.get_end();
-	for(; start <= end && end != get_offset(); start++){
-		QPoint position = nibble_to_screen(start & ~1);
-		painter.fillRect(position.x(), position.y(), font_width, font_height, 
-				 palette().color(QPalette::Active, QPalette::Highlight));
+	
+	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start() & ~1));
+	QPoint position2 = clip_screen(nibble_to_screen((selection_area.get_end() & ~1) + 2));
+	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
+	                 position2.y() - position1.y() + font_height, 
+			 palette().color(QPalette::Active, QPalette::Highlight));	
+	if(position1.x()){
+		painter.fillRect(0, position1.y(), position1.x(), font_height, palette().color(QPalette::Base));
 	}
+	
+	if(position2.x() < width()){
+		painter.fillRect(position2.x(), position2.y(),
+		                 get_line_characters() * font_width - position2.x(), 
+		                 font_height, palette().color(QPalette::Base));
+	}	
 }
 
 void text_display::mousePressEvent(QMouseEvent *event)
@@ -128,7 +137,7 @@ void text_display::mousePressEvent(QMouseEvent *event)
 	if(event->button() == Qt::RightButton || focusPolicy() == Qt::NoFocus){
 		return;
 	}
-	int nibble = screen_to_nibble(clip_x(event->x()), clip_y(event->y()));
+	int nibble = screen_to_nibble(clip_mouse(event->x(), event->y()));
 	set_cursor_nibble(nibble);
 	
 	selection selection_area = get_selection();
@@ -143,7 +152,7 @@ void text_display::mouseMoveEvent(QMouseEvent *event)
 	if(focusPolicy() == Qt::NoFocus){
 		return;
 	}
-	int nibble = screen_to_nibble(clip_x(event->x()), clip_y(event->y()));
+	int nibble = screen_to_nibble(clip_mouse(event->x(), event->y()));
 	set_cursor_nibble(nibble);
 	//TODO more proper later but works wellish
 	selection selection_area = get_selection();
@@ -168,7 +177,7 @@ void text_display::mouseReleaseEvent(QMouseEvent *event)
 	if(focusPolicy() == Qt::NoFocus){
 		return;
 	}
-	int nibble = screen_to_nibble(clip_x(event->x()), clip_y(event->y()));
+	int nibble = screen_to_nibble(clip_mouse(event->x(), event->y()));
 	set_cursor_nibble(nibble);
 	
 	selection selection_area = get_selection();

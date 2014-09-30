@@ -26,12 +26,10 @@ void address_display::get_line(int start, int end, QTextStream &stream)
 	stream << "$" << buffer->get_formatted_address(start) << ": ";
 }
 
-int address_display::screen_to_nibble(int x, int y, bool byte_align)
+int address_display::screen_to_nibble(QPoint position, bool byte_align)
 {
 	Q_UNUSED(byte_align); //only set Y position to the first byte
-	Q_UNUSED(x);
-	y /= get_font_height();
-	
+	int y = position.y() / get_font_height();
 	return (y * get_columns() + get_offset()) * 2;
 }
 

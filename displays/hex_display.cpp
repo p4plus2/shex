@@ -42,11 +42,11 @@ void hex_display::get_line(int start, int end, QTextStream &stream)
 }
 
 //possibly clean this up more
-int hex_display::screen_to_nibble(int x, int y, bool byte_align)
+int hex_display::screen_to_nibble(QPoint position, bool byte_align)
 {
-	int x_remainder = x % get_font_width();
-	x /= get_font_width();
-	y /= get_font_height();
+	int x_remainder = position.x() % get_font_width();
+	int x = position.x() / get_font_width();
+	int y = position.y() / get_font_height();
 	if(x % 3 == 2){
 		x += ((x_remainder - get_font_width() / 2) < 0 ? -1 : 1);
 	}

@@ -45,11 +45,11 @@ void ascii_display::get_line(int start, int end, QTextStream &stream)
 	}
 }
 
-int ascii_display::screen_to_nibble(int x, int y, bool byte_align)
+int ascii_display::screen_to_nibble(QPoint position, bool byte_align)
 {
 	Q_UNUSED(byte_align); //ascii is already byte aligned
-	x /= get_font_width();
-	y /= get_font_height();
+	int x = position.x() / get_font_width();
+	int y = position.y() / get_font_height();
 	
 	int last_byte = (line_characters - 1);
 	if(x > last_byte){
