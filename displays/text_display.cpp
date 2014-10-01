@@ -66,9 +66,9 @@ void text_display::paintEvent(QPaintEvent *event)
 //		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
 //	}
 	
-	QPoint cursor_position = nibble_to_screen(get_cursor_nibble());
-	
 	selection selection_area = get_selection();
+	QPoint cursor_position = nibble_to_screen(get_cursor_nibble() & ~selection_area.is_active());
+	
 	if(!selection_area.is_active()){
 		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
 		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
@@ -100,7 +100,7 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area)
 	}
 	
 	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start() & ~1));
-	QPoint position2 = clip_screen(nibble_to_screen((selection_area.get_end() & ~1) + 2));
+	QPoint position2 = clip_screen(nibble_to_screen(selection_area.get_end() & ~1));
 	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
 	                 position2.y() - position1.y() + font_height, 
 			 palette().color(QPalette::Active, QPalette::Highlight));	
@@ -172,7 +172,6 @@ void text_display::mouseReleaseEvent(QMouseEvent *event)
 		killTimer(scroll_timer_id);
 		scroll_timer_id	= 0;
 	}
-	qDebug() << selection_area.get_start() << selection_area.get_end();
 }
 
 void text_display::resizeEvent(QResizeEvent *event)

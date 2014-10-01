@@ -219,20 +219,20 @@ bool ROM_metadata::validate_address(int address, bool error_method)
 
 int ROM_metadata::branch_address(int address, QByteArray branch) const
 {
-	address = pc_to_snes(address);
+	address = pc_to_snes(address / 2);
 	short word = address & 0xFFFF;
 	if(branch.size() == 1){
 		char relative_branch = branch[0];
-		return (address & 0xFF0000) | ((word + relative_branch) & 0xFFFF);
+		return (address & 0xFF0000) | ((word + relative_branch + 1) & 0xFFFF);
 	}
 	short relative_branch = branch[0] & 0x00FF;
 	relative_branch |= (branch[1] & 0x00FF) << 8;
-	return (address & 0xFF0000) | ((word + relative_branch) & 0xFFFF);
+	return (address & 0xFF0000) | ((word + relative_branch + 1) & 0xFFFF);
 }
 
 int ROM_metadata::jump_address(int address, QByteArray jump) const
 {
-	address = pc_to_snes(address);
+	address = pc_to_snes(address / 2);
 	address &= 0xFF0000;
 	int offset = 1;
 	if(jump.size() == 3){

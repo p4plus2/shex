@@ -120,9 +120,6 @@ void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 
 void hex_editor::update_undo_action(bool direction)
 {
-	if(!is_active){
-		return;
-	}
 	update_save_state((direction << 1) + -1);
 	if(cursor_nibble / 2 > buffer->size()){
 		cursor_nibble = buffer->size() * 2 - 1;
@@ -435,7 +432,7 @@ QString hex_editor::get_status_text()
 	QTextStream string_stream(&text);
 	if(selection_area.is_active()){
 		string_stream << "Selection range: $" << buffer->get_formatted_address(selection_area.get_start() / 2)
-		              << " to $" << buffer->get_formatted_address(selection_area.get_end() / 2);
+		              << " to $" << buffer->get_formatted_address(selection_area.get_end() / 2 - 1);
 	}else{
 		int position = cursor_nibble / 2;
 		unsigned char byte = buffer->at(position);
@@ -535,4 +532,5 @@ hex_editor::~hex_editor()
 	delete buffer;
 }
 
+//TODO something with this
 const QString hex_editor::offset_header = "Offset     00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F";

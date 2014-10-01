@@ -52,7 +52,7 @@ class ROM_buffer : public ROM_metadata
 		inline QString get_file_name(){ QFileInfo info(ROM); return info.fileName();  }
 		inline virtual int size() const { return buffer.size(); }
 		inline virtual char at(int index) const { return index == size() ? 0 : buffer.at(index); }
-		inline QByteArray range(int start, int end) const { return buffer.mid(start, end-start); }
+		inline QByteArray range(int start, int end) const { return buffer.mid(start/2, (end-start)/2); }
 		inline bool check_paste_data(){ return clipboard->mimeData()->hasText(); }
 		inline void set_active(){ undo_stack->setActive(); }
 		inline bool is_active(){ return undo_stack->isActive(); }

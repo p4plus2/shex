@@ -87,19 +87,15 @@ class hex_editor : public QWidget
 		hex_display *hex;
 		ascii_display *ascii;
 		
-		//refactor adds
-		int cursor_nibble = 0;
-		selection selection_area;
-		//end refactor adds
-		
 		ROM_buffer *buffer;
 		int offset = 0;
-		bool is_active = true;
 
 		bool scroll_mode = false;
 		int save_state = 0;
 		bool is_new;
 		QString ROM_error = "";
+		int cursor_nibble = 0;
+		selection selection_area;
 		
 		void handle_search_result(QString target, int result, bool mode);
 		QString get_status_text();

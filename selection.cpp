@@ -9,7 +9,7 @@ void selection::set_start(int s)
 
 void selection::set_end(int e)
 {
-	end = e;
+	end = e + 1;
 }
 
 int selection::get_start()
