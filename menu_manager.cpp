@@ -15,7 +15,7 @@ menu_manager::menu_manager(QObject *parent, QMenuBar *m) :
 	menu_bar = m;
 	create_menus();
 	create_actions();
-	connect(copy_group, SIGNAL(triggered(QAction*)), this, SLOT(group_callback(QAction*)));
+	connect(copy_group, &QActionGroup::triggered, this, &menu_manager::group_callback);
 }
 
 void menu_manager::create_menus()

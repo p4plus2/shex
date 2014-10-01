@@ -168,21 +168,20 @@ void hex_editor::select_range(int start, int end)
 void hex_editor::context_menu(const QPoint& position)
 {	
 	QMenu menu;
-#define KEY QKeySequence
+	typedef QKeySequence hotkey;
 	bool selection_active = selection_area.is_active();
-	menu.addAction("Cut", this, SLOT(cut()), KEY::Cut)->setEnabled(selection_active);
-	menu.addAction("Copy", this, SLOT(copy()), KEY::Copy)->setEnabled(selection_active);
-	menu.addAction("Paste", this, SLOT(paste()), KEY::Paste)->setEnabled(buffer->check_paste_data());
-	menu.addAction("Delete", this, SLOT(delete_text()), KEY::Delete)->setEnabled(selection_active);
+	menu.addAction("Cut", this, SLOT(cut()), hotkey::Cut)->setEnabled(selection_active);
+	menu.addAction("Copy", this, SLOT(copy()), hotkey::Copy)->setEnabled(selection_active);
+	menu.addAction("Paste", this, SLOT(paste()), hotkey::Paste)->setEnabled(buffer->check_paste_data());
+	menu.addAction("Delete", this, SLOT(delete_text()), hotkey::Delete)->setEnabled(selection_active);
 	menu.addSeparator();
-	menu.addAction("Select all", this, SLOT(select_all()), KEY::SelectAll);
+	menu.addAction("Select all", this, SLOT(select_all()), hotkey::SelectAll);
 	menu.addSeparator();
-	menu.addAction("Follow branch", this, SLOT(branch()), KEY("Ctrl+b"))->setEnabled(follow_selection(true));
-	menu.addAction("Follow jump", this, SLOT(jump()), KEY("Ctrl+j"))->setEnabled(follow_selection(false));
-	menu.addAction("Disassemble", this, SLOT(disassemble()), KEY("Ctrl+d"))->setEnabled(selection_active);
+	menu.addAction("Follow branch", this, SLOT(branch()), hotkey("Ctrl+b"))->setEnabled(follow_selection(true));
+	menu.addAction("Follow jump", this, SLOT(jump()), hotkey("Ctrl+j"))->setEnabled(follow_selection(false));
+	menu.addAction("Disassemble", this, SLOT(disassemble()), hotkey("Ctrl+d"))->setEnabled(selection_active);
 	menu.addSeparator();
-	menu.addAction("Bookmark", this, SLOT(create_bookmark()), KEY("Ctrl+b"))->setEnabled(selection_active);
-#undef KEY
+	menu.addAction("Bookmark", this, SLOT(create_bookmark()), hotkey("Ctrl+b"))->setEnabled(selection_active);
 	menu.exec(mapToGlobal(position));
 }
 

@@ -9,20 +9,20 @@ history_menu_item::history_menu_item(QString text, QString r, QString t, QKeySeq
 	toggle = t;
 	setShortcut(hotkey);
 	prefix = text;
-	connect(this, SIGNAL(triggered()), this, SLOT(activated()));
+	connect(this, &history_menu_item::triggered, this, &history_menu_item::activated);
 }
 
 
 void history_menu_item::connect_to_widget(QUndoGroup *group)
 {
 	if(text() == "U&ndo"){
-		connect(group, SIGNAL(canUndoChanged(bool)), this, SLOT(setEnabled(bool)));
-		connect(group, SIGNAL(undoTextChanged(QString)), this, SLOT(set_prefix(QString)));
-		connect(this, SIGNAL(triggered()), group, SLOT(undo()));
+		connect(group, &QUndoGroup::canUndoChanged, this, &history_menu_item::setEnabled);
+		connect(group, &QUndoGroup::undoTextChanged, this, &history_menu_item::set_prefix);
+		connect(this, &history_menu_item::triggered, group, &QUndoGroup::undo);
 	}else{
-		connect(group, SIGNAL(canRedoChanged(bool)), this, SLOT(setEnabled(bool)));
-		connect(group, SIGNAL(redoTextChanged(QString)), this, SLOT(set_prefix(QString)));
-		connect(this, SIGNAL(triggered()), group, SLOT(redo()));
+		connect(group, &QUndoGroup::canRedoChanged, this, &history_menu_item::setEnabled);
+		connect(group, &QUndoGroup::redoTextChanged, this, &history_menu_item::set_prefix);
+		connect(this, &history_menu_item::triggered, group, &QUndoGroup::redo);
 	}
 	
 }
