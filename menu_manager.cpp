@@ -47,7 +47,7 @@ typedef QKeySequence hotkey;
 	add_action(main_window, "&Save", save(), hotkey::Save);
 	add_action(main_window, "&Save as", save_as(), hotkey::SaveAs);
 	menu->addSeparator();
-	add_toggle_action(main_window, "&Close tab", close_tab(), active_editors(bool), hotkey::Close);
+	add_toggle_action(main_window, "&Close tab", close_current_tab(), active_editors(bool), hotkey::Close);
 	add_action(main_window, "E&xit", close(), hotkey::Quit);
 
 	menu = find_menu("&Edit");

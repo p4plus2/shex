@@ -9,8 +9,8 @@ dynamic_scrollbar::dynamic_scrollbar(QWidget *parent) :
 {
 	setStyle(scroll_style);
 	toggle_mode(false);
-	connect(this, SIGNAL(sliderReleased()), this, SLOT(reset_slider()));
-	connect(this, SIGNAL(sliderPressed()), this, SLOT(send_auto_scroll()));
+	connect(this, &dynamic_scrollbar::sliderReleased, this, &dynamic_scrollbar::reset_slider);
+	connect(this, &dynamic_scrollbar::sliderPressed, this, &dynamic_scrollbar::send_auto_scroll);
 }
 
 void dynamic_scrollbar::set_range(int value)

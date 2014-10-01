@@ -6,8 +6,8 @@
 
 goto_dialog::goto_dialog()
 {
-	connect(close, SIGNAL(clicked()), this, SLOT(close()));
-	connect(goto_offset, SIGNAL(clicked()), this, SLOT(address_entered()));
+	connect(close, &QPushButton::clicked, this, &QDialog::close);
+	connect(goto_offset, &QPushButton::clicked, this, &goto_dialog::address_entered);
 	
 	label->setBuddy(offset_input);
 	absolute->setChecked(true);

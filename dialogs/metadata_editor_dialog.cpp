@@ -43,9 +43,9 @@ metadata_editor_dialog::metadata_editor_dialog()
 	setLayout(layout);
 	
 	current_name_line_edit->setProperty("maxLength", 21);
-	connect(cancel, SIGNAL(pressed()), this, SLOT(close()));
-	connect(apply, SIGNAL(pressed()), this, SLOT(write()));
-	connect(reload, SIGNAL(pressed()), this, SLOT(refresh()));
+	connect(cancel, &QPushButton::clicked, this, &metadata_editor_dialog::close);
+	connect(apply, &QPushButton::clicked, this, &metadata_editor_dialog::write);
+	connect(reload, &QPushButton::clicked, this, &metadata_editor_dialog::refresh);
 }
 
 void metadata_editor_dialog::refresh()

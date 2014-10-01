@@ -22,8 +22,6 @@ class bookmarks : public QTableView
 		
 		void add_bookmark(QString address, QString description);
 		
-	signals:
-		
 	public slots:
 		void color_clicked();
 		void address_updated(QString address);

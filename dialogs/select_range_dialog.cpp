@@ -6,8 +6,8 @@
 
 select_range_dialog::select_range_dialog()
 {	
-	connect(close, SIGNAL(clicked()), this, SLOT(close()));
-	connect(select_range, SIGNAL(clicked()), this, SLOT(range_entered()));
+	connect(close, &QPushButton::clicked, this, &QDialog::close);
+	connect(select_range, &QPushButton::clicked, this, &select_range_dialog::range_entered);
 	
 	start_label->setBuddy(start_input);
 	end_label->setBuddy(end_input);

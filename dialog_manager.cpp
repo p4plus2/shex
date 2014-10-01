@@ -14,15 +14,14 @@ dialog_manager::dialog_manager(QObject *parent) :
 
 void dialog_manager::connect_to_editor(hex_editor *editor)
 {
-	connect(find_dialog("goto"), SIGNAL(triggered(int)), editor, SLOT(goto_offset(int)));
-	connect(find_dialog("select_range"), SIGNAL(triggered(int,int)), editor, SLOT(select_range(int,int)));
-	connect(find_dialog("find_replace"), SIGNAL(count(QString, bool)), editor, SLOT(count(QString, bool)));
-	connect(find_dialog("find_replace"), SIGNAL(search(QString, bool, bool)),
-	        editor, SLOT(search(QString, bool, bool)));
-	connect(find_dialog("find_replace"), SIGNAL(replace(QString, QString, bool, bool)),
-	        editor, SLOT(replace(QString, QString, bool, bool)));
-	connect(find_dialog("find_replace"), SIGNAL(replace_all(QString, QString, bool)),
-	        editor, SLOT(replace_all(QString, QString, bool)));
+#define GET_DIALOG(D) (D##_dialog *)find_dialog(#D)
+	connect(GET_DIALOG(goto), &goto_dialog::triggered, editor, &hex_editor::goto_offset);
+	connect(GET_DIALOG(select_range), &select_range_dialog::triggered, editor, &hex_editor::select_range);
+	connect(GET_DIALOG(find_replace), &find_replace_dialog::count, editor, &hex_editor::count);
+	connect(GET_DIALOG(find_replace), &find_replace_dialog::search,editor, &hex_editor::search);
+	connect(GET_DIALOG(find_replace), &find_replace_dialog::replace, editor, &hex_editor::replace);
+	connect(GET_DIALOG(find_replace), &find_replace_dialog::replace_all, editor, &hex_editor::replace_all);
+#undef GET_DIALOG
 }
 
 void dialog_manager::set_active_editor(hex_editor *editor)

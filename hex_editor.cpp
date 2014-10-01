@@ -29,19 +29,16 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	}
 	
 	setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
-	        this, SLOT(context_menu(const QPoint&)));
-	connect(qApp->clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboard_changed()));
+	connect(this, &hex_editor::customContextMenuRequested, this, &hex_editor::context_menu);
+	connect(qApp->clipboard(), &QClipboard::dataChanged, this, &hex_editor::clipboard_changed);
 	
 	//can't initialize in header -- relies on buffer here to be const
 	address = new address_display(buffer, this);
 	hex = new hex_display(buffer, this);
 	ascii = new ascii_display(buffer, this);
 	
-	connect(hex, SIGNAL(character_typed(unsigned char, bool)), 
-	        this, SLOT(handle_typed_character(unsigned char, bool)));
-	connect(ascii, SIGNAL(character_typed(unsigned char, bool)), 
-	        this, SLOT(handle_typed_character(unsigned char, bool)));
+	connect(hex, &hex_display::character_typed, this, &hex_editor::handle_typed_character);
+	connect(hex, &ascii_display::character_typed, this, &hex_editor::handle_typed_character);
 	
 	QHBoxLayout *layout = new QHBoxLayout();
 	layout->addWidget(address);
@@ -171,24 +168,21 @@ void hex_editor::select_range(int start, int end)
 void hex_editor::context_menu(const QPoint& position)
 {	
 	QMenu menu;
-	menu.addAction("Cut", this, SLOT(cut()), QKeySequence::Cut)->setEnabled(selection_area.is_active());
-	menu.addAction("Copy", this, SLOT(copy()), QKeySequence::Copy)->setEnabled(selection_area.is_active());
-	menu.addAction("Paste", this, SLOT(paste()), QKeySequence::Paste)->setEnabled(buffer->check_paste_data());
-	menu.addAction("Delete", this, SLOT(delete_text()), 
-	               QKeySequence::Delete)->setEnabled(selection_area.is_active());
+#define KEY QKeySequence
+	bool selection_active = selection_area.is_active();
+	menu.addAction("Cut", this, SLOT(cut()), KEY::Cut)->setEnabled(selection_active);
+	menu.addAction("Copy", this, SLOT(copy()), KEY::Copy)->setEnabled(selection_active);
+	menu.addAction("Paste", this, SLOT(paste()), KEY::Paste)->setEnabled(buffer->check_paste_data());
+	menu.addAction("Delete", this, SLOT(delete_text()), KEY::Delete)->setEnabled(selection_active);
 	menu.addSeparator();
-	menu.addAction("Select all", this, SLOT(select_all()), QKeySequence::SelectAll);
+	menu.addAction("Select all", this, SLOT(select_all()), KEY::SelectAll);
 	menu.addSeparator();
-	menu.addAction("Follow branch", this, 
-	               SLOT(branch()), QKeySequence("Ctrl+b"))->setEnabled(follow_selection(true));
-	menu.addAction("Follow jump", this, 
-	               SLOT(jump()), QKeySequence("Ctrl+j"))->setEnabled(follow_selection(false));
-	menu.addAction("Disassemble", this, 
-	               SLOT(disassemble()), QKeySequence("Ctrl+d"))->setEnabled(selection_area.is_active());
+	menu.addAction("Follow branch", this, SLOT(branch()), KEY("Ctrl+b"))->setEnabled(follow_selection(true));
+	menu.addAction("Follow jump", this, SLOT(jump()), KEY("Ctrl+j"))->setEnabled(follow_selection(false));
+	menu.addAction("Disassemble", this, SLOT(disassemble()), KEY("Ctrl+d"))->setEnabled(selection_active);
 	menu.addSeparator();
-	menu.addAction("Bookmark", this, 
-	               SLOT(create_bookmark()), QKeySequence("Ctrl+b"))->setEnabled(selection_area.is_active());
-	
+	menu.addAction("Bookmark", this, SLOT(create_bookmark()), KEY("Ctrl+b"))->setEnabled(selection_active);
+#undef KEY
 	menu.exec(mapToGlobal(position));
 }
 
@@ -418,9 +412,9 @@ void hex_editor::handle_search_result(QString target, int result, bool mode)
 {
 	int start = buffer->pc_to_snes(result);
 	if(mode){
-		result += buffer->to_hex(target).length()/2 - 1;
+		result += buffer->to_hex(target).length()/2;
 	}else{
-		result += target.length() - 1;
+		result += target.length();
 	}
 	goto_offset(buffer->pc_to_snes(result)); //offsets are byte aligned
 	select_range(start, buffer->pc_to_snes(result));

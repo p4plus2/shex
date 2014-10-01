@@ -50,11 +50,11 @@ map_editor_dialog::map_editor_dialog
 	layout->addWidget(close, 20, 8, 1, 2);
 	setLayout(layout);
 
-	connect(load, SIGNAL(clicked()), this, SLOT(load_map()));
-	connect(save, SIGNAL(clicked()), this, SLOT(save_map()));
-	connect(apply, SIGNAL(clicked()), this, SLOT(apply_map()));
-	connect(clear, SIGNAL(clicked()), this, SLOT(clear_map()));
-	connect(close, SIGNAL(clicked()), this, SLOT(close()));
+	connect(load, &QPushButton::clicked, this, &map_editor_dialog::load_map);
+	connect(save, &QPushButton::clicked, this, &map_editor_dialog::save_map);
+	connect(apply, &QPushButton::clicked, this, &map_editor_dialog::apply_map);
+	connect(clear, &QPushButton::clicked, this, &map_editor_dialog::clear_map);
+	connect(close, &QPushButton::clicked, this, &QDialog::close);
 }
 
 void map_editor_dialog::load_map()

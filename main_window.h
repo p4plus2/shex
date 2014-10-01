@@ -25,7 +25,7 @@ class main_window : public QMainWindow
 		~main_window();
 		
 	public slots:
-		inline void close_tab(){ close_tab(tab_widget->currentIndex()); }
+		inline void close_current_tab(){ close_tab(tab_widget->currentIndex()); }
 		bool close_tab(int i);
 		void changed_tab(int i);
 		void file_save_state(bool clean);

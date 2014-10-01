@@ -34,9 +34,9 @@ find_replace_dialog::find_replace_dialog()
 	layout->addWidget(close, 4, 4);
 	setLayout(layout);
 
-	connect(count_button, SIGNAL(clicked()), this, SLOT(count_clicked()));
-	connect(find_button, SIGNAL(clicked()), this, SLOT(search_clicked()));
-	connect(replace_button, SIGNAL(clicked()), this, SLOT(replace_clicked()));
-	connect(replace_all_button, SIGNAL(clicked()), this, SLOT(replace_all_clicked()));
-	connect(close, SIGNAL(clicked()), this, SLOT(close()));
+	connect(count_button, &QPushButton::clicked, this, &find_replace_dialog::count_clicked);
+	connect(find_button, &QPushButton::clicked, this, &find_replace_dialog::search_clicked);
+	connect(replace_button, &QPushButton::clicked, this, &find_replace_dialog::replace_clicked);
+	connect(replace_all_button, &QPushButton::clicked, this, &find_replace_dialog::replace_all_clicked);
+	connect(close, &QPushButton::clicked, this, &QDialog::close);
 }

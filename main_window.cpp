@@ -28,9 +28,9 @@ main_window::main_window(QWidget *parent)
 	tab_widget->setTabsClosable(true);
 	tab_widget->setMovable(true);
 	setMinimumSize(600, QApplication::desktop()->height() < 650 ? 330 : 660);
-	connect(tab_widget, SIGNAL(tabCloseRequested(int)), this, SLOT(close_tab(int)));
-	connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(changed_tab(int)));
-	connect(this, SIGNAL(active_editors(bool)), dialog_controller, SIGNAL(active_editors(bool)));
+	connect(tab_widget, &QTabWidget::tabCloseRequested, this, &main_window::close_tab);
+	connect(tab_widget, &QTabWidget::currentChanged, this, &main_window::changed_tab);
+	connect(this, &main_window::active_editors, dialog_controller, &dialog_manager::active_editors);
 	menu_controller->connect_to_widget(this);
 	menu_controller->connect_to_widget(dialog_controller);
 	menu_controller->connect_to_widget(undo_group);
@@ -144,17 +144,15 @@ void main_window::closeEvent(QCloseEvent *event)
 void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, 
                                    disassembler *disassembly_panel, bookmarks *bookmark_panel)
 {
-	connect(scrollbar, SIGNAL(valueChanged(int)), editor, SLOT(slider_update(int)));
-	connect(editor, SIGNAL(update_slider(int)), scrollbar, SLOT(setValue(int)));
-	connect(editor, SIGNAL(update_range(int)), scrollbar, SLOT(set_range(int)));
-	connect(editor, SIGNAL(toggle_scroll_mode(bool)), scrollbar, SLOT(toggle_mode(bool)));
-	connect(scrollbar, SIGNAL(auto_scroll_action(bool)), editor, SLOT(control_auto_scroll(bool)));
-	connect(editor, SIGNAL(update_status_text(QString)), statusbar, SLOT(setText(QString)));
-	connect(editor, SIGNAL(can_save(bool)), this, SLOT(file_save_state(bool)));
-	connect(editor, SIGNAL(send_disassemble_data(int, int, const ROM_buffer*)), 
-				disassembly_panel, SLOT(disassemble(int, int, const ROM_buffer*)));
-	connect(editor, SIGNAL(send_bookmark_data(int, int, const ROM_buffer*)), 
-				bookmark_panel, SLOT(create_bookmark(int, int, const ROM_buffer*)));
+	connect(scrollbar, &dynamic_scrollbar::valueChanged, editor, &hex_editor::slider_update);
+	connect(editor, &hex_editor::update_slider, scrollbar, &dynamic_scrollbar::setValue);
+	connect(editor, &hex_editor::update_range, scrollbar, &dynamic_scrollbar::set_range);
+	connect(editor, &hex_editor::toggle_scroll_mode, scrollbar, &dynamic_scrollbar::toggle_mode);
+	connect(scrollbar, &dynamic_scrollbar::auto_scroll_action, editor, &hex_editor::control_auto_scroll);
+	connect(editor, &hex_editor::update_status_text, statusbar, &QLabel::setText);
+	connect(editor, &hex_editor::save_state_changed, this, &main_window::file_save_state);
+	connect(editor, &hex_editor::send_disassemble_data, disassembly_panel, &disassembler::disassemble);
+	connect(editor, &hex_editor::send_bookmark_data, bookmark_panel, &bookmarks::create_bookmark);
 	
 	dialog_controller->connect_to_editor(editor);
 	menu_controller->connect_to_widget(editor);

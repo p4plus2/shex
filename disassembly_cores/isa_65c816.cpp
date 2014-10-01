@@ -4,12 +4,12 @@
 isa_65c816::isa_65c816(QObject *parent) :
         disassembler_core(parent)
 {
-	connect(this, SIGNAL(A_changed(bool)), set_A, SLOT(setChecked(bool)));
-	connect(this, SIGNAL(I_changed(bool)), set_I, SLOT(setChecked(bool)));
+	connect(this, &isa_65c816::A_changed, set_A, &QCheckBox::setChecked);
+	connect(this, &isa_65c816::I_changed, set_I, &QCheckBox::setChecked);
 			
-	connect(set_A, SIGNAL(toggled(bool)), this, SLOT(toggle_A(bool)));
-	connect(set_I, SIGNAL(toggled(bool)), this, SLOT(toggle_I(bool)));
-	connect(stop, SIGNAL(toggled(bool)), this, SLOT(toggle_error_stop(bool)));
+	connect(set_A, &QCheckBox::toggled, this, &isa_65c816::toggle_A);
+	connect(set_I, &QCheckBox::toggled, this, &isa_65c816::toggle_I);
+	connect(stop, &QCheckBox::toggled, this, &isa_65c816::toggle_error_stop);
 }
 #define get_operand(B) ((size > B && (i+B) < data.size()) ? ((unsigned char)data.at(i+B) << (B-1)*8) : 0)
 #define hex_to_string(A) QString::number(operand, 16).rightJustified((A), '0').toUpper()

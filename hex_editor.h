@@ -49,7 +49,7 @@ class hex_editor : public QWidget
 		void selection_toggled(bool state);
 		void focused(bool has_focus);
 		void clipboard_usable(bool usable);
-		void can_save(bool save);
+		void save_state_changed(bool save);
 		void send_disassemble_data(int start, int end, const ROM_buffer *buffer);
 		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);
 
@@ -105,7 +105,7 @@ class hex_editor : public QWidget
 		void search_error(int error, QString find = "", QString replace_with = "");
 		int get_max_lines();
 	
-		inline void update_save_state(int direction){ save_state += direction; emit can_save(!save_state); }
+		inline void update_save_state(int direction){ save_state += direction; emit save_state_changed(!save_state); }
 		
 		static const QString offset_header;
 };

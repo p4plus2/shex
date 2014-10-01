@@ -31,14 +31,14 @@ bookmarks::bookmarks(QWidget *parent) :
 	color_button->setAutoFillBackground(true);
 	color_button->setFlat(true);
 	
-	connect(color_button, SIGNAL(clicked()), this, SLOT(color_clicked()));
-	connect(address_input, SIGNAL(textChanged(QString)), this, SLOT(address_updated(QString)));
+	connect(color_button, &QPushButton::clicked, this, &bookmarks::color_clicked);
+	connect(address_input, &QLineEdit::textChanged, this, &bookmarks::address_updated);
 	
-	connect(add_button, SIGNAL(clicked()), this, SLOT(add_clicked()));
-	connect(update_button, SIGNAL(clicked()), this, SLOT(update_clicked()));
-	connect(reload_button, SIGNAL(clicked()), this, SLOT(reload_clicked()));
+	connect(add_button, &QPushButton::clicked, this, &bookmarks::add_clicked);
+	connect(update_button, &QPushButton::clicked, this, &bookmarks::update_clicked);
+	connect(reload_button, &QPushButton::clicked, this, &bookmarks::reload_clicked);
 	
-	connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(row_clicked(QModelIndex)));
+	connect(this, &bookmarks::clicked, this, &bookmarks::row_clicked);
 	
 	update_button->hide();
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
