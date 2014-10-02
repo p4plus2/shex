@@ -10,6 +10,7 @@ void selection::set_start(int s)
 void selection::set_end(int e)
 {
 	end = e + 1;
+	active = true;
 }
 
 int selection::get_start()

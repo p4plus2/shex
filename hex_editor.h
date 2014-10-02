@@ -10,6 +10,7 @@
 #include <QMouseEvent>
 #include <QFont>
 #include <QTimer>
+#include <QLabel>
 
 class address_display;
 class ascii_display;
@@ -86,6 +87,8 @@ class hex_editor : public QWidget
 		address_display *address;
 		hex_display *hex;
 		ascii_display *ascii;
+		QLabel *hex_header = new QLabel("00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+		QLabel *address_header = new QLabel("Offset");
 		
 		ROM_buffer *buffer;
 		int offset = 0;
@@ -106,7 +109,5 @@ class hex_editor : public QWidget
 		int get_max_lines();
 	
 		inline void update_save_state(int direction){ save_state += direction; emit save_state_changed(!save_state); }
-		
-		static const QString offset_header;
 };
 #endif // HEX_EDITOR_H

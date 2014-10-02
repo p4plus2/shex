@@ -11,7 +11,7 @@
 #include <QAction>
 #include <QMenu>
 
-#include <QHBoxLayout>
+#include <QGridLayout>
 
 hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file) :
         QWidget(parent)
@@ -40,10 +40,15 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	connect(hex, &hex_display::character_typed, this, &hex_editor::handle_typed_character);
 	connect(hex, &ascii_display::character_typed, this, &hex_editor::handle_typed_character);
 	
-	QHBoxLayout *layout = new QHBoxLayout();
-	layout->addWidget(address);
-	layout->addWidget(hex);
-	layout->addWidget(ascii);
+	address_header->setFont(text_display::get_font());
+	hex_header->setFont(text_display::get_font());
+	
+	QGridLayout *layout = new QGridLayout();
+	layout->addWidget(address_header, 0, 0);
+	layout->addWidget(hex_header, 0, 1);
+	layout->addWidget(address, 1, 0);
+	layout->addWidget(hex, 1, 1);
+	layout->addWidget(ascii, 1, 2);
 	setLayout(layout);
 }
 
@@ -161,7 +166,6 @@ void hex_editor::select_range(int start, int end)
 	}
 	selection_area.set_start(start * 2);
 	selection_area.set_end(end * 2);
-	selection_area.set_active(true);
 	update_window();
 }
 
@@ -247,7 +251,6 @@ void hex_editor::select_all()
 	}
 	selection_area.set_start(0);
 	selection_area.set_end(buffer->size()*2);
-	selection_area.set_active(true);
 	emit update_status_text(get_status_text());
 	update_window();
 }
@@ -524,6 +527,3 @@ hex_editor::~hex_editor()
 	emit focused(false);
 	delete buffer;
 }
-
-//TODO something with this
-const QString hex_editor::offset_header = "Offset     00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F";

@@ -61,11 +61,6 @@ void text_display::paintEvent(QPaintEvent *event)
 	painter.setPen(text);
 	painter.setFont(font);
 	
-//	for(int i = hex_offset; i < total_byte_column_width + hex_offset; i += byte_column_width * 2){
-//		painter.fillRect(i-1, 0, column_width(2)+2, 
-//		                 column_height(rows+1)+vertical_offset, palette().color(QPalette::AlternateBase).darker());
-//	}
-	
 	selection selection_area = get_selection();
 	QPoint cursor_position = nibble_to_screen(get_cursor_nibble() & ~selection_area.is_active());
 	
@@ -142,7 +137,6 @@ void text_display::mouseMoveEvent(QMouseEvent *event)
 	if(!scroll_timer_id){
 		selection_area.set_end(nibble);
 	}
-	selection_area.set_active(true);
 	selection_area.set_dragging(true);
 	set_selection(selection_area);
 	

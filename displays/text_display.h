@@ -17,6 +17,7 @@ class text_display : public QWidget
 		void update_display();
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
+		static QFont get_font(){ return font; }
 		
 	protected:
 		const ROM_buffer *buffer;
