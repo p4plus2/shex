@@ -113,6 +113,11 @@ void hex_editor::goto_offset(int address)
 	if(!buffer->is_active()){
 		return;
 	}
+	
+	if(!buffer->validate_address(address, false)){
+		emit update_status_text(buffer->get_address_error());
+		return;
+	}
 
 	address = buffer->snes_to_pc(address);
 	offset = address - (text_display::get_rows() / 2) * text_display::get_columns();
@@ -422,7 +427,8 @@ QString hex_editor::get_status_text()
 bool hex_editor::follow_selection(bool type)
 {
 	if(selection_area.is_active()){
-		int range = selection_area.range();
+		int range = selection_area.range() / 2;
+		qDebug() << range;
 		if(type && (range == 1 || range == 2)){
 			return true;
 		}else if(!type && (range == 2 || range == 3)){
@@ -475,8 +481,8 @@ void hex_editor::set_offset(int o)
 {
 	if(o < 0){
 		o = 0;
-	}else if(o > buffer->size()){
-		o = buffer->size();
+	}else if(o > buffer->size() - text_display::get_rows() * text_display::get_columns()){
+		o = buffer->size() - text_display::get_rows() * text_display::get_columns();
 	}
 
 	offset = o;
@@ -495,7 +501,7 @@ void hex_editor::search_error(int error, QString find, QString replace_with)
 
 int hex_editor::get_max_lines()
 {
-	return buffer->size() / text_display::get_columns() - text_display::get_rows();
+	return buffer->size() / text_display::get_columns() - text_display::get_rows() - 1;
 }
 
 hex_editor::~hex_editor()
