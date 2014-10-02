@@ -15,6 +15,7 @@ class text_display : public QWidget
 	public:
 		explicit text_display(const ROM_buffer *b, hex_editor *parent = 0);
 		void update_display();
+		void set_auto_scroll_speed(int speed);
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
 		static QFont get_font(){ return font; }
@@ -69,6 +70,8 @@ class text_display : public QWidget
 		int scroll_timer_id = 0;
 		int cursor_timer_id = 0;
 		int scroll_direction = 1;
+		int scroll_speed = 1;
+		static const int scroll_timer_speed = 20;
 };
 
 #endif // TEXT_DISPLAY_H

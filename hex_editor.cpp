@@ -65,25 +65,12 @@ void hex_editor::set_focus()
 
 void hex_editor::slider_update(int position)
 {
-	//TODO check this
 	if(!scroll_mode){
-		move_cursor_nibble(offset - position * text_display::get_columns());
 		offset = position * text_display::get_columns();
 	}else{
-		position -= height() / 2;
-		if(position < 0){
-	//		scroll_direction = false;
-			position = -position;
-		}else if(position > 0){
-	//		scroll_direction = true;
-		}else{
-	//		scroll_speed = INT_MAX;
-	//		scroll_timer->setInterval(scroll_speed);
-			return;
-		}
-	//	scroll_speed = qAbs(((position - (height() /2))-1) / 15);
-	//	scroll_timer->setInterval(scroll_speed);
+		hex->set_auto_scroll_speed((position - height() / 2) / 10);
 	}
+	update_window();
 }
 
 void hex_editor::scroll_mode_changed()
@@ -91,15 +78,6 @@ void hex_editor::scroll_mode_changed()
 	scroll_mode = !scroll_mode;
 	update_window();
 	emit toggle_scroll_mode(scroll_mode);
-}
-void hex_editor::control_auto_scroll(bool enabled)
-{
-	//auto_scrolling = enabled;
-	//if(auto_scrolling){
-	//	scroll_timer->start(scroll_speed);
-	//}else{
-	//	scroll_timer->stop();
-	//}
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)

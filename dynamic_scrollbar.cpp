@@ -15,8 +15,9 @@ dynamic_scrollbar::dynamic_scrollbar(QWidget *parent) :
 
 void dynamic_scrollbar::set_range(int value)
 {
+	int old = maximum();
 	setRange(0, value);
-	if(mode){
+	if(mode && value != old){
 		setValue(height() / 2);
 	}
 }

@@ -148,7 +148,6 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	connect(editor, &hex_editor::update_slider, scrollbar, &dynamic_scrollbar::setValue);
 	connect(editor, &hex_editor::update_range, scrollbar, &dynamic_scrollbar::set_range);
 	connect(editor, &hex_editor::toggle_scroll_mode, scrollbar, &dynamic_scrollbar::toggle_mode);
-	connect(scrollbar, &dynamic_scrollbar::auto_scroll_action, editor, &hex_editor::control_auto_scroll);
 	connect(editor, &hex_editor::update_status_text, statusbar, &QLabel::setText);
 	connect(editor, &hex_editor::save_state_changed, this, &main_window::file_save_state);
 	connect(editor, &hex_editor::send_disassemble_data, disassembly_panel, &disassembler::disassemble);

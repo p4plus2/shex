@@ -31,6 +31,18 @@ void text_display::update_display()
 	update();
 }
 
+void text_display::set_auto_scroll_speed(int speed)
+{
+	scroll_speed = speed;
+	if(!speed && scroll_timer_id){
+		killTimer(scroll_timer_id);
+		scroll_timer_id = 0;
+		scroll_speed = 1;
+	}else if(!scroll_timer_id){
+		scroll_timer_id = startTimer(scroll_timer_speed);
+	}
+}
+
 QFont text_display::font_setup()
 {
 	font.setFamily("Courier");
@@ -141,7 +153,7 @@ void text_display::mouseMoveEvent(QMouseEvent *event)
 	set_selection(selection_area);
 	
 	if((event->y() > height() || event->y() < 0) && !scroll_timer_id){
-		scroll_timer_id = startTimer(20);
+		scroll_timer_id = startTimer(scroll_timer_speed);
 		scroll_direction = event->y() > 0 ? 1 : -1;
 	}else if(!(event->y() > height() || event->y() < 0) && scroll_timer_id){
 		killTimer(scroll_timer_id);
@@ -181,13 +193,13 @@ void text_display::timerEvent(QTimerEvent *event)
 		cursor_state = !cursor_state;
 	}else if(event->timerId() == scroll_timer_id){
 		selection selection_area = get_selection();
-		set_offset(get_offset() + columns * scroll_direction);
+		set_offset(get_offset() + columns * scroll_direction * scroll_speed);
 		if(selection_area.is_dragging()){
 			selection_area.move_end(columns * 2 * scroll_direction);
+			set_selection(selection_area);
 		}
-		set_selection(selection_area);
 	}
-	update();
+	editor->update_window();
 }
 
 int text_display::columns = 16;

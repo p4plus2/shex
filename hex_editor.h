@@ -61,7 +61,6 @@ class hex_editor : public QWidget
 		void select_range(int start, int end);
 		void slider_update(int position);
 		void scroll_mode_changed();
-		void control_auto_scroll(bool enabled);
 		void context_menu(const QPoint& position);
 		void cut();
 		void copy();
