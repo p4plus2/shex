@@ -170,9 +170,11 @@ void text_display::mouseReleaseEvent(QMouseEvent *event)
 	set_cursor_nibble(nibble);
 	
 	selection selection_area = get_selection();
-	selection_area.set_end(nibble);
-	selection_area.set_dragging(false);
-	set_selection(selection_area);
+	if(selection_area.is_active()){
+		selection_area.set_end(nibble);
+		selection_area.set_dragging(false);
+		set_selection(selection_area);
+	}
 	
 	if(scroll_timer_id){
 		killTimer(scroll_timer_id);

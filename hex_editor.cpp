@@ -453,10 +453,10 @@ void hex_editor::move_cursor_nibble(int delta)
 	
 	//TODO optimize
 	while(cursor_nibble/2 >= offset + text_display::get_rows() * text_display::get_columns()){
-		offset += text_display::get_columns();
+		set_offset(offset + text_display::get_columns());
 	}
 	while(cursor_nibble/2 < offset){
-		offset -= text_display::get_columns();
+		set_offset(offset -text_display::get_columns());
 	}
 	
 	update_window();
