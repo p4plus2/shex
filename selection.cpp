@@ -23,6 +23,17 @@ int selection::get_end()
 	return start < end ? end : start;
 }
 
+int selection::get_start_aligned()
+{
+	return (start > end ? end : start) & ~1;
+}
+
+
+int selection::get_end_aligned()
+{
+	return (start < end ? end : start) & ~1;
+}
+
 void selection::move_end(int amount)
 {
 	end += amount;

@@ -7,6 +7,8 @@ class selection{
 		void set_end(int e);
 		int get_start();
 		int get_end();
+		int get_end_aligned();
+		int get_start_aligned();
 		void move_end(int amount);
 		int drag_direction();
 		int range();

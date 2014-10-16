@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QGridLayout>
 #include "../rom_buffer.h"
+#include "selection.h"
 
 class disassembler_core : public QObject
 {
@@ -11,17 +12,29 @@ class disassembler_core : public QObject
 	public:
 		struct opcode{
 			QString name;
-			int size;
 		};
 		using QObject::QObject;
 		virtual QGridLayout *core_layout() = 0;
-		virtual QString disassemble(int start, int end, const ROM_buffer *buffer) = 0;
+		virtual QString disassemble(selection selection_area, const ROM_buffer *b);
 		
 	protected:
+		QByteArray data;
+		selection region;
+		const ROM_buffer *buffer;
+		int delta;
+		
 		QString add_label(int destination);
 		void add_mnemonic(int destination, QString mnemonic);
 		QString disassembly_text();
 		void reset();
+		int decode_name_args(QString &name);
+		QString get_hex(int n, int bytes);
+		unsigned int get_operand(int n);
+		
+		virtual QString decode_name_arg(const char arg, int &size) = 0;
+		virtual opcode get_opcode(int op) = 0;
+		virtual bool abort_unlikely(int op) = 0;
+		virtual void update_state() = 0;
 		
 	private:
 		struct block{

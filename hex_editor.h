@@ -51,7 +51,7 @@ class hex_editor : public QWidget
 		void focused(bool has_focus);
 		void clipboard_usable(bool usable);
 		void save_state_changed(bool save);
-		void send_disassemble_data(int start, int end, const ROM_buffer *buffer);
+		void send_disassemble_data(selection selection_area, const ROM_buffer *buffer);
 		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);
 
 	public slots:

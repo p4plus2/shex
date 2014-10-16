@@ -7,6 +7,7 @@
 #include <QMap>
 #include "disassembly_cores/disassembler_core.h"
 #include "debug.h"
+#include "selection.h"
 
 class disassembler : public QPlainTextEdit
 {
@@ -17,7 +18,7 @@ class disassembler : public QPlainTextEdit
 		QVBoxLayout *get_layout();
 		
 	public slots:
-		void disassemble(int start, int end, const ROM_buffer *buffer);
+		void disassemble(selection selection_area, const ROM_buffer *buffer);
 		void toggle_display(bool state);
 		
 	private:

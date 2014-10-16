@@ -27,7 +27,6 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 
 void text_display::update_display()
 {
-	cursor_state = true;
 	update();
 }
 
@@ -74,7 +73,12 @@ void text_display::paintEvent(QPaintEvent *event)
 	painter.setFont(font);
 	
 	selection selection_area = get_selection();
-	QPoint cursor_position = nibble_to_screen(get_cursor_nibble() & ~selection_area.is_active());
+	QPoint cursor_position;
+	if(selection_area.is_active()){
+		cursor_position = nibble_to_screen(selection_area.get_end_aligned());
+	}else{
+		cursor_position = nibble_to_screen(get_cursor_nibble());
+	}
 	
 	if(!selection_area.is_active()){
 		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
@@ -106,8 +110,8 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area)
 		return;  //Anything which doesn't accept focus can't be highlighted
 	}
 	
-	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start() & ~1));
-	QPoint position2 = clip_screen(nibble_to_screen(selection_area.get_end() & ~1));
+	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start_aligned()));
+	QPoint position2 = clip_screen(nibble_to_screen(selection_area.get_end_aligned()));
 	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
 	                 position2.y() - position1.y() + font_height, 
 			 palette().color(QPalette::Active, QPalette::Highlight));	

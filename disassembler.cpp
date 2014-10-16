@@ -18,9 +18,9 @@ disassembler::disassembler(QWidget *parent) :
 	setReadOnly(true);
 }
 
-void disassembler::disassemble(int start, int end, const ROM_buffer *buffer)
+void disassembler::disassemble(selection selection_area, const ROM_buffer *buffer)
 {
-	setPlainText(active_core()->disassemble(start, end, buffer));
+	setPlainText(active_core()->disassemble(selection_area, buffer));
 	show();
 	toggle_display(true);
 }

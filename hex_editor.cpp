@@ -43,9 +43,10 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	address_header->setFont(text_display::get_font());
 	hex_header->setFont(text_display::get_font());
 	
+	/*redo layout at some point, but it works for now */
 	QGridLayout *layout = new QGridLayout();
-	layout->addWidget(address_header, 0, 0);
-	layout->addWidget(hex_header, 0, 1);
+	layout->addWidget(address_header, 0, 0, Qt::AlignBottom);
+	layout->addWidget(hex_header, 0, 1, Qt::AlignBottom);
 	layout->addWidget(address, 1, 0);
 	layout->addWidget(hex, 1, 1);
 	layout->addWidget(ascii, 1, 2);
@@ -263,7 +264,7 @@ void hex_editor::disassemble()
 	if(!buffer->is_active() || !selection_area.is_active()){
 		return;
 	}
-	emit send_disassemble_data(selection_area.get_start(), selection_area.get_end(), buffer);
+	emit send_disassemble_data(selection_area, buffer);
 }
 
 void hex_editor::create_bookmark()
