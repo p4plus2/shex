@@ -1,12 +1,14 @@
 #include "disassembler.h"
 #include "debug.h"
 #include "disassembly_cores/isa_65c816.h"
-
+#include "disassembly_cores/isa_spc700.h"
+#include "utility.h"
 
 disassembler::disassembler(QWidget *parent) :
         QPlainTextEdit(parent)
 {
 	cores.insert(isa_65c816::id(), new isa_65c816(this));
+	cores.insert(isa_spc700::id(), new isa_spc700(this));
         for(auto i = cores.begin(); i != cores.end(); i++){
 		disassembler_cores->addItem(i.key());
         }
@@ -16,6 +18,7 @@ disassembler::disassembler(QWidget *parent) :
 		core_layout->hide();
 	}
 	setReadOnly(true);
+	connect(disassembler_cores, resolve<int>::from(&QComboBox::activated), this, &disassembler::update_core_layout);
 }
 
 void disassembler::disassemble(selection selection_area, const ROM_buffer *buffer)
@@ -34,6 +37,21 @@ void disassembler::toggle_display(bool state) {
 	core_layout->setVisible(state);
 	display = state;
 	layout_adjust();
+}
+
+// This method makes me very sad.
+void disassembler::update_core_layout(int a)
+{
+	Q_UNUSED(a);
+	QLayoutItem *child;
+	while ((child = core_layout->layout()->takeAt(0))) {
+		child->widget()->setParent(0);
+		delete child;
+	}
+	delete core_layout;
+	core_layout = new QWidget(this);
+	box->addWidget(core_layout);
+	core_layout->setLayout(active_core()->core_layout());
 }
 
 QVBoxLayout *disassembler::get_layout()

@@ -38,7 +38,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	ascii = new ascii_display(buffer, this);
 	
 	connect(hex, &hex_display::character_typed, this, &hex_editor::handle_typed_character);
-	connect(hex, &ascii_display::character_typed, this, &hex_editor::handle_typed_character);
+	connect(ascii, &ascii_display::character_typed, this, &hex_editor::handle_typed_character);
 	
 	address_header->setFont(text_display::get_font());
 	hex_header->setFont(text_display::get_font());
@@ -94,8 +94,13 @@ void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 	}else{
 		buffer->update_nibble(key, cursor_nibble, start, end);
 	}
-	move_cursor_nibble(update_byte ? 2 : 1);
-	update_window();
+	if(selection_area.is_active()){
+		selection_area.set_active(false);
+		cursor_nibble = selection_area.get_start();
+		move_cursor_nibble(0);
+	}else{
+		move_cursor_nibble(update_byte ? 2 : 1);
+	}
 	update_save_state(1);
 }
 

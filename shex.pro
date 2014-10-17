@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     displays/text_display.cpp \
     displays/ascii_display.cpp \
     displays/address_display.cpp \
-    selection.cpp
+    selection.cpp \
+    disassembly_cores/isa_spc700.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -72,7 +73,9 @@ HEADERS  += main_window.h \
     displays/text_display.h \
     displays/ascii_display.h \
     displays/address_display.h \
-    selection.h
+    selection.h \
+    disassembly_cores/isa_spc700.h \
+    utility.h
 
 OTHER_FILES += \
     version.sh
