@@ -26,6 +26,7 @@ class isa_65c816 : public disassembler_core
 	protected:
 		QString decode_name_arg(const char arg, int &size);
 		opcode get_opcode(int op);
+		int get_base();
 		bool abort_unlikely(int op);
 		void update_state();
 	private:		

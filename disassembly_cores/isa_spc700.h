@@ -3,6 +3,8 @@
 
 #include "disassembler_core.h"
 #include <QCheckBox>
+#include <QLineEdit>
+#include <QLabel>
 #include <QList>
 #include <QSet>
 
@@ -16,18 +18,24 @@ class isa_spc700 : public disassembler_core
 
 	public slots:
 		inline void toggle_error_stop(bool state){ error_stop = state; }
+		void update_base(QString new_base);
 
 	protected:
 		QString decode_name_arg(const char arg, int &size);
 		opcode get_opcode(int op);
+		int get_base();
 		bool abort_unlikely(int op);
 		void update_state();
 	private:		
 		bool error_stop = false;
 		//These will get parented to a layout later
 		QCheckBox *stop = new QCheckBox("Stop on unlikely");
+		QLineEdit *base_input = new QLineEdit("0500");
+		QLabel *base_text = new QLabel("Base address");
 		static const QList<disassembler_core::opcode> opcode_list;
 		static const QSet<unsigned char> unlikely;
+		
+		unsigned int base = 0x0500;
 		
 };
 

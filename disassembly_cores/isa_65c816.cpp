@@ -26,9 +26,8 @@ QGridLayout *isa_65c816::core_layout()
 	int address = buffer->snes_to_pc(buffer->T##_address(delta*2-2+region.get_start_aligned(), little_endian)); \
 	if(address < region.get_start_aligned() || address > region.get_end_aligned()){ \
 		return '$' + get_hex(O, A); \
-	}else{ \
-		return add_label(address); \
-	}}
+	} \
+	return add_label(address);}
 
 QString isa_65c816::decode_name_arg(const char arg, int &size)
 {
@@ -88,6 +87,11 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 disassembler_core::opcode isa_65c816::get_opcode(int op)
 {
 	return opcode_list[op];
+}
+
+int isa_65c816::get_base()
+{
+	return region.get_start();
 }
 
 bool isa_65c816::abort_unlikely(int op)

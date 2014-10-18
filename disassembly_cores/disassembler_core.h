@@ -27,12 +27,13 @@ class disassembler_core : public QObject
 		void add_mnemonic(int destination, QString mnemonic);
 		QString disassembly_text();
 		void reset();
-		int decode_name_args(QString &name);
+		void decode_name_args(QString &name);
 		QString get_hex(int n, int bytes);
 		unsigned int get_operand(int n);
 		
 		virtual QString decode_name_arg(const char arg, int &size) = 0;
 		virtual opcode get_opcode(int op) = 0;
+		virtual int get_base() = 0;
 		virtual bool abort_unlikely(int op) = 0;
 		virtual void update_state() = 0;
 		

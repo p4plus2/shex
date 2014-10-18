@@ -19,8 +19,8 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 		}
 		
 		delta++;
-		size += decode_name_args(op.name);
-		add_mnemonic(region.get_start()+delta, op.name);
+		decode_name_args(op.name);
+		add_mnemonic(get_base()+delta, op.name);
 		
 		delta += size;
 		if(delta > data.size()){
@@ -67,21 +67,21 @@ void disassembler_core::reset()
 	label_id = 0;
 }
 
-int disassembler_core::decode_name_args(QString &name)
+void disassembler_core::decode_name_args(QString &name)
 {
-	int size = 0;
 	int length = name.length();
 	QString encoded = name;
 	name.clear();
 	for(int i = 0; i < length; i++){
+		int size = 0;
 		if(encoded[i] != '%'){
 			name += encoded[i];
 		}else{
 			char arg = encoded.at(++i).toLatin1();
 			name += decode_name_arg(arg, size);
+			delta += size;
 		}
 	}
-	return size;
 }
 
 QString disassembler_core::get_hex(int n, int bytes)
