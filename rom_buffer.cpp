@@ -197,7 +197,7 @@ void ROM_buffer::update_nibble(char byte, int position, int delete_start, int de
 		delete_text(delete_start, delete_end);
 	}
 	
-	unsigned char data[2] = {buffer[position/2], 0};
+	unsigned char data[2] = {(unsigned char)buffer[position/2], 0};
 	buffer[position/2] = (buffer.at(position/2) &
 			     ((0x0F >> ((position & 1) << 2)) | (0x0F << ((position & 1) << 2)))) |
 			     (byte << (((position & 1)^1) << 2));
@@ -217,7 +217,7 @@ void ROM_buffer::update_byte(char byte, int position, int delete_start, int dele
 	if(delete_end){
 		delete_text(delete_start, delete_end);
 	}
-	unsigned char data[2] = {buffer[position],(unsigned char)byte};
+	unsigned char data[2] = {(unsigned char)buffer[position],(unsigned char)byte};
 	undo_stack->push(new undo_byte_command(&buffer, position, data, remove));
 	buffer[position] = byte;
 	undo_stack->endMacro();
