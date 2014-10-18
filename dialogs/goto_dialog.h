@@ -12,7 +12,7 @@ class goto_dialog : public abstract_dialog
 {
 		Q_OBJECT
 	public:
-		explicit goto_dialog();
+		explicit goto_dialog(QWidget *parent);
 		virtual QString id(){ return "goto"; }
 		
 	signals:

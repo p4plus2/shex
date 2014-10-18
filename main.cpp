@@ -38,6 +38,10 @@ int main(int argc, char *argv[])
 #ifdef LOG_TO_FILE
 	qInstallMsgHandler(message_handler);
 #endif
+	
+	QCoreApplication::setOrganizationName("p4programing");
+	QCoreApplication::setApplicationName("shex");
+	     
 	main_window window;
 	window.show();
 	

@@ -3,7 +3,7 @@
 
 #include <QGridLayout>
 
-metadata_editor_dialog::metadata_editor_dialog()
+metadata_editor_dialog::metadata_editor_dialog(QWidget *parent) : abstract_dialog(parent)
 {
 	QGridLayout *layout = new QGridLayout(this);
 	QHBoxLayout *action_buttons = new QHBoxLayout();

@@ -3,12 +3,12 @@
 
 #include <QDialog>
 #include "hex_editor.h"
-
+#include "debug.h"
 class abstract_dialog : public QDialog
 {
 		Q_OBJECT
 	public:
-		explicit abstract_dialog();
+		explicit abstract_dialog(QWidget *parent);
 		void set_active_editor(hex_editor *editor);
 		virtual QString id() = 0;
 		

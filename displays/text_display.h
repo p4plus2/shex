@@ -72,6 +72,8 @@ class text_display : public QWidget
 		int scroll_direction = 1;
 		int scroll_speed = 1;
 		static const int scroll_timer_speed = 20;
+		
+		static const int default_font_size = 14;
 };
 
 #endif // TEXT_DISPLAY_H

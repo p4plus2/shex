@@ -4,7 +4,7 @@
 #include <QGridLayout>
 #include <QMessageBox>
 
-goto_dialog::goto_dialog()
+goto_dialog::goto_dialog(QWidget *parent) : abstract_dialog(parent)
 {
 	connect(close, &QPushButton::clicked, this, &QDialog::close);
 	connect(goto_offset, &QPushButton::clicked, this, &goto_dialog::address_entered);

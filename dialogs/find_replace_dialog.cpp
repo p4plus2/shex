@@ -2,7 +2,7 @@
 #include <QGridLayout>
 #include <QCompleter>
 
-find_replace_dialog::find_replace_dialog()
+find_replace_dialog::find_replace_dialog(QWidget *parent) : abstract_dialog(parent)
 {
 	direction->addButton(next);
 	direction->addButton(previous);

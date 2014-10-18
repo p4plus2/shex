@@ -18,8 +18,7 @@ class dialog_manager : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit dialog_manager(QObject *parent = 0);
-		~dialog_manager();
+		explicit dialog_manager(QWidget *parent = 0);
 		
 		void connect_to_editor(hex_editor *editor);
 		void set_active_editor(hex_editor *editor);

@@ -29,6 +29,7 @@ QString isa_spc700::decode_name_arg(const char arg, int &size)
 	QString decode;
 	decode.reserve(7);
 	unsigned int operand = get_operand(0) | get_operand(1) | get_operand(2);
+	int relative = (char)(operand & 0xFF) + 2 + delta;
 	switch(arg){
 		case 'b':
 			size++;
@@ -50,14 +51,12 @@ QString isa_spc700::decode_name_arg(const char arg, int &size)
 			return "$"  + get_hex((operand & 0x00FF00) >> 8, 2) +
 			       "#$" + get_hex((operand & 0x0000FF) >> 0, 2);
 		case 'r':
-		case 'R':
 			size++;
 			operand &= 0xFF;
-			if(((char)operand + 2 + delta) < 0 || 
-			   ((char)operand + 2 + delta) > data.size()){
+			if(relative < 0 || relative > data.size()){
 				return '$' + get_hex(operand & 0xFF, 2);
 			}
-			return add_label((char)operand + 2 + delta + base);
+			return add_label(relative + base);
 		case 'j':
 			size += 2;
 			operand &= 0xFFFF;
@@ -94,7 +93,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
         {"nop"},
 	{"tcall 0"},
 	{"set0 %d"},
-	{"bbs0 %d, %R"},
+	{"bbs0 %d, %r"},
 	{"or a, %d"},
 	{"or a, %w"},
 	{"or a, (x)"},
@@ -110,7 +109,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"bpl %r"},
 	{"tcall 1"},
 	{"clr0 %d"},
-	{"bbc0 %d, %R"},
+	{"bbc0 %d, %r"},
 	{"or a, %d+x"},
 	{"or a, %w"},
 	{"or a, %w"},
@@ -126,7 +125,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"clrp"},
 	{"tcall 2"},
 	{"set1 %d"},
-	{"bbs1 %d, %R"},
+	{"bbs1 %d, %r"},
 	{"and a, %d"},
 	{"and a, %w"},
 	{"and a, (x)"},
@@ -137,12 +136,12 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"rol %d"},
 	{"rol %w"},
 	{"push a"},
-	{"cbne %d, %R"},
+	{"cbne %d, %r"},
 	{"bra %r"},
 	{"bmi %r"},
 	{"tcall 3"},
 	{"clr1 %d"},
-	{"bbc1 %d, %R"},
+	{"bbc1 %d, %r"},
 	{"and a, %d+x"},
 	{"and a, %w"},
 	{"and a, %w"},
@@ -158,7 +157,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"setp"},
 	{"tcall 4"},
 	{"set2 %d"},
-	{"bbs2 %d, %R"},
+	{"bbs2 %d, %r"},
 	{"eor a, %d"},
 	{"eor a, %w"},
 	{"eor a, (x)"},
@@ -174,7 +173,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"bvc %r"},
 	{"tcall 5"},
 	{"clr2 %d"},
-	{"bbc2 %d, %R"},
+	{"bbc2 %d, %r"},
 	{"eor a, %d+x"},
 	{"eor a, %w"},
 	{"eor a, %w"},
@@ -190,7 +189,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"clrc"},
 	{"tcall 6"},
 	{"set3 %d"},
-	{"bbs3 %d, %R"},
+	{"bbs3 %d, %r"},
 	{"cmp a, %d"},
 	{"cmp a, %w"},
 	{"cmp a, (x)"},
@@ -201,12 +200,12 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"ror %d"},
 	{"ror %w"},
 	{"push y"},
-	{"dbnz %d, %R"},
+	{"dbnz %d, %r"},
 	{"ret"},
 	{"bvs %r"},
 	{"tcall 7"},
 	{"clr3 %d"},
-	{"bbc3 %d, %R"},
+	{"bbc3 %d, %r"},
 	{"cmp a, %d+x"},
 	{"cmp a, %w"},
 	{"cmp a, %w"},
@@ -222,7 +221,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"setc"},
 	{"tcall 8"},
 	{"set4 %d"},
-	{"bbs4 %d, %R"},
+	{"bbs4 %d, %r"},
 	{"adc a, %d"},
 	{"adc a, %w"},
 	{"adc a, (x)"},
@@ -238,7 +237,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"bcc %r"},
 	{"tcall 9"},
 	{"clr4 %d"},
-	{"bbc4 %d, %R"},
+	{"bbc4 %d, %r"},
 	{"adc a, %d+x"},
 	{"adc a, %w"},
 	{"adc a, %w"},
@@ -254,7 +253,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"ei"},
 	{"tcall 10"},
 	{"set5 %d"},
-	{"bbs5 %d, %R"},
+	{"bbs5 %d, %r"},
 	{"sbc a, %d"},
 	{"sbc a, %w"},
 	{"sbc a, (x)"},
@@ -270,7 +269,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"bcs %r"},
 	{"tcall 11"},
 	{"clr5 %d"},
-	{"bbc5 %d, %R"},
+	{"bbc5 %d, %r"},
 	{"sbc a, %d+x"},
 	{"sbc a, %w"},
 	{"sbc a, %w"},
@@ -286,7 +285,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"di"},
 	{"tcall 12"},
 	{"set6 %d"},
-	{"bbs6 %d, %R"},
+	{"bbs6 %d, %r"},
 	{"mov %d, a"},
 	{"mov %w, a"},
 	{"mov (x), a"},
@@ -302,7 +301,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"bne %r"},
 	{"tcall 13"},
 	{"clr6 %d"},
-	{"bbc6 %d, %R"},
+	{"bbc6 %d, %r"},
 	{"mov %d+x, a"},
 	{"mov %w+x, a"},
 	{"mov %w+y, a"},
@@ -313,12 +312,12 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"mov %d+x, y"},
 	{"dec y"},
 	{"mov a, y"},
-	{"cbne %d, %R"},
+	{"cbne %d, %r"},
 	{"daa a"},
 	{"clrv"},
 	{"tcall 14"},
 	{"set7 %d"},
-	{"bbs7 %d, %R"},
+	{"bbs7 %d, %r"},
 	{"mov a, %d"},
 	{"mov a, %w"},
 	{"mov a, (x)"},
@@ -334,7 +333,7 @@ const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
 	{"beq %r"},
 	{"tcall 15"},
 	{"clr7 %d"},
-	{"bbc7 %d, %R"},
+	{"bbc7 %d, %r"},
 	{"mov a, %d+x"},
 	{"mov a, %w"},
 	{"mov a, %w"},

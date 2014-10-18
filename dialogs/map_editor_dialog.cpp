@@ -7,8 +7,7 @@
 #include <QPalette>
 #include "debug.h"
 
-map_editor_dialog::map_editor_dialog
-()
+map_editor_dialog::map_editor_dialog(QWidget *parent) : abstract_dialog(parent)
 {
 	QGridLayout *layout = new QGridLayout(this);
 	layout->setHorizontalSpacing(0);

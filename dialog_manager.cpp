@@ -1,15 +1,15 @@
 #include "dialog_manager.h"
 #include "hex_editor.h"
 
-dialog_manager::dialog_manager(QObject *parent) :
+dialog_manager::dialog_manager(QWidget *parent) :
         QObject(parent)
 {
-	dialog_list.append(new goto_dialog());
-	dialog_list.append(new select_range_dialog());
-	dialog_list.append(new expand_ROM_dialog());
-	dialog_list.append(new metadata_editor_dialog());
-	dialog_list.append(new find_replace_dialog());
-	dialog_list.append(new map_editor_dialog());
+	dialog_list.append(new goto_dialog(parent));
+	dialog_list.append(new select_range_dialog(parent));
+	dialog_list.append(new expand_ROM_dialog(parent));
+	dialog_list.append(new metadata_editor_dialog(parent));
+	dialog_list.append(new find_replace_dialog(parent));
+	dialog_list.append(new map_editor_dialog(parent));
 }
 
 void dialog_manager::connect_to_editor(hex_editor *editor)
@@ -49,11 +49,4 @@ abstract_dialog *dialog_manager::find_dialog(QString id)
 	}
 	qDebug() << "Error: Dialog " << id << " not found";
 	return 0;
-}
-
-dialog_manager::~dialog_manager()
-{
-	foreach(abstract_dialog *dialog, dialog_list){
-		delete dialog;
-	}
 }

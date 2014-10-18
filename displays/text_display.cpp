@@ -5,6 +5,7 @@
 #include <QStaticText>
 #include <QTimer>
 #include <QTimerEvent>
+#include <QSettings>
 
 #include "debug.h"
 
@@ -44,10 +45,12 @@ void text_display::set_auto_scroll_speed(int speed)
 
 QFont text_display::font_setup()
 {
+	QSettings settings;
 	font.setFamily("Courier");
 	font.setStyleHint(QFont::TypeWriter);
 	font.setKerning(false);
-	font.setPixelSize(14);
+	int font_size = settings.value("font_size", default_font_size).toInt();
+	font.setPixelSize(font_size);
 	
 	QFontMetrics font_info(font);
 	font_width = font_info.averageCharWidth();
