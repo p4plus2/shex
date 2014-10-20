@@ -141,11 +141,20 @@ int ROM_metadata::snes_to_pc(int address) const
 			return -1;
 		break;
 		case SA1ROM:
+			return -1;
+		break;
 		case SPC7110ROM:
 			return -1;
 		break;
 		case SUPERFXROM:
-			return -1;
+			if((address&0x408000)==0x008000){  //00-3f,80-bf:8000-ffff
+				address &= 0x7FFFFF;
+			}else if((address&0x600000)==0x400000){ //40-5f,c0-df:0000-ffff	
+				 address = (((address<<1) & 0x3F0000) | 0x008000 | (address&0x007FFF));
+			}else if((address&0xF00000) == 0x700000){
+				return -1;
+			}
+			return (address&0x7F0000)>>1|(address&0x7FFF);
 		break;
 		case SDD1ROM:
 			return -1;
@@ -179,11 +188,19 @@ int ROM_metadata::pc_to_snes(int address) const
 			return -1;
 		break;
 		case SA1ROM:
+			//in order from 1st to 8th MB:
+			//$00-$1f; $20-$3f; $80-$9f; $a0-$bf; $c0-$cf; $d0-$df; $e0-$ef; $f0-$ff last 4 hirom
+			return -1;
+		break;
 		case SPC7110ROM:
 			return -1;
 		break;
 		case SUPERFXROM:
-			return -1;
+			if(address >= 0x380000){
+				address = ((address << 1) & 0x7F0000) | ((address | 0x8000) & 0xFFFF);
+				return address += 0x800000;
+			}
+			return address = ((address << 1) & 0x7F0000) | ((address | 0x8000) & 0xFFFF);
 		break;
 		case SDD1ROM:
 			return -1;

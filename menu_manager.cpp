@@ -83,6 +83,7 @@ typedef QKeySequence hotkey;
 	add_action(dialog_manager, "&Character map editor", show_map_editor_dialog(), hotkey("Alt+c"));
 	add_widget_toggle_action(disassembler, "Disassembly panel toggle", toggle_display(bool), hotkey("Alt+d"));
 	add_widget_toggle_action(bookmarks, "Bookmark panel toggle", toggle_display(bool), hotkey("Alt+b"));
+	
 	menu->addMenu(find_menu("&Copy style"));
 	menu = find_menu("&Copy style");
 	add_group_action(copy_group, "&No space", set_copy_style(int), ROM_buffer::NO_SPACES, hotkey("Alt+1"));

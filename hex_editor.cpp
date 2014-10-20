@@ -50,6 +50,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	layout->addWidget(address, 1, 0);
 	layout->addWidget(hex, 1, 1);
 	layout->addWidget(ascii, 1, 2);
+	layout->setRowStretch(1, 1);
 	setLayout(layout);
 }
 

@@ -8,9 +8,11 @@
 bookmarks::bookmarks(QWidget *parent) :
         QTableView(parent)
 {
+	QFontMetrics metrics(QApplication::font(address_input));
 	QStringList labels;
-	labels << "Address" << "Description";
+	labels << "Address" << "Color" << "Description";
 	model->setHorizontalHeaderLabels(labels);
+	setSortingEnabled(true);
 	
 	if(!display){
 		hide();
@@ -22,10 +24,12 @@ bookmarks::bookmarks(QWidget *parent) :
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	
 	horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	int address_width = horizontalHeader()->sectionSize(0);
+	int address_width = metrics.width("$AA:AAAA") + input_padding;
+	int color_width = horizontalHeader()->sectionSize(1);
 	
 	horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 	horizontalHeader()->resizeSection(0, address_width);
+	horizontalHeader()->resizeSection(1, color_width);
 	horizontalHeader()->setStretchLastSection(true);
 
 	color_button->setAutoFillBackground(true);
@@ -46,13 +50,11 @@ bookmarks::bookmarks(QWidget *parent) :
 	address_input->setInputMask("$HH:HHHH");
 	size_input->setInputMask("999999");
 	
-	QFontMetrics metrics(QApplication::font(address_input));
+	address_input->setMinimumWidth(address_width);
+	address_input->setMaximumWidth(address_width);
 	
-	address_input->setMinimumWidth(metrics.width("$AA:AAAA") + 3); //pad this a bit, it looks better
-	address_input->setMaximumWidth(metrics.width("$AA:AAAA") + 3);
-	
-	size_input->setMinimumWidth(metrics.width("2222222") + 3);
-	size_input->setMaximumWidth(metrics.width("2222222") + 3);
+	size_input->setMinimumWidth(metrics.width("2222222") + input_padding);
+	size_input->setMaximumWidth(metrics.width("2222222") + input_padding);
 	
 	init_grid_layout();
 }
@@ -76,15 +78,14 @@ void bookmarks::address_updated(QString address)
 void bookmarks::add_clicked()
 {
 	QString description = description_input->toPlainText();
-	add_bookmark(address_input->text(), description);
 	
 	bookmark_data bookmark;
-	
 	bookmark.color = color_button->palette().button().color();
 	bookmark.size = size_input->text().toInt();
 	bookmark.description = description;
 	bookmark.code = code->isChecked();
 	
+	add_bookmark(address_input->text(), bookmark);
 	bookmark_map.insert(address_input->text(), bookmark);
 	
 	add_button->hide();
@@ -155,10 +156,15 @@ QVBoxLayout *bookmarks::get_layout()
 	return box;
 }
 
-void bookmarks::add_bookmark(QString address, QString description)
+void bookmarks::add_bookmark(QString address, bookmark_data bookmark)
 {
 	model->setItem(row, 0, new QStandardItem(address));
-	model->setItem(row, 1, new QStandardItem(description));
+	QStandardItem *color = new QStandardItem();
+	color->setBackground(QBrush(bookmark.color));
+	color->setForeground(QBrush(bookmark.color));
+	color->setText(bookmark.color.name());
+	model->setItem(row, 1, color);
+	model->setItem(row, 2, new QStandardItem(bookmark.description));
 	row++;
 }
 
@@ -184,10 +190,12 @@ void bookmarks::init_grid_layout()
 
 void bookmarks::set_color_button(QColor color)
 {
-	QPalette palette;
-	palette.setColor(QPalette::Button, color);
-	
-	color_button->setPalette(palette);
+	if(color.isValid()){
+		QPalette palette;
+		palette.setColor(QPalette::Button, color);
+		
+		color_button->setPalette(palette);
+	}
 }
 
 void bookmarks::layout_adjust()

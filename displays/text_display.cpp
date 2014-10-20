@@ -24,10 +24,13 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	QSize minimum(0, 0);
 	minimum.setHeight(rows*font_height);
 	setMinimumSize(minimum);
+	setAttribute(Qt::WA_StaticContents, true);
 }
 
 void text_display::update_display()
 {
+	cursor_state = true;
+	invalidate_cache();
 	update();
 }
 
@@ -90,20 +93,28 @@ void text_display::paintEvent(QPaintEvent *event)
 		paint_selection(painter, selection_area);
 	}
 	
-	int byte_count = get_rows() * get_columns() + get_offset();
-	for(int i = get_offset(), row = 0; i < byte_count; i += get_columns(), row++){
-		int line_end = i + get_columns();	
-		if(line_end > buffer->size()){
-			line_end = buffer->size();
-		}
-		QString line;
-		QTextStream string_stream(&line);
-		get_line(i, line_end, string_stream);
-		painter.drawStaticText(0, row * font_height, QStaticText(line));
-	}
-	
 	if(cursor_state && focusPolicy() != Qt::NoFocus){
 		painter.fillRect(cursor_position.x(), cursor_position.y(), 1, font_height, text);
+	}
+	
+	int byte_count = get_rows() * get_columns() + get_offset();
+	for(int i = get_offset(), row = 0; i < byte_count; i += get_columns(), row++){
+		int real_row = i / get_columns();
+		if(!row_cache.contains(real_row)){
+			int line_end = i + get_columns();	
+			if(line_end > buffer->size()){
+				line_end = buffer->size();
+			}
+			QString line;
+			QTextStream string_stream(&line);
+			get_line(i, line_end, string_stream);
+			QStaticText *text = new QStaticText(line);
+			text->setTextFormat(Qt::PlainText);
+			row_cache.insert(real_row, text);
+		}
+		if(row * font_height >= event->rect().y()){
+			painter.drawStaticText(0, row * font_height, *row_cache.object(real_row));
+		}
 	}
 }
 
@@ -193,7 +204,7 @@ void text_display::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
 
-	rows = size().height() / font_height; 
+	rows = size().height() / font_height;
 }
 
 void text_display::timerEvent(QTimerEvent *event)
@@ -207,8 +218,9 @@ void text_display::timerEvent(QTimerEvent *event)
 			selection_area.move_end(columns * 2 * scroll_direction);
 			set_selection(selection_area);
 		}
+		editor->update_window();
 	}
-	editor->update_window();
+	update();
 }
 
 int text_display::columns = 16;

@@ -20,7 +20,14 @@ class bookmarks : public QTableView
 		explicit bookmarks(QWidget *parent = 0);
 		QVBoxLayout *get_layout();
 		
-		void add_bookmark(QString address, QString description);
+		struct bookmark_data{
+			int size;
+			bool code;
+			QString description;		
+			QColor color;
+		};
+		
+		void add_bookmark(QString address, bookmark_data bookmark);
 		
 	public slots:
 		void color_clicked();
@@ -39,13 +46,6 @@ class bookmarks : public QTableView
 		void layout_adjust();
 		
 		QWidget *input_area = new QWidget(this);
-		
-		struct bookmark_data{
-			int size;
-			bool code;
-			QString description;		
-			QColor color;
-		};
 		
 		QMap<QString, bookmark_data> bookmark_map;
 		
@@ -76,6 +76,8 @@ class bookmarks : public QTableView
 		
 		QLineEdit *size_input = new QLineEdit();
 		QLabel *size_label = new QLabel("Size: ");
+		
+		static const int input_padding = 8;
 };
 
 #endif // BOOKMARKS_H

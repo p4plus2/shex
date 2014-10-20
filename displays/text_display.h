@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QFont>
+#include <QCache>
+#include <QStaticText>
 #include "rom_buffer.h"
 #include "hex_editor.h"
 
@@ -16,6 +18,7 @@ class text_display : public QWidget
 		explicit text_display(const ROM_buffer *b, hex_editor *parent = 0);
 		void update_display();
 		void set_auto_scroll_speed(int speed);
+		inline void invalidate_cache(){ row_cache.clear(); }
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
 		static QFont get_font(){ return font; }
@@ -65,6 +68,7 @@ class text_display : public QWidget
 		static int columns;
 		
 		hex_editor *editor;
+		QCache<int, QStaticText> row_cache;
 		
 		bool cursor_state = true;
 		int scroll_timer_id = 0;
