@@ -1,13 +1,15 @@
 #include "bookmarks.h"
+#include "hex_editor.h"
 #include <QHeaderView>
 #include <QStringList>
 #include <QColorDialog>
 #include <QFontMetrics>
 #include "debug.h"
 
-bookmarks::bookmarks(QWidget *parent) :
+bookmarks::bookmarks(hex_editor *parent) :
         QTableView(parent)
 {
+	editor = parent;
 	QFontMetrics metrics(QApplication::font(address_input));
 	QStringList labels;
 	labels << "Address" << "Color" << "Description";
@@ -46,7 +48,7 @@ bookmarks::bookmarks(QWidget *parent) :
 	
 	update_button->hide();
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
-	code->setChecked(true);
+	code_button->setChecked(true);
 	address_input->setInputMask("$HH:HHHH");
 	size_input->setInputMask("999999");
 	
@@ -66,7 +68,7 @@ void bookmarks::color_clicked()
 
 void bookmarks::address_updated(QString address)
 {
-	if(bookmark_map.contains(address)){
+	if(bookmark_data_map.contains(address)){
 		add_button->hide();
 		update_button->show();
 	}else{
@@ -78,23 +80,34 @@ void bookmarks::address_updated(QString address)
 void bookmarks::add_clicked()
 {
 	QString description = description_input->toPlainText();
+	int clean_address = check_address(address_input->text());
+	if(clean_address == -1){
+		return;
+	}
 	
 	bookmark_data bookmark;
+	bookmark.address = clean_address;
 	bookmark.color = color_button->palette().button().color();
 	bookmark.size = size_input->text().toInt();
 	bookmark.description = description;
-	bookmark.code = code->isChecked();
+	bookmark.code = code_button->isChecked();
 	
 	add_bookmark(address_input->text(), bookmark);
-	bookmark_map.insert(address_input->text(), bookmark);
+	bookmark_data_map.insert(address_input->text(), bookmark);
 	
 	add_button->hide();
 	update_button->show();
 	selectRow(row-1);
+	
+	editor->update_window();
 }
 
 void bookmarks::update_clicked()
 {
+	int clean_address = check_address(address_input->text());
+	if(clean_address == -1){
+		return;
+	}
 	for(int i = 0; i < row; i++){
 		QModelIndex address_index = model->index(i, 0, QModelIndex());
 		if(address_index.data().toString() == address_input->text()){
@@ -116,14 +129,14 @@ void bookmarks::row_clicked(QModelIndex index)
 	active_row = index.row();
 	QModelIndex address_index = model->index(active_row, 0, QModelIndex());
 	
-	bookmark_data bookmark = bookmark_map[address_index.data().toString()];
+	bookmark_data bookmark = bookmark_data_map[address_index.data().toString()];
 	
 	size_input->setText(QString::number(bookmark.size));
 	description_input->setPlainText(bookmark.description);
 	set_color_button(bookmark.color);
 	address_input->setText(address_index.data().toString());
-	code->setChecked(bookmark.code);
-	data->setChecked(!bookmark.code);
+	code_button->setChecked(bookmark.code);
+	data_button->setChecked(!bookmark.code);
 }
 
 void bookmarks::create_bookmark(int start, int end, const ROM_buffer *buffer)
@@ -131,7 +144,7 @@ void bookmarks::create_bookmark(int start, int end, const ROM_buffer *buffer)
 	size_input->setText(QString::number(end - start));
 	description_input->setPlainText("");
 	address_input->setText(buffer->get_formatted_address(start));
-	code->setChecked(true);
+	code_button->setChecked(true);
 	
 	show();
 	toggle_display(true);
@@ -175,8 +188,8 @@ void bookmarks::init_grid_layout()
 	grid->addWidget(size_label, 0, 2, 1, 1, Qt::AlignRight);
 	grid->addWidget(size_input, 0, 3);
 	grid->addWidget(description_label, 1, 0, 1, 2);
-	grid->addWidget(code, 1, 2, 1, 1, Qt::AlignRight);
-	grid->addWidget(data, 1, 3, 1, 1);
+	grid->addWidget(code_button, 1, 2, 1, 1, Qt::AlignRight);
+	grid->addWidget(data_button, 1, 3, 1, 1);
 	grid->addWidget(description_input, 2, 0, 1, 4);
 	grid->addWidget(color_label, 3, 0, 1, 1, Qt::AlignRight);
 	grid->addWidget(color_button, 3, 1);
@@ -210,6 +223,16 @@ void bookmarks::layout_adjust()
 		parent->repaint();
 		parent = parent->parentWidget();
 	}
+}
+
+int bookmarks::check_address(QString address)
+{
+	bool status;
+	int clean = address.remove(QRegExp("[^0-9A-Fa-f]")).toInt(&status, 16);
+	if(editor->get_buffer()->validate_address(clean)){
+		return clean;
+	}
+	return -1;
 }
 
 bool bookmarks::display = false;

@@ -19,6 +19,7 @@ class text_display : public QWidget
 		void update_display();
 		void set_auto_scroll_speed(int speed);
 		inline void invalidate_cache(){ row_cache.clear(); }
+		inline void disable_cursor_timer() { killTimer(cursor_timer_id); }
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
 		static QFont get_font(){ return font; }
@@ -71,13 +72,15 @@ class text_display : public QWidget
 		QCache<int, QStaticText> row_cache;
 		
 		bool cursor_state = true;
-		int scroll_timer_id = 0;
 		int cursor_timer_id = 0;
+		
+		int scroll_timer_id = 0;
 		int scroll_direction = 1;
 		int scroll_speed = 1;
 		static const int scroll_timer_speed = 20;
 		
 		static const int default_font_size = 14;
+		static const int cursor_width = 1;
 };
 
 #endif // TEXT_DISPLAY_H

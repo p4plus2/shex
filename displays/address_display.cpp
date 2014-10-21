@@ -7,6 +7,7 @@ address_display::address_display(const ROM_buffer *b, hex_editor *parent) : text
 {
 	setMaximumWidth(get_font_width() * line_characters);
 	setFocusPolicy(Qt::NoFocus);
+	disable_cursor_timer();
 }
 
 void address_display::paintEvent(QPaintEvent *event)

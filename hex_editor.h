@@ -3,6 +3,7 @@
 
 #include "selection.h"
 #include "rom_buffer.h"
+#include "bookmarks.h"
 
 #include <QWidget>
 #include <QKeyEvent>
@@ -25,7 +26,6 @@ class hex_editor : public QWidget
 		inline ROM_buffer *get_buffer(){ return buffer; }
 		inline int get_relative_position(int address){ return cursor_nibble / 2 + address; }
 		void set_focus();
-		void update_window();
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
 		inline bool new_file(){ return is_new; }
@@ -41,6 +41,8 @@ class hex_editor : public QWidget
 		inline selection get_selection(){ return selection_area; }
 		inline void set_selection(selection s){ selection_area = s; update_window(); }
 
+		inline const bookmark_map *get_bookmark_map(){ return bookmark_data_map; }
+		inline void set_bookmark_map(const bookmark_map *b){ bookmark_data_map = b; }
 	signals:
 		void update_slider(int position);
 		void update_range(int value);
@@ -54,6 +56,7 @@ class hex_editor : public QWidget
 		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);
 
 	public slots:
+		void update_window();
 		void handle_typed_character(unsigned char key, bool update_byte = false);
 		void update_undo_action(bool direction);
 		void goto_offset(int address);
@@ -89,6 +92,7 @@ class hex_editor : public QWidget
 		QLabel *address_header = new QLabel("Offset");
 		
 		ROM_buffer *buffer;
+		const bookmark_map *bookmark_data_map;
 		int offset = 0;
 
 		bool scroll_mode = false;

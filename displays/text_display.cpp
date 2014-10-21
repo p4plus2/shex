@@ -72,11 +72,11 @@ QPoint text_display::clip_mouse(int x, int y)
 
 void text_display::paintEvent(QPaintEvent *event)
 {
-	Q_UNUSED(event);
 	QPainter painter(this);
 	QColor text = palette().color(QPalette::WindowText);
 	painter.setPen(text);
 	painter.setFont(font);
+	painter.setClipRegion(event->region());
 	
 	selection selection_area = get_selection();
 	QPoint cursor_position;
@@ -94,7 +94,7 @@ void text_display::paintEvent(QPaintEvent *event)
 	}
 	
 	if(cursor_state && focusPolicy() != Qt::NoFocus){
-		painter.fillRect(cursor_position.x(), cursor_position.y(), 1, font_height, text);
+		painter.fillRect(cursor_position.x(), cursor_position.y(), cursor_width, font_height, text);
 	}
 	
 	int byte_count = get_rows() * get_columns() + get_offset();
@@ -211,6 +211,8 @@ void text_display::timerEvent(QTimerEvent *event)
 {
 	if(event->timerId() == cursor_timer_id){
 		cursor_state = !cursor_state;
+		QPoint screen = nibble_to_screen(get_cursor_nibble());
+		update(screen.x(), screen.y(), cursor_width, font_height);
 	}else if(event->timerId() == scroll_timer_id){
 		selection selection_area = get_selection();
 		set_offset(get_offset() + columns * scroll_direction * scroll_speed);
@@ -220,7 +222,6 @@ void text_display::timerEvent(QTimerEvent *event)
 		}
 		editor->update_window();
 	}
-	update();
 }
 
 int text_display::columns = 16;

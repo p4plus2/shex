@@ -172,6 +172,7 @@ void main_window::create_new_tab(QString name, bool new_file)
 	dynamic_scrollbar *scrollbar = new dynamic_scrollbar(editor);
 	disassembler *disassembly_panel = new disassembler(editor);
 	bookmarks *bookmark_panel = new bookmarks(editor);
+	editor->set_bookmark_map(bookmark_panel->map());
 	init_connections(editor, scrollbar, disassembly_panel, bookmark_panel);
 	
 	QHBoxLayout *hex_layout = new QHBoxLayout(widget);

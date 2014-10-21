@@ -32,7 +32,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	connect(this, &hex_editor::customContextMenuRequested, this, &hex_editor::context_menu);
 	connect(qApp->clipboard(), &QClipboard::dataChanged, this, &hex_editor::clipboard_changed);
 	
-	//can't initialize in header -- relies on buffer here to be const
 	address = new address_display(buffer, this);
 	hex = new hex_display(buffer, this);
 	ascii = new ascii_display(buffer, this);
@@ -43,7 +42,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	address_header->setFont(text_display::get_font());
 	hex_header->setFont(text_display::get_font());
 	
-	/*redo layout at some point, but it works for now */
 	QGridLayout *layout = new QGridLayout();
 	layout->addWidget(address_header, 0, 0, Qt::AlignBottom);
 	layout->addWidget(hex_header, 0, 1, Qt::AlignBottom);
@@ -80,6 +78,21 @@ void hex_editor::scroll_mode_changed()
 	scroll_mode = !scroll_mode;
 	update_window();
 	emit toggle_scroll_mode(scroll_mode);
+}
+
+void hex_editor::update_window()
+{
+	if(!scroll_mode){
+		emit update_slider(offset / text_display::get_columns());
+		emit update_range(get_max_lines()+1);
+	}else{
+		emit update_range(height());
+	}
+	emit update_status_text(get_status_text());
+	ascii->update_display();
+	hex->update_display();
+	address->update_display();
+	emit selection_toggled(selection_area.is_active());
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
@@ -467,21 +480,6 @@ void hex_editor::move_cursor_nibble(int delta)
 	}
 	
 	update_window();
-}
-
-void hex_editor::update_window()
-{
-	if(!scroll_mode){
-		emit update_slider(offset / text_display::get_columns());
-		emit update_range(get_max_lines()+1);
-	}else{
-		emit update_range(height());
-	}
-	emit update_status_text(get_status_text());
-	ascii->update_display();
-	hex->update_display();
-	address->update_display();
-	emit selection_toggled(selection_area.is_active());
 }
 
 void hex_editor::set_offset(int o)

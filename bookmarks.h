@@ -11,23 +11,29 @@
 #include <QLineEdit>
 #include <QMap>
 #include <QRadioButton>
-#include "rom_buffer.h"
+
+class hex_editor;
+class ROM_buffer;
+
+struct bookmark_data{
+	int address;
+	int size;
+	bool code;
+	QString description;		
+	QColor color;
+};
+
+typedef QMap<QString, bookmark_data> bookmark_map;
 
 class bookmarks : public QTableView
 {
 		Q_OBJECT
 	public:
-		explicit bookmarks(QWidget *parent = 0);
+		explicit bookmarks(hex_editor *parent = 0);
 		QVBoxLayout *get_layout();
 		
-		struct bookmark_data{
-			int size;
-			bool code;
-			QString description;		
-			QColor color;
-		};
-		
 		void add_bookmark(QString address, bookmark_data bookmark);
+		const bookmark_map *map(){ return &bookmark_data_map; }
 		
 	public slots:
 		void color_clicked();
@@ -44,10 +50,12 @@ class bookmarks : public QTableView
 		void init_grid_layout();
 		void set_color_button(QColor color);
 		void layout_adjust();
+		int check_address(QString address);
 		
+		hex_editor *editor;
 		QWidget *input_area = new QWidget(this);
 		
-		QMap<QString, bookmark_data> bookmark_map;
+		bookmark_map bookmark_data_map;
 		
 		static bool display;
 		int row = 0;
@@ -65,8 +73,8 @@ class bookmarks : public QTableView
 		QPushButton *color_button = new QPushButton();
 		QLabel *color_label = new QLabel("Color: ");
 		
-		QRadioButton *code = new QRadioButton("Code", this);
-		QRadioButton *data = new QRadioButton("Data", this);
+		QRadioButton *code_button = new QRadioButton("Code", this);
+		QRadioButton *data_button = new QRadioButton("Data", this);
 		                
 		QPlainTextEdit *description_input = new QPlainTextEdit();
 		QLabel *description_label = new QLabel("Description: ");
@@ -77,7 +85,7 @@ class bookmarks : public QTableView
 		QLineEdit *size_input = new QLineEdit();
 		QLabel *size_label = new QLabel("Size: ");
 		
-		static const int input_padding = 8;
+		static const int input_padding = 12;
 };
 
 #endif // BOOKMARKS_H
