@@ -8,6 +8,7 @@
 #include "bookmarks.h"
 #include "debug.h"
 
+#include <typeinfo>
 
 menu_manager::menu_manager(QObject *parent, QMenuBar *m) :
         QObject(parent)
@@ -16,6 +17,8 @@ menu_manager::menu_manager(QObject *parent, QMenuBar *m) :
 	create_menus();
 	create_actions();
 	connect(copy_group, &QActionGroup::triggered, this, &menu_manager::group_callback);
+	
+	qDebug() << typeid(&QActionGroup::triggered).name();
 }
 
 void menu_manager::create_menus()
@@ -98,8 +101,11 @@ typedef QKeySequence hotkey;
 	menu = find_menu("&Help");
 	add_action(main_window, "&Version", version(), hotkey("Alt+v"));
 
-#undef add_action
 #undef add_toggle_action
+#undef add_widget_toggle_action
+#undef add_action
+#undef add_group_action
+#undef add_history_action
 }
 
 QMenu *menu_manager::find_menu(QString id)
