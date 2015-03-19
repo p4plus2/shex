@@ -37,7 +37,7 @@ QString disassembler_core::add_label(int destination)
 	block &b = disassembly_list[destination];
 	if(b.label.isEmpty()){
 		label_id++;
-		b.label = QString("label_") + QString::number(label_id);
+		b.label = QString("label_") + QString::number(label_id).rightJustified(6, '0');
 	}
 	return b.label;
 }

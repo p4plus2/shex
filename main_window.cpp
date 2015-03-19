@@ -36,6 +36,7 @@ main_window::main_window(QWidget *parent)
 	menu_controller->connect_to_widget(undo_group);
 #ifdef USE_DEFAULT_ROM
 	create_new_tab("SMW.smc");
+	create_new_tab("speedy.sfc");
 #endif
 }
 

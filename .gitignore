@@ -1,6 +1,7 @@
 *.o
 shex
 *.smc
+*.sfc
 *.swp
 moc_*
 Makefile*
