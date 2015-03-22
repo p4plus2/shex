@@ -46,6 +46,9 @@ class bookmarks : public QTableView
 		void create_bookmark(int start, int end, const ROM_buffer *buffer);
 		void toggle_display(bool state);
 		
+	protected:
+		virtual bool event(QEvent *event);
+		
 	private:
 		void init_grid_layout();
 		void set_color_button(QColor color);

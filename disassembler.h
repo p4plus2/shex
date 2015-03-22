@@ -21,6 +21,9 @@ class disassembler : public QPlainTextEdit
 		void disassemble(selection selection_area, const ROM_buffer *buffer);
 		void toggle_display(bool state);
 		void update_core_layout(int a);
+	
+	protected:
+		virtual bool event(QEvent *event);
 		
 	private:
 		static bool display;

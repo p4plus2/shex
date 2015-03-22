@@ -181,6 +181,21 @@ void bookmarks::add_bookmark(QString address, bookmark_data bookmark)
 	row++;
 }
 
+bool bookmarks::event(QEvent *event)
+{
+	if(event->type() != (QEvent::Type)BOOK_PANEL_EVENT){
+		return QWidget::event(event);
+	}
+	switch(((book_panel_event *)event)->sub_type()){
+		case BOOK_TOGGLE_DISPLAY:
+			toggle_display(!display);
+			return true;
+		default:
+			qDebug() << "Bad event" << ((editor_event *)event)->sub_type();
+			return false;
+	}
+}
+
 void bookmarks::init_grid_layout()
 {
 	grid->addWidget(address_label, 0, 0, 1, 1, Qt::AlignRight);

@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "disassembly_cores/isa_65c816.h"
 #include "disassembly_cores/isa_spc700.h"
+#include "events/event_types.h"
 #include "utility.h"
 
 disassembler::disassembler(QWidget *parent) :
@@ -61,6 +62,21 @@ QVBoxLayout *disassembler::get_layout()
 	box->addWidget(core_layout);
 	core_layout->setLayout(active_core()->core_layout());
 	return box;
+}
+
+bool disassembler::event(QEvent *event)
+{
+	if(event->type() != (QEvent::Type)DISA_PANEL_EVENT){
+		return QWidget::event(event);
+	}
+	switch(((disa_panel_event *)event)->sub_type()){
+		case DISA_TOGGLE_DISPLAY:
+			toggle_display(!display);
+			return true;
+		default:
+			qDebug() << "Bad event" << ((editor_event *)event)->sub_type();
+			return false;
+	}
 }
 
 void disassembler::layout_adjust()

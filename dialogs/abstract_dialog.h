@@ -10,7 +10,6 @@ class abstract_dialog : public QDialog
 	public:
 		explicit abstract_dialog(QWidget *parent);
 		void set_active_editor(hex_editor *editor);
-		virtual QString id() = 0;
 		
 	public slots:
 		virtual void refresh();

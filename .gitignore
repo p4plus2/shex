@@ -2,6 +2,7 @@
 shex
 *.smc
 *.swp
+*.sfc
 moc_*
 Makefile*
 *.user
