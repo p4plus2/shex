@@ -52,7 +52,6 @@ void menu_manager::add_group_action(QString text, S type, hotkey key, QMenu *men
 
 void menu_manager::create_actions()
 {
-#define add_history_action(N,R,H) menu->addAction(new history_menu_item(N, SLOT(R), "", H, menu))
 	toggle_function active_editors = &main_window::active_editors;
 	
 	QMenu *menu = find_menu("&File");
@@ -110,7 +109,6 @@ void menu_manager::create_actions()
 
 	menu = find_menu("&Help");
 	add_action<window_event>("&Version", VERSION, hotkey("Alt+v"), menu);
-#undef add_history_action
 }
 
 QMenu *menu_manager::find_menu(QString id)
