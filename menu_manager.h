@@ -27,12 +27,11 @@ class menu_manager : public QObject
 		typedef QKeySequence hotkey;
 		
 		QMenuBar *menu_bar;
-		QUndoGroup *undo_group;
 		QList<QMenu *> menu_list;
 		QMap<event_types, QObject *> event_map;
 		
 		void create_menus();
-		void create_actions();
+		void create_actions(QUndoGroup *undo_group);
 		QMenu *find_menu(QString id);
 		void enable_checkable(QActionGroup *group);
 		void check_enabled(QMenu *menu);

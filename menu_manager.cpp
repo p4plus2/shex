@@ -11,9 +11,8 @@ menu_manager::menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u) :
         QObject(parent)
 {
 	menu_bar = m;
-	undo_group = u;
 	create_menus();
-	create_actions();
+	create_actions(u);
 }
 
 void menu_manager::create_menus()
@@ -50,7 +49,7 @@ void menu_manager::add_group_action(QString text, S type, hotkey key, QMenu *men
 	menu->addAction(group->addAction((new abstract_menu_item(text, new T(type), nullptr, key, this, true))));
 }
 
-void menu_manager::create_actions()
+void menu_manager::create_actions(QUndoGroup *undo_group)
 {
 	toggle_function active_editors = &main_window::active_editors;
 	
