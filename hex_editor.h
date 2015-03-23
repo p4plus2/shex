@@ -4,7 +4,7 @@
 #include "events/event_types.h"
 #include "selection.h"
 #include "rom_buffer.h"
-#include "bookmarks.h"
+#include "panels/bookmark_panel.h"
 
 #include <QWidget>
 #include <QKeyEvent>

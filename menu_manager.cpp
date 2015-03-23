@@ -3,8 +3,6 @@
 #include "menus/history_menu_item.h"
 #include "hex_editor.h"
 #include "main_window.h"
-#include "disassembler.h"
-#include "bookmarks.h"
 #include "debug.h"
 
 menu_manager::menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u) :
@@ -91,8 +89,8 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_toggle_action<editor_event>("&Scrollbar toggle", SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);
 	add_action<dialog_event>("&Character map editor", MAP_EDITOR, hotkey("Alt+c"), menu);
 	//todo merge panels
-	add_action<disa_panel_event>("Disassembly panel toggle", DISA_TOGGLE_DISPLAY, hotkey("Alt+d"), menu, true);
-	add_action<book_panel_event>("Bookmark panel toggle", BOOK_TOGGLE_DISPLAY, hotkey("Alt+b"), menu, true);
+	add_action<panel_event>("Disassembly panel toggle", DISASSEMBLER, hotkey("Alt+d"), menu, true);
+	add_action<panel_event>("Bookmark panel toggle", BOOKMARKS, hotkey("Alt+b"), menu, true);
 	
 	menu->addMenu(find_menu("&Copy style"));
 	menu = find_menu("&Copy style");

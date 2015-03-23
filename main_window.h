@@ -6,6 +6,7 @@
 #include <QAction>
 #include "dialog_manager.h"
 #include "menu_manager.h"
+#include "panel_manager.h"
 #include "rom_buffer.h"
 #include <QLayout>
 
@@ -47,10 +48,10 @@ class main_window : public QMainWindow
 		
 		static bool has_active_editors;
 
-		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, 
-		                      disassembler *disassembly_panel, bookmarks *bookmark_panel);
+		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, panel_manager *panel);
 		void create_new_tab(QString name, bool new_file = false);
 		hex_editor *get_editor(int i) const;
+		panel_manager *get_panel(int i) const;
 		
 };
 

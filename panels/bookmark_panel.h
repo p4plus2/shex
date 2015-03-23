@@ -11,8 +11,8 @@
 #include <QLineEdit>
 #include <QMap>
 #include <QRadioButton>
+#include "abstract_panel.h"
 
-class hex_editor;
 class ROM_buffer;
 
 struct bookmark_data{
@@ -25,12 +25,12 @@ struct bookmark_data{
 
 typedef QMap<QString, bookmark_data> bookmark_map;
 
-class bookmarks : public QTableView
+class bookmark_panel : public QTableView, public abstract_panel
 {
 		Q_OBJECT
 	public:
-		explicit bookmarks(hex_editor *parent = 0);
-		QVBoxLayout *get_layout();
+		explicit bookmark_panel(QWidget *parent = 0);
+		virtual QLayout *get_layout();
 		
 		void add_bookmark(QString address, bookmark_data bookmark);
 		const bookmark_map *map(){ return &bookmark_data_map; }
@@ -44,10 +44,6 @@ class bookmarks : public QTableView
 		void row_clicked(QModelIndex index);
 		
 		void create_bookmark(int start, int end, const ROM_buffer *buffer);
-		void toggle_display(bool state);
-		
-	protected:
-		virtual bool event(QEvent *event);
 		
 	private:
 		void init_grid_layout();
@@ -55,12 +51,10 @@ class bookmarks : public QTableView
 		void layout_adjust();
 		int check_address(QString address);
 		
-		hex_editor *editor;
 		QWidget *input_area = new QWidget(this);
 		
 		bookmark_map bookmark_data_map;
-		
-		static bool display;
+
 		int row = 0;
 		int active_row = 0;
 		QStandardItemModel *model = new QStandardItemModel();

@@ -30,16 +30,18 @@ SOURCES += main.cpp\
     dialogs/find_replace_dialog.cpp \
     character_mapper.cpp \
     dialogs/map_editor_dialog.cpp \
-    disassembler.cpp \
     disassembly_cores/isa_65c816.cpp \
     disassembly_cores/disassembler_core.cpp \
-    bookmarks.cpp \
     displays/hex_display.cpp \
     displays/text_display.cpp \
     displays/ascii_display.cpp \
     displays/address_display.cpp \
     selection.cpp \
-    disassembly_cores/isa_spc700.cpp
+    disassembly_cores/isa_spc700.cpp \
+    panels/abstract_panel.cpp \
+    panel_manager.cpp \
+    panels/bookmark_panel.cpp \
+    panels/disassembler_panel.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -61,10 +63,8 @@ HEADERS  += main_window.h \
     dialogs/find_replace_dialog.h \
     character_mapper.h \
     dialogs/map_editor_dialog.h \
-    disassembler.h \
     disassembly_cores/isa_65c816.h \
     disassembly_cores/disassembler_core.h \
-    bookmarks.h \
     displays/hex_display.h \
     displays/text_display.h \
     displays/ascii_display.h \
@@ -73,7 +73,11 @@ HEADERS  += main_window.h \
     disassembly_cores/isa_spc700.h \
     utility.h \
     events/event_types.h \
-    events/general_event.h
+    events/general_event.h \
+    panels/abstract_panel.h \
+    panel_manager.h \
+    panels/disassembler_panel.h \
+    panels/bookmark_panel.h
 
 OTHER_FILES += \
     version.sh

@@ -8,25 +8,21 @@
 #include "disassembly_cores/disassembler_core.h"
 #include "debug.h"
 #include "selection.h"
+#include "abstract_panel.h"
 
-class disassembler : public QPlainTextEdit
+class disassembler_panel : public QPlainTextEdit, public abstract_panel
 {
 		Q_OBJECT
 	public:
 
-		explicit disassembler(QWidget *parent = 0);
-		QVBoxLayout *get_layout();
+		explicit disassembler_panel(QWidget *parent = 0);
+		virtual QLayout *get_layout();
 		
 	public slots:
 		void disassemble(selection selection_area, const ROM_buffer *buffer);
-		void toggle_display(bool state);
 		void update_core_layout(int a);
-	
-	protected:
-		virtual bool event(QEvent *event);
 		
 	private:
-		static bool display;
 		void layout_adjust();
 		disassembler_core *active_core(){ return cores[disassembler_cores->currentText()]; }
 		
