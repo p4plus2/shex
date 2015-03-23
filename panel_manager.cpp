@@ -3,7 +3,7 @@
 #include "panels/bookmark_panel.h"
 #include "hex_editor.h"
 
-panel_manager::panel_manager(QWidget *parent) : QObject(parent)
+panel_manager::panel_manager(QWidget *parent) : QWidget(parent)
 {
 	panel_map[DISASSEMBLER] = new disassembler_panel(parent);
 	panel_map[BOOKMARKS] = new bookmark_panel(parent);
@@ -15,6 +15,7 @@ panel_manager::panel_manager(QWidget *parent) : QObject(parent)
 
 void panel_manager::init_displays()
 {
+	setLayout(layout);
 	foreach(abstract_panel *panel, panel_map){
 		panel->init_display();
 	}	

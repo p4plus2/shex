@@ -1,7 +1,7 @@
 #ifndef PANEL_MANAGER_H
 #define PANEL_MANAGER_H
 
-#include <QObject>
+#include <QWidget>
 #include <QMap>
 #include <QHBoxLayout>
 #include <QEvent>
@@ -10,7 +10,7 @@
 
 class hex_editor;
 
-class panel_manager : public QObject
+class panel_manager : public QWidget
 {
 		Q_OBJECT
 	public:

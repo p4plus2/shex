@@ -200,7 +200,7 @@ void main_window::create_new_tab(QString name, bool new_file)
 	QHBoxLayout *hex_layout = new QHBoxLayout(widget);
 	hex_layout->addWidget(editor);
 	hex_layout->addWidget(scrollbar);
-	hex_layout->addLayout(panel_controller->get_layout());
+	hex_layout->addWidget(panel_controller);
 	widget->setLayout(hex_layout);
 	tab_widget->addTab(widget, QFileInfo(name).fileName());
 	
