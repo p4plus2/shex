@@ -443,6 +443,9 @@ bool hex_editor::event(QEvent *event)
 		case editor_events::DISASSEMBLE:
 			disassemble();
 			return true;
+		case editor_events::SCROLL_MODE:
+			scroll_mode_changed();
+			return true;
 		default:
 			qDebug() << "Bad event" << type;
 			return false;

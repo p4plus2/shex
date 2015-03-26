@@ -237,11 +237,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 	{"BRA %r"},
 	{"STA (%b,X)"},
 	{"BRL %R"},
-<<<<<<< HEAD
-	{"STA %b,s"},
-=======
 	{"STA %b,S"},
->>>>>>> menu_refactor2
 	{"STY %b"},
 	{"STA %b"},
 	{"STX %b"},
