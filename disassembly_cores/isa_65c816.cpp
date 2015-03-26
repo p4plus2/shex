@@ -24,7 +24,6 @@ QGridLayout *isa_65c816::core_layout()
 #define label_op(O, A, T) {\
 	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(O, A).toLatin1())); \
 	int address = buffer->snes_to_pc(buffer->T##_address(delta*2-2+region.get_start_aligned(), little_endian)); \
-	qDebug() << hex << address; \
 	if(address < (region.get_start_aligned()/2) || address > (region.get_end_aligned()/2)){ \
 		return '$' + get_hex(O, A); \
 	} \
@@ -238,7 +237,11 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 	{"BRA %r"},
 	{"STA (%b,X)"},
 	{"BRL %R"},
+<<<<<<< HEAD
 	{"STA %b,s"},
+=======
+	{"STA %b,S"},
+>>>>>>> menu_refactor2
 	{"STY %b"},
 	{"STA %b"},
 	{"STX %b"},

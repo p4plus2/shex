@@ -13,7 +13,6 @@ class select_range_dialog : public abstract_dialog
 		Q_OBJECT
 	public:
 		explicit select_range_dialog(QWidget *parent);
-		virtual QString id(){ return "select_range"; }
 		
 	signals:
 		void triggered(int start, int end);

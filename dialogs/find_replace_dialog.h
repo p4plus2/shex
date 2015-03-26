@@ -13,7 +13,6 @@ class find_replace_dialog : public abstract_dialog
 		Q_OBJECT
 	public:
 		explicit find_replace_dialog(QWidget *parent);
-		virtual QString id(){ return "find_replace"; }
 		
 	signals:
 		void count(QString find, bool mode);

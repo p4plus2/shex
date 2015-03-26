@@ -1,9 +1,10 @@
 #ifndef HEX_EDITOR_H
 #define HEX_EDITOR_H
 
+#include "events/event_types.h"
 #include "selection.h"
 #include "rom_buffer.h"
-#include "bookmarks.h"
+#include "panels/bookmark_panel.h"
 
 #include <QWidget>
 #include <QKeyEvent>
@@ -43,6 +44,10 @@ class hex_editor : public QWidget
 
 		inline const bookmark_map *get_bookmark_map(){ return bookmark_data_map; }
 		inline void set_bookmark_map(const bookmark_map *b){ bookmark_data_map = b; }
+		
+		static bool active_selection(){ return active_editor_selection; } 
+		static bool clipboard_usable(){ return active_editor_clipboard_usable; }
+		
 	signals:
 		void update_slider(int position);
 		void update_range(int value);
@@ -50,7 +55,6 @@ class hex_editor : public QWidget
 		void toggle_scroll_mode(bool mode);
 		void selection_toggled(bool state);
 		void focused(bool has_focus);
-		void clipboard_usable(bool usable);
 		void save_state_changed(bool save);
 		void send_disassemble_data(selection selection_area, const ROM_buffer *buffer);
 		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);
@@ -78,11 +82,12 @@ class hex_editor : public QWidget
 		void replace(QString find, QString replace, bool direction, bool mode);
 		void replace_all(QString find, QString replace, bool mode);
 		
-		inline void clipboard_changed(){ emit clipboard_usable(buffer->check_paste_data()); }
+		inline void clipboard_changed(){ active_editor_clipboard_usable = buffer->check_paste_data(); }
 
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void wheelEvent(QWheelEvent *event);
+		virtual bool event(QEvent *event);
 
 	private:
 		address_display *address;
@@ -101,6 +106,10 @@ class hex_editor : public QWidget
 		QString ROM_error = "";
 		int cursor_nibble = 0;
 		selection selection_area;
+		
+		static bool active_editor_selection;
+		static bool active_editor_has_focus;
+		static bool active_editor_clipboard_usable;
 		
 		void handle_search_result(QString target, int result, bool mode);
 		QString get_status_text();

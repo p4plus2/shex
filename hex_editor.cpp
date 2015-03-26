@@ -57,8 +57,7 @@ void hex_editor::set_focus()
 	emit update_status_text(get_status_text());
 	hex->setFocus();
 	buffer->set_active();
-	emit selection_toggled(selection_area.is_active());
-	emit focused(true);
+	active_editor_selection = selection_area.is_active();
 	emit update_save_state(0);
 	clipboard_changed();
 }
@@ -92,7 +91,7 @@ void hex_editor::update_window()
 	ascii->update_display();
 	hex->update_display();
 	address->update_display();
-	emit selection_toggled(selection_area.is_active());
+	active_editor_selection = selection_area.is_active();
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
@@ -413,6 +412,43 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 	move_cursor_nibble(text_display::get_columns() * 2 * steps);
 }
 
+bool hex_editor::event(QEvent *event)
+{
+	if(event->type() != (QEvent::Type)EDITOR_EVENT){
+		return QWidget::event(event);
+	}
+	editor_events type = ((editor_event *)event)->sub_type();
+	switch(type){
+		case editor_events::CUT:
+			cut();
+			return true;
+		case editor_events::COPY:
+			copy();
+			return true;
+		case editor_events::PASTE:
+			paste();
+			return true;
+		case editor_events::DELETE_TEXT:
+			delete_text();
+			return true;
+		case editor_events::NO_SPACES ... editor_events::C_SOURCE:
+			ROM_buffer::set_copy_style((ROM_buffer::copy_style)(type-editor_events::NO_SPACES));
+			return true;
+		case editor_events::UNDO:
+			update_undo_action(true);
+			return true;
+		case editor_events::REDO:
+			update_undo_action(false);
+			return true;
+		case editor_events::DISASSEMBLE:
+			disassemble();
+			return true;
+		default:
+			qDebug() << "Bad event" << type;
+			return false;
+	}
+}
+
 void hex_editor::handle_search_result(QString target, int result, bool mode)
 {
 	int start = buffer->pc_to_snes(result);
@@ -511,8 +547,10 @@ int hex_editor::get_max_lines()
 
 hex_editor::~hex_editor()
 {
-	emit selection_toggled(false);
-	emit clipboard_usable(false);
-	emit focused(false);
+	active_editor_selection = false;
+	active_editor_clipboard_usable = false;
 	delete buffer;
 }
+
+bool hex_editor::active_editor_selection = false;
+bool hex_editor::active_editor_clipboard_usable = false;

@@ -14,7 +14,6 @@ class metadata_editor_dialog : public abstract_dialog
 		Q_OBJECT
 	public:
 		explicit metadata_editor_dialog(QWidget *parent);
-		virtual QString id(){ return "metadata_editor"; }
 		
 	public slots:
 		virtual void refresh();

@@ -1,4 +1,4 @@
-#include "bookmarks.h"
+#include "bookmark_panel.h"
 #include "hex_editor.h"
 #include <QHeaderView>
 #include <QStringList>
@@ -6,20 +6,14 @@
 #include <QFontMetrics>
 #include "debug.h"
 
-bookmarks::bookmarks(hex_editor *parent) :
-        QTableView(parent)
+bookmark_panel::bookmark_panel(QWidget *parent) :
+        QTableView(parent), abstract_panel(this)
 {
-	editor = parent;
 	QFontMetrics metrics(QApplication::font(address_input));
 	QStringList labels;
 	labels << "Address" << "Color" << "Description";
 	model->setHorizontalHeaderLabels(labels);
 	setSortingEnabled(true);
-	
-	if(!display){
-		hide();
-		input_area->hide();
-	}
 	
 	setModel(model);
 	verticalHeader()->hide();
@@ -37,14 +31,14 @@ bookmarks::bookmarks(hex_editor *parent) :
 	color_button->setAutoFillBackground(true);
 	color_button->setFlat(true);
 	
-	connect(color_button, &QPushButton::clicked, this, &bookmarks::color_clicked);
-	connect(address_input, &QLineEdit::textChanged, this, &bookmarks::address_updated);
+	connect(color_button, &QPushButton::clicked, this, &bookmark_panel::color_clicked);
+	connect(address_input, &QLineEdit::textChanged, this, &bookmark_panel::address_updated);
 	
-	connect(add_button, &QPushButton::clicked, this, &bookmarks::add_clicked);
-	connect(update_button, &QPushButton::clicked, this, &bookmarks::update_clicked);
-	connect(reload_button, &QPushButton::clicked, this, &bookmarks::reload_clicked);
+	connect(add_button, &QPushButton::clicked, this, &bookmark_panel::add_clicked);
+	connect(update_button, &QPushButton::clicked, this, &bookmark_panel::update_clicked);
+	connect(reload_button, &QPushButton::clicked, this, &bookmark_panel::reload_clicked);
 	
-	connect(this, &bookmarks::clicked, this, &bookmarks::row_clicked);
+	connect(this, &bookmark_panel::clicked, this, &bookmark_panel::row_clicked);
 	
 	update_button->hide();
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -61,12 +55,12 @@ bookmarks::bookmarks(hex_editor *parent) :
 	init_grid_layout();
 }
 
-void bookmarks::color_clicked()
+void bookmark_panel::color_clicked()
 {
 	set_color_button(QColorDialog::getColor());
 }
 
-void bookmarks::address_updated(QString address)
+void bookmark_panel::address_updated(QString address)
 {
 	if(bookmark_data_map.contains(address)){
 		add_button->hide();
@@ -77,7 +71,7 @@ void bookmarks::address_updated(QString address)
 	}
 }
 
-void bookmarks::add_clicked()
+void bookmark_panel::add_clicked()
 {
 	QString description = description_input->toPlainText();
 	int clean_address = check_address(address_input->text());
@@ -99,10 +93,10 @@ void bookmarks::add_clicked()
 	update_button->show();
 	selectRow(row-1);
 	
-	editor->update_window();
+	active_editor->update_window();
 }
 
-void bookmarks::update_clicked()
+void bookmark_panel::update_clicked()
 {
 	int clean_address = check_address(address_input->text());
 	if(clean_address == -1){
@@ -119,12 +113,12 @@ void bookmarks::update_clicked()
 	add_clicked();
 }
 
-void bookmarks::reload_clicked()
+void bookmark_panel::reload_clicked()
 {
 	row_clicked(model->index(active_row, 0, QModelIndex()));
 }
 
-void bookmarks::row_clicked(QModelIndex index)
+void bookmark_panel::row_clicked(QModelIndex index)
 {	
 	active_row = index.row();
 	QModelIndex address_index = model->index(active_row, 0, QModelIndex());
@@ -139,7 +133,7 @@ void bookmarks::row_clicked(QModelIndex index)
 	data_button->setChecked(!bookmark.code);
 }
 
-void bookmarks::create_bookmark(int start, int end, const ROM_buffer *buffer)
+void bookmark_panel::create_bookmark(int start, int end, const ROM_buffer *buffer)
 {
 	size_input->setText(QString::number(end - start));
 	description_input->setPlainText("");
@@ -150,26 +144,14 @@ void bookmarks::create_bookmark(int start, int end, const ROM_buffer *buffer)
 	toggle_display(true);
 }
 
-void bookmarks::toggle_display(bool state) { 
-	if(state == display){
-		return;
-	}
-	setVisible(state);
-	
-	input_area->setVisible(state);
-	
-	display = state;
-	layout_adjust();
-}
-
-QVBoxLayout *bookmarks::get_layout()
+QLayout *bookmark_panel::get_layout()
 {
 	box->addWidget(this);
 	box->addWidget(input_area);
 	return box;
 }
 
-void bookmarks::add_bookmark(QString address, bookmark_data bookmark)
+void bookmark_panel::add_bookmark(QString address, bookmark_data bookmark)
 {
 	model->setItem(row, 0, new QStandardItem(address));
 	QStandardItem *color = new QStandardItem();
@@ -181,7 +163,7 @@ void bookmarks::add_bookmark(QString address, bookmark_data bookmark)
 	row++;
 }
 
-void bookmarks::init_grid_layout()
+void bookmark_panel::init_grid_layout()
 {
 	grid->addWidget(address_label, 0, 0, 1, 1, Qt::AlignRight);
 	grid->addWidget(address_input, 0, 1);
@@ -201,7 +183,7 @@ void bookmarks::init_grid_layout()
 	input_area->setLayout(grid);
 }
 
-void bookmarks::set_color_button(QColor color)
+void bookmark_panel::set_color_button(QColor color)
 {
 	if(color.isValid()){
 		QPalette palette;
@@ -211,28 +193,14 @@ void bookmarks::set_color_button(QColor color)
 	}
 }
 
-void bookmarks::layout_adjust()
-{
-        QWidget *parent = parentWidget();
-        while(parent){
-		int height = parent->height();
-		parent->setUpdatesEnabled(false);
-		parent->adjustSize();
-		parent->resize(parent->width(), height);
-		parent->setUpdatesEnabled(true);
-		parent->repaint();
-		parent = parent->parentWidget();
-	}
-}
-
-int bookmarks::check_address(QString address)
+int bookmark_panel::check_address(QString address)
 {
 	bool status;
 	int clean = address.remove(QRegExp("[^0-9A-Fa-f]")).toInt(&status, 16);
-	if(editor->get_buffer()->validate_address(clean)){
+	if(active_editor->get_buffer()->validate_address(clean)){
 		return clean;
 	}
 	return -1;
 }
 
-bool bookmarks::display = false;
+bool bookmark_panel::state = false;
