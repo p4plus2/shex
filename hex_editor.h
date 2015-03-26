@@ -1,11 +1,6 @@
 #ifndef HEX_EDITOR_H
 #define HEX_EDITOR_H
 
-#include "events/event_types.h"
-#include "selection.h"
-#include "rom_buffer.h"
-#include "panels/bookmark_panel.h"
-
 #include <QWidget>
 #include <QKeyEvent>
 #include <QWheelEvent>
@@ -13,6 +8,11 @@
 #include <QFont>
 #include <QTimer>
 #include <QLabel>
+
+#include "events/event_types.h"
+#include "selection.h"
+#include "rom_buffer.h"
+#include "panels/bookmark_panel.h"
 
 class address_display;
 class ascii_display;

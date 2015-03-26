@@ -2,7 +2,9 @@
 #define ABSTRACT_PANEL_H
 
 #include <QWidget>
+
 #include "events/event_types.h"
+
 class hex_editor;
 
 class abstract_panel

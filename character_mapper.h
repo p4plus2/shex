@@ -1,6 +1,8 @@
 #ifndef CHARACTER_MAPPER_H
 #define CHARACTER_MAPPER_H
+
 #include <QMap>
+
 class character_mapper
 {
 	public:

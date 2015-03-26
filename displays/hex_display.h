@@ -2,7 +2,6 @@
 #define HEX_DISPLAY_H
 
 #include "text_display.h"
-#include <QSize>
 
 class hex_display : public text_display
 {

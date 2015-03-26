@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QHBoxLayout>
 #include <QEvent>
+
 #include "events/event_types.h"
 #include "panels/abstract_panel.h"
 

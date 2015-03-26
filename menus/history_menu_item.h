@@ -3,7 +3,6 @@
 #include "menus/abstract_menu_item.h"
 
 class QUndoGroup;
-class hex_editor;
 
 class history_menu_item : public abstract_menu_item
 {

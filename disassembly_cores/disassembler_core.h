@@ -1,9 +1,11 @@
 #ifndef DISASSEMBLER_CORE_H
 #define DISASSEMBLER_CORE_H
+
 #include <QObject>
 #include <QMap>
 #include <QGridLayout>
-#include "../rom_buffer.h"
+
+#include "rom_buffer.h"
 #include "selection.h"
 
 class disassembler_core : public QObject

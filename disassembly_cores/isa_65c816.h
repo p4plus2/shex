@@ -4,6 +4,7 @@
 #include <QCheckBox>
 #include <QSet>
 #include <QGridLayout>
+
 #include "disassembler_core.h"
 
 class isa_65c816 : public disassembler_core

@@ -1,10 +1,12 @@
 #ifndef DIALOG_MANAGER_H
 #define DIALOG_MANAGER_H
+
+#include <QObject>
+#include <QMap>
+
 #include "debug.h"
 #include "events/event_types.h"
 #include "dialogs/abstract_dialog.h"
-#include <QObject>
-#include <QMap>
 
 class hex_editor;
 

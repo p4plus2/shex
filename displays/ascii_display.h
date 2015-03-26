@@ -2,7 +2,6 @@
 #define ASCII_DISPLAY_H
 
 #include "text_display.h"
-#include <QSize>
 
 class ascii_display : public text_display
 {

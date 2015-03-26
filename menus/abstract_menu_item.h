@@ -3,17 +3,12 @@
 
 #include <QAction>
 #include <QEvent>
+
 #include "debug.h"
 
-typedef bool(*toggle_function)();
-
-class hex_editor;
-class main_window;
-class dialog_manager;
-class QUndoGroup;
-class disassembler;
-class bookmarks;
 class menu_manager;
+
+typedef bool(*toggle_function)();
 
 class abstract_menu_item : public QAction
 {

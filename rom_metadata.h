@@ -2,7 +2,6 @@
 #define ROM_metadata_H
 
 #include <QObject>
-#include <map>
 #include <QPair>
 
 class ROM_metadata {

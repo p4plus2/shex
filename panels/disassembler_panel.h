@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QLayout>
 #include <QMap>
+
 #include "disassembly_cores/disassembler_core.h"
 #include "debug.h"
 #include "selection.h"

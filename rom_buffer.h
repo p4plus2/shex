@@ -1,8 +1,6 @@
 #ifndef ROM_BUFFER_H
 #define ROM_BUFFER_H
 
-#include "rom_metadata.h"
-
 #include <QFile>
 #include <QFileInfo>
 #include <QClipboard>
@@ -11,6 +9,8 @@
 #include <QUndoGroup>
 #include <QUndoStack>
 #include <QRegExp>
+
+#include "rom_metadata.h"
 
 class ROM_buffer : public ROM_metadata
 {

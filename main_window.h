@@ -4,18 +4,15 @@
 #include <QMainWindow>
 #include <QUndoGroup>
 #include <QAction>
+#include <QLayout>
 #include "dialog_manager.h"
 #include "menu_manager.h"
 #include "panel_manager.h"
 #include "rom_buffer.h"
-#include <QLayout>
-
 #include "debug.h"
+
 class hex_editor;
 class dynamic_scrollbar;
-class QLabel;
-class disassembler;
-class bookmarks;
 
 class main_window : public QMainWindow
 {

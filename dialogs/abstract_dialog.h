@@ -2,8 +2,10 @@
 #define ABSTRACT_DIALOG_H
 
 #include <QDialog>
+
 #include "hex_editor.h"
 #include "debug.h"
+
 class abstract_dialog : public QDialog
 {
 		Q_OBJECT

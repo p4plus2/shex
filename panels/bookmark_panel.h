@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include <QMap>
 #include <QRadioButton>
+
 #include "abstract_panel.h"
 
 class ROM_buffer;

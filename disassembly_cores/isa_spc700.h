@@ -1,12 +1,13 @@
 #ifndef ISA_SPC700_H
 #define ISA_SPC700_H
 
-#include "disassembler_core.h"
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QLabel>
 #include <QList>
 #include <QSet>
+
+#include "disassembler_core.h"
 
 class isa_spc700 : public disassembler_core
 {

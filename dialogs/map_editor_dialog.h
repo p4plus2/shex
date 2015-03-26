@@ -1,9 +1,10 @@
 #ifndef MAP_EDITOR_DIALOG_H
 #define MAP_EDITOR_DIALOG_H
 
-#include "dialogs/abstract_dialog.h"
 #include <QPushButton>
 #include <QList>
+
+#include "abstract_dialog.h"
 
 class QLineEdit;
 class map_editor_dialog : public abstract_dialog

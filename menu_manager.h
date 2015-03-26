@@ -7,6 +7,7 @@
 #include <QActionGroup>
 #include <QCoreApplication>
 #include <QMap>
+
 #include "menus/abstract_menu_item.h"
 #include "events/event_types.h"
 

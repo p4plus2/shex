@@ -1,5 +1,6 @@
 #ifndef EVENT_TYPES
 #define EVENT_TYPES
+
 #include "general_event.h"
 #include "rom_buffer.h"
 

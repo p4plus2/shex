@@ -1,12 +1,13 @@
 #ifndef FIND_DIALOG_H
 #define FIND_DIALOG_H
-#include "abstract_dialog.h"
 
 #include <QLabel>
 #include <QComboBox>
 #include <QRadioButton>
 #include <QPushButton>
 #include <QButtonGroup>
+
+#include "abstract_dialog.h"
 
 class find_replace_dialog : public abstract_dialog
 {
