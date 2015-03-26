@@ -188,7 +188,7 @@ void hex_editor::context_menu(const QPoint& position)
 
 void hex_editor::cut()
 {
-	if(!buffer->is_active() || !selection_area.is_active()){
+	if(!selection_area.is_active()){
 		return;
 	}
 	
@@ -201,7 +201,7 @@ void hex_editor::cut()
 
 void hex_editor::copy()
 {
-	if(!buffer->is_active() || !selection_area.is_active()){
+	if(!selection_area.is_active()){
 		return;
 	}
 	
@@ -211,9 +211,6 @@ void hex_editor::copy()
 
 void hex_editor::paste(bool raw)
 {
-	if(!buffer->is_active()){
-		return;
-	}
 	if(!selection_area.is_active()){
 		buffer->paste(selection_area.get_start(), selection_area.get_end(), raw);
 	}else{
@@ -227,9 +224,6 @@ void hex_editor::paste(bool raw)
 
 void hex_editor::delete_text()
 {
-	if(!buffer->is_active()){
-		return;
-	}
 	if(!selection_area.is_active()){
 		buffer->delete_text(cursor_nibble);
 	}else{
@@ -243,9 +237,6 @@ void hex_editor::delete_text()
 
 void hex_editor::select_all()
 {
-	if(!buffer->is_active()){
-		return;
-	}
 	selection_area.set_start(0);
 	selection_area.set_end(buffer->size()*2);
 	emit update_status_text(get_status_text());
@@ -254,7 +245,7 @@ void hex_editor::select_all()
 
 void hex_editor::branch()
 {
-	if(!buffer->is_active() || !selection_area.is_active()){
+	if(!selection_area.is_active()){
 		return;
 	}
 
@@ -264,7 +255,7 @@ void hex_editor::branch()
 
 void hex_editor::jump()
 {
-	if(!buffer->is_active() || !selection_area.is_active()){
+	if(!selection_area.is_active()){
 		return;
 	}
 	
@@ -274,7 +265,7 @@ void hex_editor::jump()
 
 void hex_editor::disassemble()
 {
-	if(!buffer->is_active() || !selection_area.is_active()){
+	if(!selection_area.is_active()){
 		return;
 	}
 	emit send_disassemble_data(selection_area, buffer);
@@ -282,7 +273,7 @@ void hex_editor::disassemble()
 
 void hex_editor::create_bookmark()
 {
-	if(!buffer->is_active() || !selection_area.is_active()){
+	if(!selection_area.is_active()){
 		return;
 	}
 	emit send_bookmark_data(selection_area.get_start(), selection_area.get_end(), buffer);
