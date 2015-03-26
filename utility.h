@@ -10,4 +10,12 @@ struct resolve{
     } 
 };
 
+template<typename T>
+T clamp(T value, T low, T high)
+{
+	return (value < low) ? low :
+	       (value > high) ? high :
+	       value;
+}
+
 #endif // UTILITY_H

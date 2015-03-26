@@ -4,6 +4,7 @@
 #include "displays/ascii_display.h"
 #include "displays/address_display.h"
 #include "debug.h"
+#include "utility.h"
 
 #include <QPainter>
 #include <QFontMetrics>
@@ -141,11 +142,8 @@ void hex_editor::goto_offset(int address)
 	address = buffer->snes_to_pc(address);
 	offset = address - text_display::get_rows_by_columns() / 2;
 	offset -= offset % text_display::get_columns();
-	if(offset < 0){
-		offset = 0;
-	}else if(offset > buffer->size() - text_display::get_rows_by_columns()){
-		offset = buffer->size() - text_display::get_rows_by_columns();
-	}
+	offset = clamp(offset, 0, buffer->size() - text_display::get_rows_by_columns());
+	
 	cursor_nibble = address * 2;
 	selection_area.set_active(false);
 	update_window();
@@ -161,11 +159,8 @@ void hex_editor::select_range(int start, int end)
 
 	offset = start - text_display::get_rows_by_columns() / 2;
 	offset -= offset % text_display::get_columns();
-	if(offset < 0){
-		offset = 0;
-	}else if(offset > buffer->size() - text_display::get_rows_by_columns()){
-		offset = buffer->size() - text_display::get_rows_by_columns();
-	}
+	offset = clamp(offset, 0, buffer->size() - text_display::get_rows_by_columns());
+	
 	selection_area.set_start(start * 2);
 	selection_area.set_end(end * 2);
 	update_window();
@@ -503,11 +498,7 @@ bool hex_editor::follow_selection(bool type)
 void hex_editor::move_cursor_nibble(int delta)
 {
 	cursor_nibble += delta;
-	if(cursor_nibble < 0){
-		cursor_nibble = 0;
-	}else if(cursor_nibble >= buffer->size() * 2){
-		cursor_nibble = buffer->size() * 2 - 1;  //last nibble
-	}
+	offset = clamp(offset, 0, buffer->size() * 2 - 1);
 	
 	//TODO optimize
 	while(cursor_nibble/2 >= offset + text_display::get_rows_by_columns()){
@@ -522,13 +513,7 @@ void hex_editor::move_cursor_nibble(int delta)
 
 void hex_editor::set_offset(int o)
 {
-	if(o < 0){
-		o = 0;
-	}else if(o > buffer->size() - text_display::get_rows_by_columns()){
-		o = buffer->size() - text_display::get_rows_by_columns();
-	}
-
-	offset = o;
+	offset = clamp(o, 0, buffer->size() - text_display::get_rows_by_columns());
 }
 
 void hex_editor::search_error(int error, QString find, QString replace_with)
