@@ -24,7 +24,7 @@ QGridLayout *isa_65c816::core_layout()
 #define label_op(O, A, T) {\
 	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(O, A).toLatin1())); \
 	int address = buffer->snes_to_pc(buffer->T##_address(delta*2-2+region.get_start_aligned(), little_endian)); \
-	if(address < region.get_start_aligned() || address > region.get_end_aligned()){ \
+	if(address < (region.get_start_aligned()/2) || address > (region.get_end_aligned()/2)){ \
 		return '$' + get_hex(O, A); \
 	} \
 	return add_label(address);}
@@ -91,7 +91,7 @@ disassembler_core::opcode isa_65c816::get_opcode(int op)
 
 int isa_65c816::get_base()
 {
-	return region.get_start();
+	return region.get_start() / 2 - 2;
 }
 
 bool isa_65c816::abort_unlikely(int op)
@@ -237,7 +237,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 	{"BRA %r"},
 	{"STA (%b,X)"},
 	{"BRL %R"},
-	{"STA %b"},
+	{"STA %b,S"},
 	{"STY %b"},
 	{"STA %b"},
 	{"STX %b"},
@@ -269,7 +269,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 	{"LDY %i"},
 	{"LDA (%b,X)"},
 	{"LDX %i"},
-	{"LDA %b"},
+	{"LDA %b,S"},
 	{"LDY %b"},
 	{"LDA %b"},
 	{"LDX %b"},

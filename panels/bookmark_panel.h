@@ -31,6 +31,8 @@ class bookmark_panel : public QTableView, public abstract_panel
 	public:
 		explicit bookmark_panel(QWidget *parent = 0);
 		virtual QLayout *get_layout();
+		virtual void toggle_state(){ state = !state; }
+		virtual bool display_state(){ return state; }
 		
 		void add_bookmark(QString address, bookmark_data bookmark);
 		const bookmark_map *map(){ return &bookmark_data_map; }
@@ -83,6 +85,7 @@ class bookmark_panel : public QTableView, public abstract_panel
 		QLabel *size_label = new QLabel("Size: ");
 		
 		static const int input_padding = 12;
+		static bool state;
 };
 
 #endif // BOOKMARKS_H

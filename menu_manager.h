@@ -19,6 +19,7 @@ class menu_manager : public QObject
 		explicit menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u);
 		~menu_manager();
 		void connect_to_widget(QObject *object, event_types event){ event_map[event] = object; }
+		void group_connect_to_widget(QObject *object, event_types event);
 		
 	public slots:
 		void post_event(QEvent *event);

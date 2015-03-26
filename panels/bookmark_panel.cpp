@@ -202,3 +202,5 @@ int bookmark_panel::check_address(QString address)
 	}
 	return -1;
 }
+
+bool bookmark_panel::state = false;

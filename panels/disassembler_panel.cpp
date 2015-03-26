@@ -48,3 +48,5 @@ QLayout *disassembler_panel::get_layout()
 	core_layout->setLayout(active_core()->core_layout());
 	return box;
 }
+
+bool disassembler_panel::state = false;

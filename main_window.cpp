@@ -79,7 +79,6 @@ void main_window::changed_tab(int i)
 	editor->set_focus();
 	dialog_controller->set_active_editor(editor);
 	menu_controller->connect_to_widget(editor, EDITOR_EVENT);
-	menu_controller->connect_to_widget(get_panel(i), PANEL_EVENT);
 }
 
 void main_window::file_save_state(bool clean)
@@ -180,7 +179,7 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	dialog_controller->connect_to_editor(editor);
 	panel->connect_to_editor(editor);
 	menu_controller->connect_to_widget(editor, EDITOR_EVENT);
-	menu_controller->connect_to_widget(panel, PANEL_EVENT);
+	menu_controller->group_connect_to_widget(panel, PANEL_EVENT);
 }
 
 void main_window::create_new_tab(QString name, bool new_file)
@@ -214,11 +213,6 @@ void main_window::create_new_tab(QString name, bool new_file)
 hex_editor *main_window::get_editor(int i) const
 {
 	return dynamic_cast<hex_editor *>(tab_widget->widget(i)->layout()->itemAt(0)->widget());
-}
-
-panel_manager *main_window::get_panel(int i) const
-{
-	return dynamic_cast<panel_manager *>(tab_widget->widget(i)->layout()->itemAt(2)->widget());
 }
 
 main_window::~main_window()

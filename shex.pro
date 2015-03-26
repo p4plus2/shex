@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     panels/abstract_panel.cpp \
     panel_manager.cpp \
     panels/bookmark_panel.cpp \
-    panels/disassembler_panel.cpp
+    panels/disassembler_panel.cpp \
+    object_group.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -77,7 +78,8 @@ HEADERS  += main_window.h \
     panels/abstract_panel.h \
     panel_manager.h \
     panels/disassembler_panel.h \
-    panels/bookmark_panel.h
+    panels/bookmark_panel.h \
+    object_group.h
 
 OTHER_FILES += \
     version.sh

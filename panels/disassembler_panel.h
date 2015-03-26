@@ -17,6 +17,8 @@ class disassembler_panel : public QPlainTextEdit, public abstract_panel
 
 		explicit disassembler_panel(QWidget *parent = 0);
 		virtual QLayout *get_layout();
+		virtual void toggle_state(){ state = !state; }
+		virtual bool display_state(){ return state; }
 		
 	public slots:
 		void disassemble(selection selection_area, const ROM_buffer *buffer);
@@ -30,6 +32,7 @@ class disassembler_panel : public QPlainTextEdit, public abstract_panel
 		QVBoxLayout *box = new QVBoxLayout();	
 		QComboBox *disassembler_cores = new QComboBox(this);
 		QMap<QString, disassembler_core *> cores;
+		static bool state;
 };
 
 #endif // DISASSEMBLER_H

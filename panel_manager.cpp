@@ -10,6 +10,7 @@ panel_manager::panel_manager(QWidget *parent) : QWidget(parent)
 	
 	foreach(abstract_panel *panel, panel_map){
 		layout->addWidget(panel->get_display());
+		panel->toggle_display(panel->display_state());
 	}
 }
 
@@ -26,7 +27,13 @@ bool panel_manager::event(QEvent *event)
 	if(event->type() != (QEvent::Type)PANEL_EVENT){
 		return QObject::event(event);
 	}
-	find_panel(((panel_event *)event)->sub_type())->toggle_display();
+	
+	abstract_panel *panel = find_panel(((panel_event *)event)->sub_type());
+	if(!event->isAccepted()){
+		panel->toggle_state();
+	}
+	panel->toggle_display(panel->display_state());
+	event->accept();
 	return true;
 }
 

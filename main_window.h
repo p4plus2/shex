@@ -51,7 +51,6 @@ class main_window : public QMainWindow
 		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, panel_manager *panel);
 		void create_new_tab(QString name, bool new_file = false);
 		hex_editor *get_editor(int i) const;
-		panel_manager *get_panel(int i) const;
 		
 };
 

@@ -10,9 +10,9 @@ void abstract_panel::set_active_editor(hex_editor *editor)
 	active_editor = editor;
 }
 
-void abstract_panel::toggle_display(bool force)
+void abstract_panel::toggle_display(bool state)
 {
-	display->setVisible(!display->isVisible() | force);
+	display->setVisible(state);
 	layout_adjust();
 }
 

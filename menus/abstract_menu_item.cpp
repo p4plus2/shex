@@ -19,6 +19,7 @@ abstract_menu_item::abstract_menu_item(QString txt, QEvent *e, toggle_function t
 
 void abstract_menu_item::send_event()
 {
+	event->setAccepted(false);
 	((menu_manager *)parent())->post_event(event);
 }
 

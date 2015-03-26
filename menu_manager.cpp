@@ -4,6 +4,7 @@
 #include "hex_editor.h"
 #include "main_window.h"
 #include "debug.h"
+#include "object_group.h"
 
 menu_manager::menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u) :
         QObject(parent)
@@ -11,6 +12,14 @@ menu_manager::menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u) :
 	menu_bar = m;
 	create_menus();
 	create_actions(u);
+}
+
+void menu_manager::group_connect_to_widget(QObject *object, event_types event)
+{
+	if(!event_map.contains(event)){
+		event_map[event] = new object_group(this);
+	}
+	((object_group *)event_map[event])->add_to_group(object);
 }
 
 void menu_manager::create_menus()
@@ -88,7 +97,6 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	menu = find_menu("&Options");
 	add_toggle_action<editor_event>("&Scrollbar toggle", SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);
 	add_action<dialog_event>("&Character map editor", MAP_EDITOR, hotkey("Alt+c"), menu);
-	//todo merge panels
 	add_action<panel_event>("Disassembly panel toggle", DISASSEMBLER, hotkey("Alt+d"), menu, true);
 	add_action<panel_event>("Bookmark panel toggle", BOOKMARKS, hotkey("Alt+b"), menu, true);
 	
