@@ -21,13 +21,16 @@ QGridLayout *isa_65c816::core_layout()
 	return grid;
 }
 
-#define label_op(O, A, T) {\
-	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(O, A).toLatin1())); \
-	int address = buffer->snes_to_pc(buffer->T##_address(delta*2-2+region.get_start_aligned(), little_endian)); \
-	if(address < (region.get_start_aligned()/2) || address > (region.get_end_aligned()/2)){ \
-		return '$' + get_hex(O, A); \
-	} \
-	return add_label(address);}
+template <typename V> 
+QString isa_65c816::label_op(int offset, int size, V validator)
+{
+	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(offset, size).toLatin1()));
+	int address = buffer->snes_to_pc((buffer->*validator)(delta*2-2+region.get_start_aligned(), little_endian));
+	if(address < (region.get_start_aligned()/2) || address > (region.get_end_aligned()/2)){
+		return '$' + get_hex(offset, size);
+	}
+	return add_label(address);
+}
 
 QString isa_65c816::decode_name_arg(const char arg, int &size)
 {
@@ -46,16 +49,16 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 			return "$" + get_hex(operand & 0x0000FF, 2);	
 		case 'r':
 			size++;
-			label_op(operand & 0x0000FF, 2, branch);
+			return label_op(operand & 0x0000FF, 2, &ROM_buffer::branch_address);
 		case 'R':
 			size += 2;
-			label_op(operand & 0x00FFFF, 4, branch);
+			return label_op(operand & 0x00FFFF, 4, &ROM_buffer::branch_address);
 		case 'j':
 			size += 2;
-			label_op(operand & 0x00FFFF, 4, jump);
+			return label_op(operand & 0x00FFFF, 4, &ROM_buffer::jump_address);
 		case 'J':
 			size += 3;
-			label_op(operand & 0xFFFFFF, 6, jump);
+			return label_op(operand & 0xFFFFFF, 6, &ROM_buffer::jump_address);
 		case 'a':
 			size += 1 + A_state;
 			if(A_state){
@@ -83,6 +86,11 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 }
 
 #undef label_op
+
+QString isa_65c816::address_to_label()
+{
+	return "";
+}
 
 disassembler_core::opcode isa_65c816::get_opcode(int op)
 {

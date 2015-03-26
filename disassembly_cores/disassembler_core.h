@@ -32,6 +32,7 @@ class disassembler_core : public QObject
 		unsigned int get_operand(int n);
 		
 		virtual QString decode_name_arg(const char arg, int &size) = 0;
+		virtual QString address_to_label() = 0;
 		virtual opcode get_opcode(int op) = 0;
 		virtual int get_base() = 0;
 		virtual bool abort_unlikely(int op) = 0;

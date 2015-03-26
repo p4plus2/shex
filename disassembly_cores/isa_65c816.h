@@ -25,6 +25,8 @@ class isa_65c816 : public disassembler_core
 
 	protected:
 		QString decode_name_arg(const char arg, int &size);
+		virtual QString address_to_label();
+		template <typename V> QString label_op(int offset, int size, V validator);
 		opcode get_opcode(int op);
 		int get_base();
 		bool abort_unlikely(int op);

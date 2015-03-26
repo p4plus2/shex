@@ -22,6 +22,7 @@ class isa_spc700 : public disassembler_core
 
 	protected:
 		QString decode_name_arg(const char arg, int &size);
+		virtual QString address_to_label();
 		opcode get_opcode(int op);
 		int get_base();
 		bool abort_unlikely(int op);

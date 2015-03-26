@@ -70,6 +70,11 @@ QString isa_spc700::decode_name_arg(const char arg, int &size)
 	return "";
 }
 
+QString isa_spc700::address_to_label()
+{
+	return "";
+}
+
 disassembler_core::opcode isa_spc700::get_opcode(int op)
 {
 	return opcode_list[op];
