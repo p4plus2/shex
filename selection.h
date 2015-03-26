@@ -7,11 +7,14 @@ class selection{
 		void set_end(int e);
 		int get_start();
 		int get_end();
+		int get_start_byte();
+		int get_end_byte();
 		int get_end_aligned();
 		int get_start_aligned();
 		void move_end(int amount);
 		int drag_direction();
 		int range();
+		int byte_range();
 		bool is_active();
 		void set_active(bool a);
 		bool is_dragging();

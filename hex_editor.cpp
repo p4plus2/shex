@@ -469,8 +469,8 @@ QString hex_editor::get_status_text()
 	QString text;
 	QTextStream string_stream(&text);
 	if(selection_area.is_active()){
-		string_stream << "Selection range: $" << buffer->get_formatted_address(selection_area.get_start() / 2)
-		              << " to $" << buffer->get_formatted_address(selection_area.get_end() / 2 - 1);
+		string_stream << "Selection range: $" << buffer->get_formatted_address(selection_area.get_start_byte())
+		              << " to $" << buffer->get_formatted_address(selection_area.get_end_byte() - 1);
 	}else{
 		int position = cursor_nibble / 2;
 		unsigned char byte = buffer->at(position);
@@ -486,8 +486,7 @@ QString hex_editor::get_status_text()
 bool hex_editor::follow_selection(bool type)
 {
 	if(selection_area.is_active()){
-		int range = selection_area.range() / 2;
-		qDebug() << range;
+		int range = selection_area.byte_range();
 		if(type && (range == 1 || range == 2)){
 			return true;
 		}else if(!type && (range == 2 || range == 3)){

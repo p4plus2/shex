@@ -23,6 +23,16 @@ int selection::get_end()
 	return start < end ? end : start;
 }
 
+int selection::get_start_byte()
+{
+	return get_start() / 2;
+}
+
+int selection::get_end_byte()
+{
+	return get_end() / 2;
+}
+
 int selection::get_start_aligned()
 {
 	return (start > end ? end : start) & ~1;
@@ -42,6 +52,11 @@ void selection::move_end(int amount)
 int selection::range()
 {
 	return end - start + 1; //selections are inclusive of the last byte
+}
+
+int selection::byte_range()
+{
+	return (end - start + 1) / 2; //selections are inclusive of the last byte
 }
 
 bool selection::is_active()

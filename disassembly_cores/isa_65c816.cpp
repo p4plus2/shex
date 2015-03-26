@@ -26,7 +26,7 @@ QString isa_65c816::label_op(int offset, int size, V validator)
 {
 	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(offset, size).toLatin1()));
 	int address = buffer->snes_to_pc((buffer->*validator)(delta*2-2+region.get_start_aligned(), little_endian));
-	if(address < (region.get_start_aligned()/2) || address > (region.get_end_aligned()/2)){
+	if(address < (region.get_start_byte()) || address > (region.get_end_byte())){
 		return '$' + get_hex(offset, size);
 	}
 	return add_label(address);
@@ -99,7 +99,7 @@ disassembler_core::opcode isa_65c816::get_opcode(int op)
 
 int isa_65c816::get_base()
 {
-	return region.get_start() / 2 - 2;
+	return region.get_start_byte() - 2;
 }
 
 bool isa_65c816::abort_unlikely(int op)
