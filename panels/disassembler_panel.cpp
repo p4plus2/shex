@@ -22,7 +22,8 @@ disassembler_panel::disassembler_panel(QWidget *parent) :
 void disassembler_panel::disassemble(selection selection_area, const ROM_buffer *buffer)
 {
 	setPlainText(active_core()->disassemble(selection_area, buffer));
-	toggle_display(true);
+	state = true;
+	toggle_event(DISASSEMBLER);
 }
 
 // This method makes me very sad.

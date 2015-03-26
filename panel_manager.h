@@ -19,6 +19,9 @@ class panel_manager : public QWidget
 		void connect_to_editor(hex_editor *editor);
 		QHBoxLayout *get_layout(){ return layout; }
 		
+	signals:
+		void send_event(QEvent *event);
+		
 	protected:
 		virtual bool event(QEvent *event);
 		

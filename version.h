@@ -14,11 +14,11 @@ void display_version_dialog()
 		OS = "Operating system: Unknown or unsupported";
 	#endif
 	QMessageBox version_info;
-	version_info.setText(QString("The current version is: v134-WIP").leftJustified(100));
+	version_info.setText(QString("The current version is: v135-WIP").leftJustified(100));
 	version_info.setWindowTitle("Version info");
 	version_info.setDetailedText(
 				     "The current build branch is: master\n"
-				     "The current commit sha1 is: e5dc32f5b462239a5a846d8e4b2d37f61a28883f\n"
+				     "The current commit sha1 is: 3d00c05e1d7554cea92f92ab3c4cee818e2d4a63\n"
 				     "Compiled with: gcc (Gentoo 4.8.4 p1.0, pie-0.6.1) 4.8.4\n" + OS
 				     );
 	version_info.setWindowFlags(version_info.windowFlags());

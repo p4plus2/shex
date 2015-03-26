@@ -5,8 +5,8 @@
 
 panel_manager::panel_manager(QWidget *parent) : QWidget(parent)
 {
-	panel_map[DISASSEMBLER] = new disassembler_panel(parent);
-	panel_map[BOOKMARKS] = new bookmark_panel(parent);
+	panel_map[DISASSEMBLER] = new disassembler_panel(this);
+	panel_map[BOOKMARKS] = new bookmark_panel(this);
 	
 	foreach(abstract_panel *panel, panel_map){
 		layout->addWidget(panel->get_display());

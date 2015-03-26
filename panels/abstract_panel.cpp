@@ -1,4 +1,6 @@
 #include "abstract_panel.h"
+#include "panel_manager.h"
+#include <QApplication>
 
 abstract_panel::abstract_panel(QWidget *display_parent)
 {
@@ -14,6 +16,11 @@ void abstract_panel::toggle_display(bool state)
 {
 	display->setVisible(state);
 	layout_adjust();
+}
+
+void abstract_panel::toggle_event(panel_events event)
+{
+	((panel_manager *)display->parent())->send_event(new panel_event(event));
 }
 
 void abstract_panel::layout_adjust()

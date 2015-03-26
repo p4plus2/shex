@@ -141,7 +141,8 @@ void bookmark_panel::create_bookmark(int start, int end, const ROM_buffer *buffe
 	code_button->setChecked(true);
 	
 	show();
-	toggle_display(true);
+	state = true;
+	toggle_event(BOOKMARKS);
 }
 
 QLayout *bookmark_panel::get_layout()

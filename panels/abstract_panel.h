@@ -2,7 +2,7 @@
 #define ABSTRACT_PANEL_H
 
 #include <QWidget>
-
+#include "events/event_types.h"
 class hex_editor;
 
 class abstract_panel
@@ -14,6 +14,7 @@ class abstract_panel
 		virtual bool display_state() = 0;
 		void toggle_display(bool state);
 		void set_active_editor(hex_editor *editor);
+		void toggle_event(panel_events event);
 		
 		void init_display(){ display->setLayout(get_layout()); }
 		inline QWidget *get_display(){ return display; }
