@@ -1,6 +1,7 @@
 #ifndef HISTORY_MENU_ITEM_H
 #define HISTORY_MENU_ITEM_H
-#include "menus/abstract_menu_item.h"
+
+#include "abstract_menu_item.h"
 
 class QUndoGroup;
 

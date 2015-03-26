@@ -1,13 +1,6 @@
 #ifndef MENU_MANAGER_H
 #define MENU_MANAGER_H
 
-#include <QObject>
-#include <QList>
-#include <QMenu>
-#include <QActionGroup>
-#include <QCoreApplication>
-#include <QMap>
-
 #include "menus/abstract_menu_item.h"
 #include "events/event_types.h"
 

@@ -1,10 +1,7 @@
+#include <QFileDialog>
+
 #include "map_editor_dialog.h"
 #include "character_mapper.h"
-#include <QGridLayout>
-#include <QLineEdit>
-#include <QLabel>
-#include <QFileDialog>
-#include <QPalette>
 #include "debug.h"
 
 map_editor_dialog::map_editor_dialog(QWidget *parent) : abstract_dialog(parent)

@@ -1,7 +1,7 @@
+#include <QApplication>
+
 #include "object_group.h"
 #include "debug.h"
-#include <QApplication>
-#include <QMetaObject>
 
 void object_group::add_to_group(QObject *object)
 {

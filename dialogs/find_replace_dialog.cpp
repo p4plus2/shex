@@ -1,5 +1,4 @@
 #include "find_replace_dialog.h"
-#include <QGridLayout>
 #include <QCompleter>
 
 find_replace_dialog::find_replace_dialog(QWidget *parent) : abstract_dialog(parent)

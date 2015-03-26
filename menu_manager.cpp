@@ -1,10 +1,11 @@
 #include <QMenuBar>
+
 #include "menu_manager.h"
 #include "menus/history_menu_item.h"
 #include "hex_editor.h"
 #include "main_window.h"
-#include "debug.h"
 #include "object_group.h"
+#include "debug.h"
 
 menu_manager::menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u) :
         QObject(parent)

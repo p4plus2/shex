@@ -1,13 +1,7 @@
 #ifndef METADATA_EDITOR_DIALOG_H
 #define METADATA_EDITOR_DIALOG_H
 
-#include <QLabel>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QLineEdit>
-
 #include "abstract_dialog.h"
-#include "hex_editor.h"
 
 class metadata_editor_dialog : public abstract_dialog
 {

@@ -1,9 +1,4 @@
 #include "hex_display.h"
-#include <QPainter>
-#include <QTextStream>
-#include <QMouseEvent>
-#include <QKeyEvent>
-
 #include "debug.h"
 
 void hex_display::paintEvent(QPaintEvent *event)

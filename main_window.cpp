@@ -1,17 +1,15 @@
+#include <QStatusBar>
+#include <QTabWidget>
+#include <QFileDialog>
+#include <QDesktopWidget>
+
 #include "main_window.h"
 #include "hex_editor.h"
 #include "dynamic_scrollbar.h"
 #include "version.h"
 #include "debug.h"
 #include "character_mapper.h"
-
-#include <QStatusBar>
-#include <QHBoxLayout>
-#include <QTabWidget>
-#include <QMenuBar>
-#include <QFileDialog>
-#include <QDesktopWidget>
-#include <QLabel>
+#include "panel_manager.h"
 
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)

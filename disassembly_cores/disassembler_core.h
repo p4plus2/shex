@@ -1,8 +1,6 @@
 #ifndef DISASSEMBLER_CORE_H
 #define DISASSEMBLER_CORE_H
 
-#include <QObject>
-#include <QMap>
 #include <QGridLayout>
 
 #include "rom_buffer.h"

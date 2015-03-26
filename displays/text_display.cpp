@@ -1,13 +1,9 @@
-#include "text_display.h"
-#include "hex_editor.h"
 #include <QPainter>
-#include <QMouseEvent>
-#include <QStaticText>
-#include <QTimer>
-#include <QTimerEvent>
 #include <QSettings>
 
 #include "debug.h"
+#include "text_display.h"
+#include "hex_editor.h"
 
 text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)

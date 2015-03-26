@@ -1,7 +1,7 @@
+#include <QGridLayout>
+
 #include "metadata_editor_dialog.h"
 #include "debug.h"
-
-#include <QGridLayout>
 
 metadata_editor_dialog::metadata_editor_dialog(QWidget *parent) : abstract_dialog(parent)
 {

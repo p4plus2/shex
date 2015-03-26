@@ -1,3 +1,5 @@
+#include <QMenu>
+
 #include "hex_editor.h"
 #include "character_mapper.h"
 #include "displays/hex_display.h"
@@ -5,14 +7,6 @@
 #include "displays/address_display.h"
 #include "debug.h"
 #include "utility.h"
-
-#include <QPainter>
-#include <QFontMetrics>
-#include <QMessageBox>
-#include <QAction>
-#include <QMenu>
-
-#include <QGridLayout>
 
 hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file) :
         QWidget(parent)

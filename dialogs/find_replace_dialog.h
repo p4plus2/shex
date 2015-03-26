@@ -1,10 +1,7 @@
 #ifndef FIND_DIALOG_H
 #define FIND_DIALOG_H
 
-#include <QLabel>
 #include <QComboBox>
-#include <QRadioButton>
-#include <QPushButton>
 #include <QButtonGroup>
 
 #include "abstract_dialog.h"

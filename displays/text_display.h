@@ -5,6 +5,7 @@
 #include <QFont>
 #include <QCache>
 #include <QStaticText>
+
 #include "rom_buffer.h"
 #include "hex_editor.h"
 

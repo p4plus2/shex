@@ -1,5 +1,5 @@
 #include "isa_65c816.h"
-#include "../debug.h"
+#include "debug.h"
 
 isa_65c816::isa_65c816(QObject *parent) :
         disassembler_core(parent)

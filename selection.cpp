@@ -1,6 +1,7 @@
+#include <QtAlgorithms>
+
 #include "selection.h"
 #include "debug.h"
-#include <QtAlgorithms>
 
 void selection::set_start(int s)
 {

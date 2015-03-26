@@ -4,7 +4,6 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QLabel>
-#include <QList>
 #include <QSet>
 
 #include "disassembler_core.h"

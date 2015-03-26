@@ -1,11 +1,6 @@
 #ifndef GOTO_DIALOG_H
 #define GOTO_DIALOG_H
 
-#include <QLabel>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QLineEdit>
-
 #include "abstract_dialog.h"
 
 class goto_dialog : public abstract_dialog

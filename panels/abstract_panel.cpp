@@ -1,6 +1,5 @@
 #include "abstract_panel.h"
 #include "panel_manager.h"
-#include <QApplication>
 
 abstract_panel::abstract_panel(QWidget *display_parent)
 {

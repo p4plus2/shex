@@ -1,6 +1,7 @@
-#include "character_mapper.h"
 #include <QFile>
 #include <QRegExp>
+
+#include "character_mapper.h"
 #include "debug.h"
 
 bool character_mapper::load_map(QString map_file_path)

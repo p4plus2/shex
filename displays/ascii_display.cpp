@@ -1,10 +1,5 @@
 #include "ascii_display.h"
 #include "character_mapper.h"
-#include <QPainter>
-#include <QTextStream>
-#include <QMouseEvent>
-#include <QKeyEvent>
-
 #include "debug.h"
 
 void ascii_display::paintEvent(QPaintEvent *event)

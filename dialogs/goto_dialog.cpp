@@ -1,9 +1,6 @@
 #include "goto_dialog.h"
 #include "debug.h"
 
-#include <QGridLayout>
-#include <QMessageBox>
-
 goto_dialog::goto_dialog(QWidget *parent) : abstract_dialog(parent)
 {
 	connect(close, &QPushButton::clicked, this, &QDialog::close);

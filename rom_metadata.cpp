@@ -1,5 +1,6 @@
-#include "rom_metadata.h"
 #include <QMessageBox>
+
+#include "rom_metadata.h"
 #include "debug.h"
 
 //Used super-famicom.hpp of nall by byuu as a reference

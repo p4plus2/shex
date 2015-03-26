@@ -2,11 +2,11 @@
 #define ABSTRACT_MENU_ITEM_H
 
 #include <QAction>
-#include <QEvent>
 
 #include "debug.h"
 
 class menu_manager;
+class QEvent;
 
 typedef bool(*toggle_function)();
 

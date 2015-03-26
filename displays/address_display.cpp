@@ -1,7 +1,5 @@
 #include "address_display.h"
 #include "debug.h"
-#include <QPainter>
-#include <QTextStream>
 
 address_display::address_display(const ROM_buffer *b, hex_editor *parent) : text_display(b, parent)
 {

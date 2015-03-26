@@ -3,16 +3,14 @@
 
 #include <QMainWindow>
 #include <QUndoGroup>
-#include <QAction>
-#include <QLayout>
 #include "dialog_manager.h"
 #include "menu_manager.h"
-#include "panel_manager.h"
 #include "rom_buffer.h"
 #include "debug.h"
 
 class hex_editor;
 class dynamic_scrollbar;
+class panel_manager;
 
 class main_window : public QMainWindow
 {

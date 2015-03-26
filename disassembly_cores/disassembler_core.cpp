@@ -1,5 +1,6 @@
-#include "disassembler_core.h"
 #include <QStringBuilder>
+
+#include "disassembler_core.h"
 #include "debug.h"
 
 QString disassembler_core::disassemble(selection selection_area, const ROM_buffer *b)

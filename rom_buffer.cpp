@@ -3,9 +3,6 @@
 #include "debug.h"
 #include "character_mapper.h"
 
-#include <QTextStream>
-#include <QRegExp>
-
 ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 {
 	ROM.setFileName(file_name);

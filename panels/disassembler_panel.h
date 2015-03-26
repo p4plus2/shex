@@ -3,8 +3,7 @@
 
 #include <QPlainTextEdit>
 #include <QComboBox>
-#include <QLayout>
-#include <QMap>
+#include <QVBoxLayout>
 
 #include "disassembly_cores/disassembler_core.h"
 #include "debug.h"

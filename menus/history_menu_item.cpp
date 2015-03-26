@@ -1,5 +1,6 @@
-#include "history_menu_item.h"
 #include <QUndoGroup>
+
+#include "history_menu_item.h"
 #include "hex_editor.h"
 
 history_menu_item::history_menu_item(QString t, QEvent *e, QKeySequence hotkey, menu_manager *parent, QUndoGroup *g)

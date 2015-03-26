@@ -1,14 +1,12 @@
 #ifndef ROM_BUFFER_H
 #define ROM_BUFFER_H
 
-#include <QFile>
 #include <QFileInfo>
 #include <QClipboard>
 #include <QApplication>
 #include <QMimeData>
 #include <QUndoGroup>
 #include <QUndoStack>
-#include <QRegExp>
 
 #include "rom_metadata.h"
 

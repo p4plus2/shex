@@ -1,14 +1,6 @@
 #ifndef HEX_EDITOR_H
 #define HEX_EDITOR_H
 
-#include <QWidget>
-#include <QKeyEvent>
-#include <QWheelEvent>
-#include <QMouseEvent>
-#include <QFont>
-#include <QTimer>
-#include <QLabel>
-
 #include "events/event_types.h"
 #include "selection.h"
 #include "rom_buffer.h"

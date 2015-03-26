@@ -1,10 +1,5 @@
-#include <QApplication>
-#include <QtDebug>
 #include "main_window.h"
 #include "debug.h"
-
-#include <QFile>
-#include <QTextStream>
 
 void message_handler(QtMsgType type, const char *message)
 {

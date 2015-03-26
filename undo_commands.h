@@ -1,7 +1,6 @@
 #ifndef UNDO_COMMANDS_H
 #define UNDO_COMMANDS_H
 
-#include <QByteArray>
 #include <QUndoCommand>
 
 class undo_nibble_command : public QUndoCommand

@@ -9,7 +9,6 @@
 #include <QColormap>
 #include <QLabel>
 #include <QLineEdit>
-#include <QMap>
 #include <QRadioButton>
 
 #include "abstract_panel.h"

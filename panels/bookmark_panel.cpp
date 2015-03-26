@@ -1,9 +1,8 @@
+#include <QHeaderView>
+#include <QColorDialog>
+
 #include "bookmark_panel.h"
 #include "hex_editor.h"
-#include <QHeaderView>
-#include <QStringList>
-#include <QColorDialog>
-#include <QFontMetrics>
 #include "debug.h"
 
 bookmark_panel::bookmark_panel(QWidget *parent) :
