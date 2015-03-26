@@ -22,6 +22,7 @@ class text_display : public QWidget
 		inline void disable_cursor_timer() { killTimer(cursor_timer_id); }
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
+		static int get_rows_by_columns(){ return rows * columns; }
 		static QFont get_font(){ return font; }
 		virtual QSize minimumSizeHint() const { return sizeHint(); }
 	protected:

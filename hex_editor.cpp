@@ -139,12 +139,12 @@ void hex_editor::goto_offset(int address)
 	}
 
 	address = buffer->snes_to_pc(address);
-	offset = address - (text_display::get_rows() / 2) * text_display::get_columns();
+	offset = address - text_display::get_rows_by_columns() / 2;
 	offset -= offset % text_display::get_columns();
 	if(offset < 0){
 		offset = 0;
-	}else if(offset > buffer->size() - text_display::get_rows() * text_display::get_columns()){
-		offset = buffer->size() - text_display::get_rows() * text_display::get_columns();
+	}else if(offset > buffer->size() - text_display::get_rows_by_columns()){
+		offset = buffer->size() - text_display::get_rows_by_columns();
 	}
 	cursor_nibble = address * 2;
 	selection_area.set_active(false);
@@ -159,12 +159,12 @@ void hex_editor::select_range(int start, int end)
 	start = buffer->snes_to_pc(start);
 	end = buffer->snes_to_pc(end);
 
-	offset = start - (text_display::get_rows() / 2) * text_display::get_columns();
+	offset = start - text_display::get_rows_by_columns() / 2;
 	offset -= offset % text_display::get_columns();
 	if(offset < 0){
 		offset = 0;
-	}else if(offset > buffer->size() - text_display::get_rows() * text_display::get_columns()){
-		offset = buffer->size() - text_display::get_rows() * text_display::get_columns();
+	}else if(offset > buffer->size() - text_display::get_rows_by_columns()){
+		offset = buffer->size() - text_display::get_rows_by_columns();
 	}
 	selection_area.set_start(start * 2);
 	selection_area.set_end(end * 2);
@@ -393,10 +393,10 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 			move_cursor_nibble(-1 - ascii->hasFocus());
 		break;
 		case Qt::Key_PageUp:
-			move_cursor_nibble(-text_display::get_columns() * 2 * text_display::get_rows());
+			move_cursor_nibble(-text_display::get_rows_by_columns() * 2);
 		break;
 		case Qt::Key_PageDown:
-			move_cursor_nibble(text_display::get_columns() * 2 * text_display::get_rows());
+			move_cursor_nibble(text_display::get_rows_by_columns() * 2);
 		break;
 		default:
 			return;
@@ -510,7 +510,7 @@ void hex_editor::move_cursor_nibble(int delta)
 	}
 	
 	//TODO optimize
-	while(cursor_nibble/2 >= offset + text_display::get_rows() * text_display::get_columns()){
+	while(cursor_nibble/2 >= offset + text_display::get_rows_by_columns()){
 		set_offset(offset + text_display::get_columns());
 	}
 	while(cursor_nibble/2 < offset){
@@ -524,8 +524,8 @@ void hex_editor::set_offset(int o)
 {
 	if(o < 0){
 		o = 0;
-	}else if(o > buffer->size() - text_display::get_rows() * text_display::get_columns()){
-		o = buffer->size() - text_display::get_rows() * text_display::get_columns();
+	}else if(o > buffer->size() - text_display::get_rows_by_columns()){
+		o = buffer->size() - text_display::get_rows_by_columns();
 	}
 
 	offset = o;
