@@ -23,7 +23,7 @@ class text_display : public QWidget
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
 		static QFont get_font(){ return font; }
-		
+		virtual QSize minimumSizeHint() const { return sizeHint(); }
 	protected:
 		const ROM_buffer *buffer;
 		QFont font_setup();

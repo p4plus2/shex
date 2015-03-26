@@ -6,6 +6,7 @@
 address_display::address_display(const ROM_buffer *b, hex_editor *parent) : text_display(b, parent)
 {
 	setMaximumWidth(get_font_width() * line_characters);
+	setMinimumWidth(get_font_width() * line_characters);
 	setFocusPolicy(Qt::NoFocus);
 	disable_cursor_timer();
 }
