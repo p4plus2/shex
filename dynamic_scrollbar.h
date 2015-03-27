@@ -24,6 +24,7 @@ class dynamic_scrollbar : public QScrollBar
 		Q_OBJECT
 	public:
 		explicit dynamic_scrollbar(QWidget *parent = 0);
+		~dynamic_scrollbar(){ delete scroll_style; }
 		
 	signals:
 		void auto_scroll_action(bool);

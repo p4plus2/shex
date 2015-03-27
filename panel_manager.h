@@ -12,7 +12,7 @@ class panel_manager : public QWidget
 {
 		Q_OBJECT
 	public:
-		explicit panel_manager(QWidget *parent = 0);
+		explicit panel_manager(hex_editor *parent = 0);
 		void init_displays();
 		void connect_to_editor(hex_editor *editor);
 		QHBoxLayout *get_layout(){ return layout; }

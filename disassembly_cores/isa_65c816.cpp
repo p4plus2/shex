@@ -113,6 +113,13 @@ void isa_65c816::update_state()
 	emit I_changed(I_state);
 }
 
+isa_65c816::~isa_65c816()
+{
+	delete stop;
+	delete set_A;
+	delete set_I;
+}
+
 const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
         {"BRK %c"},
 	{"ORA (%b,X)"},

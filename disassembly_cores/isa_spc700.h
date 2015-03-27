@@ -13,6 +13,7 @@ class isa_spc700 : public disassembler_core
 		Q_OBJECT
 	public:
 		explicit isa_spc700(QObject *parent = 0);
+		~isa_spc700();
 		QGridLayout *core_layout();
 		static QString id(){ return "SPC700"; }
 
@@ -29,7 +30,6 @@ class isa_spc700 : public disassembler_core
 		void update_state();
 	private:		
 		bool error_stop = false;
-		//These will get parented to a layout later
 		QCheckBox *stop = new QCheckBox("Stop on unlikely");
 		QLineEdit *base_input = new QLineEdit("0500");
 		QLabel *base_text = new QLabel("Base address");

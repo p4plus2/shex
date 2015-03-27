@@ -172,7 +172,7 @@ void hex_editor::context_menu(const QPoint& position)
 	menu.addSeparator();
 	menu.addAction("Select all", this, SLOT(select_all()), hotkey::SelectAll);
 	menu.addSeparator();
-	menu.addAction("Follow branch", this, SLOT(branch()), hotkey("Ctrl+b"))->setEnabled(follow_selection(true));
+	menu.addAction("Follow branch", this, SLOT(branch()), hotkey("Alt+j"))->setEnabled(follow_selection(true));
 	menu.addAction("Follow jump", this, SLOT(jump()), hotkey("Ctrl+j"))->setEnabled(follow_selection(false));
 	menu.addAction("Disassemble", this, SLOT(disassemble()), hotkey("Ctrl+d"))->setEnabled(selection_active);
 	menu.addSeparator();
@@ -422,6 +422,9 @@ bool hex_editor::event(QEvent *event)
 			return true;
 		case editor_events::DISASSEMBLE:
 			disassemble();
+			return true;
+		case editor_events::BOOKMARK:
+			create_bookmark();
 			return true;
 		case editor_events::SCROLL_MODE:
 			scroll_mode_changed();

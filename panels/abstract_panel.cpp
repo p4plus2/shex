@@ -1,13 +1,9 @@
 #include "abstract_panel.h"
 #include "panel_manager.h"
 
-abstract_panel::abstract_panel(QWidget *display_parent)
+abstract_panel::abstract_panel(panel_manager *display_parent, hex_editor *editor)
 {
 	display->setParent(display_parent);
-}
-
-void abstract_panel::set_active_editor(hex_editor *editor)
-{
 	active_editor = editor;
 }
 

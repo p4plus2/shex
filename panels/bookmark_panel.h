@@ -12,6 +12,7 @@
 #include <QRadioButton>
 
 #include "abstract_panel.h"
+#include "panel_manager.h"
 
 class ROM_buffer;
 
@@ -29,7 +30,7 @@ class bookmark_panel : public QTableView, public abstract_panel
 {
 		Q_OBJECT
 	public:
-		explicit bookmark_panel(QWidget *parent = 0);
+		explicit bookmark_panel(panel_manager *parent, hex_editor *editor);
 		virtual QLayout *get_layout();
 		virtual void toggle_state(){ state = !state; }
 		virtual bool display_state(){ return state; }
@@ -59,30 +60,29 @@ class bookmark_panel : public QTableView, public abstract_panel
 
 		int row = 0;
 		int active_row = 0;
-		QStandardItemModel *model = new QStandardItemModel();
+		QStandardItemModel *model = new QStandardItemModel(this);
 		
-		QVBoxLayout *box = new QVBoxLayout();	
-		QGridLayout *grid = new QGridLayout();
+		QVBoxLayout *box = new QVBoxLayout();
 		
-		QPushButton *add_button = new QPushButton("Add Bookmark");
-		QPushButton *update_button = new QPushButton("Update Bookmark");
+		QPushButton *add_button = new QPushButton("Add Bookmark", this);
+		QPushButton *update_button = new QPushButton("Update Bookmark", this);
 		
-		QPushButton *reload_button = new QPushButton("Reload Bookmark");
+		QPushButton *reload_button = new QPushButton("Reload Bookmark", this);
 		
-		QPushButton *color_button = new QPushButton();
-		QLabel *color_label = new QLabel("Color: ");
+		QPushButton *color_button = new QPushButton(this);
+		QLabel *color_label = new QLabel("Color: ", this);
 		
 		QRadioButton *code_button = new QRadioButton("Code", this);
 		QRadioButton *data_button = new QRadioButton("Data", this);
 		                
-		QPlainTextEdit *description_input = new QPlainTextEdit();
-		QLabel *description_label = new QLabel("Description: ");
+		QPlainTextEdit *description_input = new QPlainTextEdit(this);
+		QLabel *description_label = new QLabel("Description: ", this);
 
-		QLineEdit *address_input = new QLineEdit();
-		QLabel *address_label = new QLabel("Address: ");
+		QLineEdit *address_input = new QLineEdit(this);
+		QLabel *address_label = new QLabel("Address: ", this);
 		
-		QLineEdit *size_input = new QLineEdit();
-		QLabel *size_label = new QLabel("Size: ");
+		QLineEdit *size_input = new QLineEdit(this);
+		QLabel *size_label = new QLabel("Size: ", this);
 		
 		static const int input_padding = 12;
 		static bool state;

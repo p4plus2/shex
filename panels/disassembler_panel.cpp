@@ -5,8 +5,8 @@
 #include "events/event_types.h"
 #include "utility.h"
 
-disassembler_panel::disassembler_panel(QWidget *parent) :
-        QPlainTextEdit(parent), abstract_panel(this)
+disassembler_panel::disassembler_panel(panel_manager *parent, hex_editor *editor) :
+        QPlainTextEdit(parent), abstract_panel(parent, editor)
 {
 	cores.insert(isa_65c816::id(), new isa_65c816(this));
 	cores.insert(isa_spc700::id(), new isa_spc700(this));

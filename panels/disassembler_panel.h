@@ -9,13 +9,14 @@
 #include "debug.h"
 #include "selection.h"
 #include "abstract_panel.h"
+#include "panel_manager.h"
 
 class disassembler_panel : public QPlainTextEdit, public abstract_panel
 {
 		Q_OBJECT
 	public:
 
-		explicit disassembler_panel(QWidget *parent = 0);
+		explicit disassembler_panel(panel_manager *parent, hex_editor *editor);
 		virtual QLayout *get_layout();
 		virtual void toggle_state(){ state = !state; }
 		virtual bool display_state(){ return state; }

@@ -94,6 +94,13 @@ void isa_spc700::update_state()
 {
 }
 
+isa_spc700::~isa_spc700()
+{
+	delete stop;
+	delete base_text;
+	delete base_input;
+}
+
 const QList<disassembler_core::opcode> isa_spc700::opcode_list = {
         {"nop"},
 	{"tcall 0"},

@@ -5,8 +5,8 @@
 #include "hex_editor.h"
 #include "debug.h"
 
-bookmark_panel::bookmark_panel(QWidget *parent) :
-        QTableView(parent), abstract_panel(this)
+bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
+        QTableView(parent), abstract_panel(parent, editor)
 {
 	QFontMetrics metrics(QApplication::font(address_input));
 	QStringList labels;
@@ -165,6 +165,7 @@ void bookmark_panel::add_bookmark(QString address, bookmark_data bookmark)
 
 void bookmark_panel::init_grid_layout()
 {
+	QGridLayout *grid = new QGridLayout(this);
 	grid->addWidget(address_label, 0, 0, 1, 1, Qt::AlignRight);
 	grid->addWidget(address_input, 0, 1);
 	grid->addWidget(size_label, 0, 2, 1, 1, Qt::AlignRight);

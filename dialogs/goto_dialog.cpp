@@ -9,6 +9,8 @@ goto_dialog::goto_dialog(QWidget *parent) : abstract_dialog(parent)
 	label->setBuddy(offset_input);
 	absolute->setChecked(true);
 	
+	offset_input->setProperty("maxLength", 7);
+	
 	QGridLayout *layout = new QGridLayout(this);
 	layout->addWidget(label, 0, 0);
 	layout->addWidget(offset_input, 0, 1, 1, 2);
@@ -17,8 +19,6 @@ goto_dialog::goto_dialog(QWidget *parent) : abstract_dialog(parent)
 	layout->addWidget(goto_offset, 3, 1);
 	layout->addWidget(close, 3, 2);
 	setLayout(layout);
-	
-	offset_input->setProperty("maxLength", 7);
 }
 
 void goto_dialog::address_entered()

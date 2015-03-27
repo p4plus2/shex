@@ -91,9 +91,10 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_toggle_action<dialog_event>("&Expand ROM", EXPAND, active_editors, hotkey("Ctrl+e"), menu);
 	add_toggle_action<dialog_event>("&Metadata editor", METADATA_EDITOR, active_editors, hotkey("Ctrl+m"), menu);
 	menu->addSeparator();
-	add_toggle_action<editor_event>("Follow &branch", BRANCH, active_editors, hotkey("Ctrl+b"), menu);
+	add_toggle_action<editor_event>("Follow b&ranch", BRANCH, active_editors, hotkey("Alt+j"), menu);
 	add_toggle_action<editor_event>("Follow &jump", JUMP, active_editors, hotkey("Ctrl+j"), menu);
 	add_toggle_action<editor_event>("&Disassemble", DISASSEMBLE, active_editors, hotkey("Ctrl+d"), menu);
+	add_toggle_action<editor_event>("&Bookmark", BOOKMARK, active_editors, hotkey("Ctrl+b"), menu);
 
 	menu = find_menu("&Options");
 	add_toggle_action<editor_event>("&Scrollbar toggle", SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);

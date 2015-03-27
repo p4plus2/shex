@@ -12,6 +12,7 @@ class isa_65c816 : public disassembler_core
 		Q_OBJECT
 	public:
 		explicit isa_65c816(QObject *parent = 0);
+		~isa_65c816();
 		QGridLayout *core_layout();
 		static QString id(){ return "65c186"; }
 		
@@ -36,7 +37,6 @@ class isa_65c816 : public disassembler_core
 		bool A_state = false;
 		bool I_state = false;
 		bool error_stop = false;
-		//These will get parented to a layout later
 		QCheckBox *set_A = new QCheckBox("16 bit A");
 		QCheckBox *set_I = new QCheckBox("16 bit I");
 		QCheckBox *stop = new QCheckBox("Stop on unlikely");
