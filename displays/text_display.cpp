@@ -73,7 +73,7 @@ void text_display::paintEvent(QPaintEvent *event)
 	painter.setPen(text);
 	painter.setFont(font);
 	painter.setClipRegion(event->region());
-	
+	painter.setClipping(true);
 	const bookmark_map *bookmarks = buffer->get_bookmark_map();
 	if(bookmarks){
 		foreach(bookmark_data bookmark, *bookmarks){
@@ -92,12 +92,13 @@ void text_display::paintEvent(QPaintEvent *event)
 	}
 	
 	if(!selection_area.is_active()){
+		painter.setClipping(false);
 		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
 		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
 	}else{
 		paint_selection(painter, selection_area, palette().color(QPalette::Active, QPalette::Highlight));
 	}
-	
+	painter.setClipping(false);
 	if(cursor_state && focusPolicy() != Qt::NoFocus){
 		painter.fillRect(cursor_position.x(), cursor_position.y(), cursor_width, font_height, text);
 	}
@@ -128,20 +129,21 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area,
 	if(focusPolicy() == Qt::NoFocus){
 		return;  //Anything which doesn't accept focus can't be highlighted
 	}
-	
 	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start_aligned()));
 	QPoint position2 = clip_screen(nibble_to_screen(selection_area.get_end_aligned()));
-	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
-	                 position2.y() - position1.y() + font_height, color);	
+	QRegion area = QRect(0, position1.y(), get_line_characters() * font_width, 
+	                 position2.y() - position1.y() + font_height);
 	if(position1.x()){
-		painter.fillRect(0, position1.y(), position1.x(), font_height, palette().color(QPalette::Base));
+		area -= QRect(0, position1.y(), position1.x(), font_height);
 	}
 	
 	if(position2.x() < width()){
-		painter.fillRect(position2.x(), position2.y(),
-		                 get_line_characters() * font_width - position2.x(), 
-		                 font_height, palette().color(QPalette::Base));
-	}	
+		area -= QRect(position2.x(), position2.y(), 
+		              get_line_characters() * font_width - position2.x(), font_height);
+	}
+	painter.setClipRegion(area);
+	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
+	                 position2.y() - position1.y() + font_height, color);
 }
 
 void text_display::mousePressEvent(QMouseEvent *event)
