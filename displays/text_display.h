@@ -8,6 +8,7 @@
 
 #include "rom_buffer.h"
 #include "hex_editor.h"
+#include "panels/bookmark_panel.h"
 
 class QPainter;
 class QTextStream;
@@ -46,7 +47,7 @@ class text_display : public QWidget
 		inline void set_selection(selection s){ editor->set_selection(s); }
 		
 		virtual void paintEvent(QPaintEvent *event);
-		virtual void paint_selection(QPainter &painter, selection &selection_area);
+		virtual void paint_selection(QPainter &painter, selection &selection_area, const QColor &color);
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);
 		virtual void mouseReleaseEvent(QMouseEvent *event);
@@ -60,19 +61,11 @@ class text_display : public QWidget
 	signals:
 		void character_typed(unsigned char key, bool update_byte);
 		
-	private:		
-		//make these static at some point, no need to duplicate them
-		static int font_width;
-		static int font_height;
-		static QFont font;
-		
-		//also make these static at some point
-		static int rows;
-		static int columns;
+	private:				
+		QCache<int, QStaticText> row_cache;
+		bookmark_map *bookmarks = nullptr;
 		
 		hex_editor *editor;
-		QCache<int, QStaticText> row_cache;
-		
 		bool cursor_state = true;
 		int cursor_timer_id = 0;
 		
@@ -83,6 +76,13 @@ class text_display : public QWidget
 		
 		static const int default_font_size = 14;
 		static const int cursor_width = 1;
+		
+		static int font_width;
+		static int font_height;
+		static QFont font;
+		
+		static int rows;
+		static int columns;
 };
 
 #endif // TEXT_DISPLAY_H

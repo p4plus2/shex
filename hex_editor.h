@@ -33,9 +33,6 @@ class hex_editor : public QWidget
 		
 		inline selection get_selection(){ return selection_area; }
 		inline void set_selection(selection s){ selection_area = s; update_window(); }
-
-		inline const bookmark_map *get_bookmark_map(){ return bookmark_data_map; }
-		inline void set_bookmark_map(const bookmark_map *b){ bookmark_data_map = b; }
 		
 		static bool active_selection(){ return active_editor_selection; } 
 		static bool clipboard_usable(){ return active_editor_clipboard_usable; }
@@ -89,7 +86,6 @@ class hex_editor : public QWidget
 		QLabel *address_header = new QLabel("Offset");
 		
 		ROM_buffer *buffer;
-		const bookmark_map *bookmark_data_map;
 		int offset = 0;
 
 		bool scroll_mode = false;

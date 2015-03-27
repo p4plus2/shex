@@ -2,7 +2,6 @@
 #define EVENT_TYPES
 
 #include "general_event.h"
-#include "rom_buffer.h"
 
 enum editor_events{
 	CUT = QEvent::User+1,

@@ -486,7 +486,7 @@ bool hex_editor::follow_selection(bool type)
 void hex_editor::move_cursor_nibble(int delta)
 {
 	cursor_nibble += delta;
-	offset = clamp(offset, 0, buffer->size() * 2 - 1);
+	cursor_nibble = clamp(cursor_nibble, 0, buffer->size() * 2 - 1);
 	
 	//TODO optimize
 	while(cursor_nibble/2 >= offset + text_display::get_rows_by_columns()){

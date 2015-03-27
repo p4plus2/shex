@@ -74,6 +74,15 @@ void text_display::paintEvent(QPaintEvent *event)
 	painter.setFont(font);
 	painter.setClipRegion(event->region());
 	
+	const bookmark_map *bookmarks = buffer->get_bookmark_map();
+	if(bookmarks){
+		foreach(bookmark_data bookmark, *bookmarks){
+			selection bookmark_selection = selection::create_selection(
+							buffer->snes_to_pc(bookmark.address), bookmark.size);
+			paint_selection(painter, bookmark_selection, bookmark.color);
+		}
+	}
+	
 	selection selection_area = get_selection();
 	QPoint cursor_position;
 	if(selection_area.is_active()){
@@ -86,7 +95,7 @@ void text_display::paintEvent(QPaintEvent *event)
 		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
 		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
 	}else{
-		paint_selection(painter, selection_area);
+		paint_selection(painter, selection_area, palette().color(QPalette::Active, QPalette::Highlight));
 	}
 	
 	if(cursor_state && focusPolicy() != Qt::NoFocus){
@@ -114,7 +123,7 @@ void text_display::paintEvent(QPaintEvent *event)
 	}
 }
 
-void text_display::paint_selection(QPainter &painter, selection &selection_area)
+void text_display::paint_selection(QPainter &painter, selection &selection_area, const QColor &color)
 {
 	if(focusPolicy() == Qt::NoFocus){
 		return;  //Anything which doesn't accept focus can't be highlighted
@@ -123,8 +132,7 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area)
 	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start_aligned()));
 	QPoint position2 = clip_screen(nibble_to_screen(selection_area.get_end_aligned()));
 	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
-	                 position2.y() - position1.y() + font_height, 
-			 palette().color(QPalette::Active, QPalette::Highlight));	
+	                 position2.y() - position1.y() + font_height, color);	
 	if(position1.x()){
 		painter.fillRect(0, position1.y(), position1.x(), font_height, palette().color(QPalette::Base));
 	}

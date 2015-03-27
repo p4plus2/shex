@@ -2,6 +2,7 @@
 #define PANEL_MANAGER_H
 
 #include <QHBoxLayout>
+#include <QMap>
 
 #include "events/event_types.h"
 #include "panels/abstract_panel.h"

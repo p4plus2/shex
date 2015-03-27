@@ -36,7 +36,6 @@ class bookmark_panel : public QTableView, public abstract_panel
 		virtual bool display_state(){ return state; }
 		
 		void add_bookmark(QString address, bookmark_data bookmark);
-		const bookmark_map *map(){ return &bookmark_data_map; }
 		
 	public slots:
 		void color_clicked();
@@ -56,7 +55,7 @@ class bookmark_panel : public QTableView, public abstract_panel
 		
 		QWidget *input_area = new QWidget(this);
 		
-		bookmark_map bookmark_data_map;
+		bookmark_map bookmarks;
 
 		int row = 0;
 		int active_row = 0;

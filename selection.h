@@ -3,6 +3,7 @@
 
 class selection{
 	public:
+		static selection create_selection(int start, int size);
 		void set_start(int s);
 		void set_end(int e);
 		int get_start();

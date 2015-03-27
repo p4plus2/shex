@@ -9,6 +9,7 @@
 #include <QUndoStack>
 
 #include "rom_metadata.h"
+#include "panels/bookmark_panel.h"
 
 class ROM_buffer : public ROM_metadata
 {
@@ -58,6 +59,9 @@ class ROM_buffer : public ROM_metadata
 		inline QString load_error() { return ROM_error; }
 		static inline void set_copy_style(copy_style style){ copy_type = style; }
 		
+		inline const bookmark_map *get_bookmark_map() const { return bookmarks; }
+		inline void set_bookmark_map(const bookmark_map *b){ bookmarks = b; }
+		
 
 	private:
 		QFile ROM;
@@ -67,6 +71,7 @@ class ROM_buffer : public ROM_metadata
 		QUndoStack *undo_stack;
 		static copy_style copy_type;
 		QString ROM_error = "";
+		const bookmark_map *bookmarks = nullptr;
 		
 		QByteArray input_to_byte_array(QString input, int mode);
 };

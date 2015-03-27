@@ -3,6 +3,15 @@
 #include "selection.h"
 #include "debug.h"
 
+selection selection::create_selection(int start, int size)
+{
+	selection s;
+	s.set_start(start);
+	s.set_end(start + size);
+	s.active = true;
+	return s;
+}
+
 void selection::set_start(int s)
 {
 	start = s;

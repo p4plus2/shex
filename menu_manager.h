@@ -1,6 +1,8 @@
 #ifndef MENU_MANAGER_H
 #define MENU_MANAGER_H
 
+#include <QUndoGroup>
+
 #include "menus/abstract_menu_item.h"
 #include "events/event_types.h"
 

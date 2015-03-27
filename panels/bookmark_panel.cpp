@@ -52,6 +52,7 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	size_input->setMaximumWidth(metrics.width("2222222") + input_padding);
 	
 	init_grid_layout();
+	editor->get_buffer()->set_bookmark_map(&bookmarks);
 }
 
 void bookmark_panel::color_clicked()
@@ -61,7 +62,7 @@ void bookmark_panel::color_clicked()
 
 void bookmark_panel::address_updated(QString address)
 {
-	if(bookmark_data_map.contains(address)){
+	if(bookmarks.contains(address)){
 		add_button->hide();
 		update_button->show();
 	}else{
@@ -86,7 +87,7 @@ void bookmark_panel::add_clicked()
 	bookmark.code = code_button->isChecked();
 	
 	add_bookmark(address_input->text(), bookmark);
-	bookmark_data_map.insert(address_input->text(), bookmark);
+	bookmarks.insert(address_input->text(), bookmark);
 	
 	add_button->hide();
 	update_button->show();
@@ -122,7 +123,7 @@ void bookmark_panel::row_clicked(QModelIndex index)
 	active_row = index.row();
 	QModelIndex address_index = model->index(active_row, 0, QModelIndex());
 	
-	bookmark_data bookmark = bookmark_data_map[address_index.data().toString()];
+	bookmark_data bookmark = bookmarks[address_index.data().toString()];
 	
 	size_input->setText(QString::number(bookmark.size));
 	description_input->setPlainText(bookmark.description);
