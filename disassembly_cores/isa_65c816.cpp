@@ -87,9 +87,9 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 
 #undef label_op
 
-QString isa_65c816::address_to_label()
+QString isa_65c816::address_to_label(int address)
 {
-	return "";
+	return QString::number(buffer->pc_to_snes(address), 16).rightJustified(6, '0').toUpper();
 }
 
 disassembler_core::opcode isa_65c816::get_opcode(int op)
