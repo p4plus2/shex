@@ -36,9 +36,9 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	
 	connect(add_button, &QPushButton::clicked, this, &bookmark_panel::add_clicked);
 	connect(update_button, &QPushButton::clicked, this, &bookmark_panel::update_clicked);
-	connect(reload_button, &QPushButton::clicked, this, &bookmark_panel::reload_clicked);
 	
 	connect(this, &bookmark_panel::clicked, this, &bookmark_panel::row_clicked);
+	connect(this, &bookmark_panel::doubleClicked, this, &bookmark_panel::row_double_clicked);
 	
 	update_button->hide();
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -139,11 +139,6 @@ void bookmark_panel::update_clicked()
 	add_clicked();
 }
 
-void bookmark_panel::reload_clicked()
-{
-	row_clicked(model->index(active_row, 0, QModelIndex()));
-}
-
 void bookmark_panel::row_clicked(QModelIndex index)
 {	
 	active_row = index.row();
@@ -156,6 +151,13 @@ void bookmark_panel::row_clicked(QModelIndex index)
 	set_color_button(bookmark.color);
 	address_input->setText(address_index.data().toString());
 	data_type->setCurrentIndex(bookmark.data_type);
+}
+
+void bookmark_panel::row_double_clicked(QModelIndex index)
+{	
+	active_row = index.row();
+	QModelIndex address_index = model->index(active_row, 0, QModelIndex());
+	active_editor->goto_offset(check_address(address_index.data().toString()));
 }
 
 void bookmark_panel::delete_item()
@@ -210,9 +212,8 @@ void bookmark_panel::init_grid_layout()
 	grid->addWidget(description_input, 2, 0, 1, 4);
 	grid->addWidget(color_label, 3, 0, 1, 1, Qt::AlignRight);
 	grid->addWidget(color_button, 3, 1);
-	grid->addWidget(add_button, 3, 2);
-	grid->addWidget(update_button, 3, 2);
-	grid->addWidget(reload_button, 3, 3);
+	grid->addWidget(add_button, 3, 2, 1, 2);
+	grid->addWidget(update_button, 3, 2, 1, 2);
 	
 	
 	input_area->setLayout(grid);

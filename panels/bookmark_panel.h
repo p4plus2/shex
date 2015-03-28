@@ -55,8 +55,8 @@ class bookmark_panel : public QTableView, public abstract_panel
 		void context_menu(const QPoint& position);
 		void add_clicked();
 		void update_clicked();
-		void reload_clicked();
 		void row_clicked(QModelIndex index);
+		void row_double_clicked(QModelIndex index);
 		void delete_item();
 		
 		void create_bookmark(int start, int end, const ROM_buffer *buffer);
@@ -79,8 +79,6 @@ class bookmark_panel : public QTableView, public abstract_panel
 		
 		QPushButton *add_button = new QPushButton("Add Bookmark", this);
 		QPushButton *update_button = new QPushButton("Update Bookmark", this);
-		
-		QPushButton *reload_button = new QPushButton("Reload Bookmark", this);
 		
 		QPushButton *color_button = new QPushButton(this);
 		QLabel *color_label = new QLabel("Color: ", this);
