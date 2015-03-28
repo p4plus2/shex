@@ -59,7 +59,7 @@ QString disassembler_core::add_label(int destination)
 	qDebug() << destination;
 	if(b.label.isEmpty()){
 		label_id++;
-		b.label = QString("label_") + address_to_label(destination);
+		b.label = "label_" % address_to_label(destination) % ":\n";
 	}
 	return b.label;
 }
@@ -71,9 +71,9 @@ QString disassembler_core::disassembly_text()
 	QString table_line;
 	table_line.reserve(42);
 	foreach(block b, disassembly_list){
-		if(!b.label.isEmpty()){
+		if(!b.label.isEmpty() || table_line.length() > 42){
 			table_line.chop(2);
-			text += table_line % '\n' % b.label % ":\n";
+			text += table_line % '\n' % b.label;
 			table_line.clear();
 		}
 		if(b.data.isEmpty()){
@@ -88,15 +88,10 @@ QString disassembler_core::disassembly_text()
 					table_line = prefix[b.format - block::DATA_PACKED];
 				}
 				table_line += '$' % b.data % ", ";
-				if(table_line.length() > 42){
-					table_line.chop(2);
-					text += table_line % '\n';
-					table_line.clear();
-				}
 			break;
 			case block::DATA_UNPACKED ... block::DATA_UNPACKED_END:
-			break;
 				text += prefix[b.format - block::DATA_UNPACKED] % '$' % b.data % '\n';
+			break;
 			default:
 				qDebug() << "Unknown formatter" << b.format;
 			break;
@@ -148,9 +143,9 @@ void disassembler_core::make_table(QByteArray &data, int start, int size, int wi
 {
 	add_label(get_base() + start);
 	add_label(get_base() + start + size);
-	for(int i = 0; i < size && i < start+data.size(); i += width+1){
+	for(int i = 0; i < size && i + start < data.size(); i += width+1){
 		unsigned int table_value = 0;
-		for(int j = width; j >= 0; j--){
+		for(int j = width; j >= 0 && (i + j + start) < data.size(); j--){
 			table_value |= (unsigned char)data.at(start+i+j) << (j * 8);
 		}
 		add_data(start+i, QString::number(table_value, 16).rightJustified((width+1)*2, '0').toUpper(),
