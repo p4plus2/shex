@@ -6,9 +6,8 @@
 selection selection::create_selection(int start, int size)
 {
 	selection s;
-	s.set_start(start);
-	s.set_end(start + size);
-	s.active = true;
+	s.set_start(start * 2);
+	s.set_end((start + size) * 2);
 	return s;
 }
 

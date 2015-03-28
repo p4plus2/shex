@@ -270,7 +270,7 @@ void hex_editor::create_bookmark()
 	if(!selection_area.is_active()){
 		return;
 	}
-	emit send_bookmark_data(selection_area.get_start(), selection_area.get_end(), buffer);
+	emit send_bookmark_data(selection_area.get_start_byte(), selection_area.get_end_byte(), buffer);
 }
 
 void hex_editor::count(QString find, bool mode)
