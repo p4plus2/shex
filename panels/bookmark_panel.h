@@ -52,10 +52,12 @@ class bookmark_panel : public QTableView, public abstract_panel
 	public slots:
 		void color_clicked();
 		void address_updated(QString address);
+		void context_menu(const QPoint& position);
 		void add_clicked();
 		void update_clicked();
 		void reload_clicked();
 		void row_clicked(QModelIndex index);
+		void delete_item();
 		
 		void create_bookmark(int start, int end, const ROM_buffer *buffer);
 		

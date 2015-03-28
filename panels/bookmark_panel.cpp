@@ -1,5 +1,6 @@
 #include <QHeaderView>
 #include <QColorDialog>
+#include <QMenu>
 
 #include "bookmark_panel.h"
 #include "hex_editor.h"
@@ -66,6 +67,9 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	
 	init_grid_layout();
 	editor->get_buffer()->set_bookmark_map(&bookmarks);
+	
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, &bookmark_panel::customContextMenuRequested, this, &bookmark_panel::context_menu);
 }
 
 void bookmark_panel::color_clicked()
@@ -81,6 +85,15 @@ void bookmark_panel::address_updated(QString address)
 	}else{
 		update_button->hide();
 		add_button->show();
+	}
+}
+
+void bookmark_panel::context_menu(const QPoint& position)
+{	
+	QMenu menu;
+	if(indexAt(position).isValid()){
+		menu.addAction("Delete", this, SLOT(delete_item()));
+		menu.exec(mapToGlobal(position));
 	}
 }
 
@@ -143,6 +156,14 @@ void bookmark_panel::row_clicked(QModelIndex index)
 	set_color_button(bookmark.color);
 	address_input->setText(address_index.data().toString());
 	data_type->setCurrentIndex(bookmark.data_type);
+}
+
+void bookmark_panel::delete_item()
+{
+	foreach(QModelIndex i, selectionModel()->selectedRows()){
+		bookmarks.remove(i.data().toString());
+		model->removeRow(i.row());
+	}
 }
 
 void bookmark_panel::create_bookmark(int start, int end, const ROM_buffer *buffer)
