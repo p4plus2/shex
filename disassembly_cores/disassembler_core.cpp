@@ -31,7 +31,7 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 				}else if(bookmark.data_type & bookmark_data::DOUBLE){
 					width = 3;
 				}
-				add_data(opcode_address, make_table(data, delta, bookmark.size, width, packed));
+				make_table(data, delta, bookmark.size, width, packed);
 				continue;
 			}
 		}
@@ -42,7 +42,7 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 		}
 		delta++;
 		decode_name_args(op.name);
-		add_data(opcode_address, op.name);
+		add_data(opcode_address, op.name, block::CODE);
 		
 		if(delta > data.size()){
 			error = "Disassembly range too small, last opcode may be invalid.";
@@ -56,6 +56,7 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 QString disassembler_core::add_label(int destination)
 {
 	block &b = disassembly_list[destination];
+	qDebug() << destination;
 	if(b.label.isEmpty()){
 		label_id++;
 		b.label = QString("label_") + address_to_label(destination);
@@ -63,20 +64,42 @@ QString disassembler_core::add_label(int destination)
 	return b.label;
 }
 
-void disassembler_core::add_data(int destination, QString data)
-{
-	disassembly_list[get_base()+destination].data = data;
-}
-
 QString disassembler_core::disassembly_text()
 {
+	const QString prefix[] = {"db ", "dw ", "dl ", "dd "};
 	QString text;
+	QString table_line;
+	table_line.reserve(42);
 	foreach(block b, disassembly_list){
 		if(!b.label.isEmpty()){
-			text += b.label % ":\n";
+			table_line.chop(2);
+			text += table_line % '\n' % b.label % ":\n";
+			table_line.clear();
 		}
-		if(!b.data.isEmpty()){
-			text += (label_id > 0 ? "\t" : "") % b.data % "\n";
+		if(b.data.isEmpty()){
+			continue;
+		}
+		switch(b.format){
+			case block::CODE:
+				text += (label_id > 0 ? '\t' : '\0') % b.data % '\n';
+			break;
+			case block::DATA_PACKED ... block::DATA_PACKED_END:
+				if(table_line.isEmpty()){
+					table_line = prefix[b.format - block::DATA_PACKED];
+				}
+				table_line += '$' % b.data % ", ";
+				if(table_line.length() > 42){
+					table_line.chop(2);
+					text += table_line % '\n';
+					table_line.clear();
+				}
+			break;
+			case block::DATA_UNPACKED ... block::DATA_UNPACKED_END:
+			break;
+				text += prefix[b.format - block::DATA_UNPACKED] % '$' % b.data % '\n';
+			default:
+				qDebug() << "Unknown formatter" << b.format;
+			break;
 		}
 	}
 	return text;
@@ -115,27 +138,25 @@ unsigned int disassembler_core::get_operand(int n)
 	return delta+n < data.size() ? ((unsigned char)data.at(delta+n) << n*8) : 0;
 }
 
-QString disassembler_core::make_table(QByteArray &data, int start, int size, int width, bool packed)
+void disassembler_core::add_data(int destination, QString data, block::data_format format)
 {
-	const QString prefix[] = {"db $", "dw $", "dl $", "dd $"};
-	const int packed_size[] = {8, 8, 9, 8};
+	disassembly_list[get_base()+destination].data = data;
+	disassembly_list[get_base()+destination].format = format;
+}
+
+void disassembler_core::make_table(QByteArray &data, int start, int size, int width, bool packed)
+{
 	QString table;
 	table.reserve(data.size() * 6);  // echo to hold ", $FF\n" for every byte
-	add_label(start);
-	add_label(start+size);
+	add_label(get_base() + start);
+	add_label(get_base() + start + size);
 	for(int i = 0; i < size && i < start+data.size(); i += width+1){
-		if(!packed || !(i % packed_size[width])){
-			table.chop(3);
-			table += "\n\t" % prefix[width];
-		}
-		
 		unsigned int table_value = 0;
 		for(int j = width; j >= 0; j--){
 			table_value |= (unsigned char)data.at(start+i+j) << (j * 8);
 		}
-		table += QString::number(table_value, 16).rightJustified((width+1)*2, '0') % ", $";
+		add_data(start+i, QString::number(table_value, 16).rightJustified((width+1)*2, '0').toUpper(),
+				  (block::data_format)((packed ? block::DATA_PACKED : block::DATA_UNPACKED) + width));
 	}
-	table.chop(3);
 	delta += size;
-	return table.remove(0, 2);
 }

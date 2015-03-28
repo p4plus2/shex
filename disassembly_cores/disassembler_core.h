@@ -24,7 +24,6 @@ class disassembler_core : public QObject
 		int delta;
 		
 		QString add_label(int destination);
-		void add_data(int destination, QString data);
 		QString disassembly_text();
 		void reset();
 		void decode_name_args(QString &name);
@@ -41,14 +40,23 @@ class disassembler_core : public QObject
 		
 	private:
 		struct block{
+			enum data_format{
+				CODE = 0,
+				DATA_PACKED = 1,
+				DATA_PACKED_END = 4,
+				DATA_UNPACKED = 5,
+				DATA_UNPACKED_END = 9
+			};
 			QString label = "";
 			QString data = "";
+			data_format format;
 		};
 
 		QMap<int, block> disassembly_list;
 		int label_id;
 		
-		QString make_table(QByteArray &data, int start, int size, int width, bool packed);
+		void add_data(int destination, QString data, block::data_format format);
+		void make_table(QByteArray &data, int start, int size, int width, bool packed);
 };
 
 #endif // DISASSEMBLER_CORE_H
