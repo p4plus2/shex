@@ -420,6 +420,9 @@ bool hex_editor::event(QEvent *event)
 		case editor_events::REDO:
 			update_undo_action(false);
 			return true;
+		case editor_events::SELECT_ALL:
+			select_all();
+			return true;
 		case editor_events::DISASSEMBLE:
 			disassemble();
 			return true;

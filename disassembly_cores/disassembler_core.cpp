@@ -56,12 +56,13 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 QString disassembler_core::add_label(int destination)
 {
 	block &b = disassembly_list[destination];
-	qDebug() << destination;
 	if(b.label.isEmpty()){
 		label_id++;
 		b.label = "label_" % address_to_label(destination) % ":\n";
 	}
-	return b.label;
+	QString label(b.label);
+	label.chop(2);
+	return label;
 }
 
 QString disassembler_core::disassembly_text()
