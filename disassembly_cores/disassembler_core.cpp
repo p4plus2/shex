@@ -11,8 +11,8 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 	region = selection_area;
 	data = buffer->range(region.get_start_aligned(), region.get_end_aligned());
 	delta = 0;
+	
 	while(delta < data.size() && error.isEmpty()){
-		int size = 0;
 		unsigned char hex = data.at(delta);
 		disassembler_core::opcode op = get_opcode(hex);	
 		if(abort_unlikely(hex)){
@@ -23,7 +23,6 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 		decode_name_args(op.name);
 		add_mnemonic(get_base()+delta, op.name);
 		
-		delta += size;
 		if(delta > data.size()){
 			error = "Disassembly range too small, last opcode may be invalid.";
 		}
@@ -93,4 +92,26 @@ QString disassembler_core::get_hex(int n, int bytes)
 unsigned int disassembler_core::get_operand(int n)
 {
 	return delta+n < data.size() ? ((unsigned char)data.at(delta+n) << n*8) : 0;
+}
+
+QString disassembler_core::make_table(QByteArray &data, int start, int size, int width, bool packed)
+{
+	const QString prefix[] = {"db $", "dw $", "dl $", "dd $"};
+	const int packed_size[] = {8, 8, 9, 8};
+	QString table;
+	table.reserve(data.size() * 6);  // echo to hold ", $FF\n" for every byte
+	for(int i = start; i < start+size; i += width+1){
+		if(!packed || !(i % packed_size[width])){
+			table.chop(3);
+			table += '\n' % prefix[width];
+		}
+		
+		unsigned int table_value = 0;
+		for(int j = width; j >= 0; j--){
+			table_value |= (unsigned char)data.at(i+j) << (j * 8);
+		}
+		table += QString::number(table_value, 16).rightJustified((width+1)*2, '0') % ", $";
+	}
+	table.chop(3);
+	return table.remove(0, 1);
 }

@@ -495,7 +495,7 @@ void hex_editor::move_cursor_nibble(int delta)
 	while(cursor_nibble/2 < offset){
 		set_offset(offset -text_display::get_columns());
 	}
-	
+
 	update_window();
 }
 

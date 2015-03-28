@@ -46,6 +46,8 @@ class disassembler_core : public QObject
 
 		QMap<int, block> disassembly_list;
 		int label_id;
+		
+		QString make_table(QByteArray &data, int start, int size, int width, bool packed);
 };
 
 #endif // DISASSEMBLER_CORE_H
