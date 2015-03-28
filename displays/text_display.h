@@ -29,7 +29,7 @@ class text_display : public QWidget
 		virtual QSize minimumSizeHint() const { return sizeHint(); }
 	protected:
 		const ROM_buffer *buffer;
-		QFont font_setup();
+		void font_setup();
 		
 		static int get_font_width(){ return font_width; }
 		static int get_font_height(){ return font_height; }

@@ -452,13 +452,13 @@ QString hex_editor::get_status_text()
 	QString text;
 	QTextStream string_stream(&text);
 	if(selection_area.is_active()){
-		string_stream << "Selection range: $" << buffer->get_formatted_address(selection_area.get_start_byte())
-		              << " to $" << buffer->get_formatted_address(selection_area.get_end_byte() - 1);
+		string_stream << "Selection range: " << buffer->get_formatted_address(selection_area.get_start_byte())
+		              << " to " << buffer->get_formatted_address(selection_area.get_end_byte() - 1);
 	}else{
 		int position = cursor_nibble / 2;
 		unsigned char byte = buffer->at(position);
 		
-		string_stream << "Current offset: $" << buffer->get_formatted_address(position)
+		string_stream << "Current offset: " << buffer->get_formatted_address(position)
 		              << "    Hex: 0x" << QString::number(byte, 16).rightJustified(2, '0').toUpper()
 		              << "    Dec: " << QString::number(byte).rightJustified(3, '0')
 		              << "    Bin: %" << QString::number(byte, 2).rightJustified(8, '0');

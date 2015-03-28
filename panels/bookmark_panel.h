@@ -16,25 +16,22 @@
 
 class ROM_buffer;
 
-enum bookmark_data_types{
-	CODE_A8_I8,
-	CODE_A8_I16,
-	CODE_A16_I8,
-	CODE_A16_I16,
-	DATA_PACKED_BYTE,
-	DATA_PACKED_WORD,
-	DATA_PACKED_LONG,
-	DATA_PACKED_DOUBLE,
-	DATA_BYTE,
-	DATA_WORD,
-	DATA_LONG,
-	DATA_DOUBLE
-};
-
 struct bookmark_data{
+	enum types{
+		CODE = 1,
+		PACKED = 2,
+		A = 4,
+		I = 8,
+		BYTE = 16,
+		WORD = 32,
+		LONG = 64,
+		DOUBLE = 128,
+		UNKNOWN = 256
+	};
+		
 	int address;
 	int size;
-	bookmark_data_types data_type;
+	types data_type;
 	QString description;		
 	QColor color;
 };

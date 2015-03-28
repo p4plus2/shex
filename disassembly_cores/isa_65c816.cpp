@@ -25,7 +25,7 @@ template <typename V>
 QString isa_65c816::label_op(int offset, int size, V validator)
 {
 	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(offset, size).toLatin1()));
-	int address = buffer->snes_to_pc((buffer->*validator)(delta*2-2+region.get_start_aligned(), little_endian));
+	int address = buffer->snes_to_pc((buffer->*validator)(delta*2+region.get_start_aligned(), little_endian));
 	if(address < (region.get_start_byte()) || address > (region.get_end_byte())){
 		return '$' + get_hex(offset, size);
 	}
@@ -99,7 +99,7 @@ disassembler_core::opcode isa_65c816::get_opcode(int op)
 
 int isa_65c816::get_base()
 {
-	return region.get_start_byte() - 2;
+	return region.get_start_byte();
 }
 
 bool isa_65c816::abort_unlikely(int op)
@@ -111,6 +111,12 @@ void isa_65c816::update_state()
 {
   	emit A_changed(A_state);
 	emit I_changed(I_state);
+}
+
+void isa_65c816::set_flags(bookmark_data::types type)
+{
+	A_state = type & bookmark_data::A;
+	I_state = type & bookmark_data::I;
 }
 
 isa_65c816::~isa_65c816()

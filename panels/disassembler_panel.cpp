@@ -15,8 +15,11 @@ disassembler_panel::disassembler_panel(panel_manager *parent, hex_editor *editor
         }
 	
 	setReadOnly(true);
+	setWordWrapMode(QTextOption::NoWrap);
+	setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 	connect(disassembler_cores, resolve<int>::from(&QComboBox::activated), 
 	        this, &disassembler_panel::update_core_layout);
+	connect(this, &disassembler_panel::textChanged, this, &disassembler_panel::update_width);
 }
 
 void disassembler_panel::disassemble(selection selection_area, const ROM_buffer *buffer)
@@ -50,6 +53,12 @@ QLayout *disassembler_panel::get_layout()
 	box->addWidget(core_layout);
 	core_layout->setLayout(active_core()->core_layout());
 	return box;
+}
+
+void disassembler_panel::update_width()
+{
+	setMinimumWidth(document()->size().width());
+	updateGeometry();
 }
 
 bool disassembler_panel::state = false;

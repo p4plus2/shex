@@ -24,7 +24,7 @@ class disassembler_core : public QObject
 		int delta;
 		
 		QString add_label(int destination);
-		void add_mnemonic(int destination, QString mnemonic);
+		void add_data(int destination, QString data);
 		QString disassembly_text();
 		void reset();
 		void decode_name_args(QString &name);
@@ -37,11 +37,12 @@ class disassembler_core : public QObject
 		virtual int get_base() = 0;
 		virtual bool abort_unlikely(int op) = 0;
 		virtual void update_state() = 0;
+		virtual void set_flags(bookmark_data::types flags) = 0;
 		
 	private:
 		struct block{
 			QString label = "";
-			QString mnemonic = "";
+			QString data = "";
 		};
 
 		QMap<int, block> disassembly_list;

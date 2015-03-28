@@ -23,7 +23,7 @@ QSize address_display::sizeHint () const
 void address_display::get_line(int start, int end, QTextStream &stream)
 {
 	Q_UNUSED(end);
-	stream << "$" << buffer->get_formatted_address(start) << ": ";
+	stream << buffer->get_formatted_address(start) << ": ";
 }
 
 int address_display::screen_to_nibble(QPoint position, bool byte_align)

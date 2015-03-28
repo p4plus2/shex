@@ -50,18 +50,19 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	size_input->setMinimumWidth(metrics.width("2222222") + input_padding);
 	size_input->setMaximumWidth(metrics.width("2222222") + input_padding);
 	
-	data_type->addItem("Code: 8 bit A, 8 bit index");
-	data_type->addItem("Code: 8 bit A, 16 bit index");
-	data_type->addItem("Code: 16 bit A, 8 bit index");
-	data_type->addItem("Code: 16 bit A, 16 bit index");
-	data_type->addItem("Data: packed byte");
-	data_type->addItem("Data: packed word");
-	data_type->addItem("Data: packed long");
-	data_type->addItem("Data: packed double");
-	data_type->addItem("Data: byte");
-	data_type->addItem("Data: word");
-	data_type->addItem("Data: long");
-	data_type->addItem("Data: double");
+	data_type->addItem("Code: Unknown A/Index", bookmark_data::CODE | bookmark_data::UNKNOWN);
+	data_type->addItem("Code: 8 bit A, 8 bit index", bookmark_data::CODE);
+	data_type->addItem("Code: 8 bit A, 16 bit index", bookmark_data::CODE | bookmark_data::I);
+	data_type->addItem("Code: 16 bit A, 8 bit index", bookmark_data::CODE | bookmark_data::A);
+	data_type->addItem("Code: 16 bit A, 16 bit index", bookmark_data::CODE | bookmark_data::A | bookmark_data::I);
+	data_type->addItem("Data: packed byte", bookmark_data::PACKED | bookmark_data::BYTE);
+	data_type->addItem("Data: packed word", bookmark_data::PACKED | bookmark_data::WORD);
+	data_type->addItem("Data: packed long", bookmark_data::PACKED | bookmark_data::LONG);
+	data_type->addItem("Data: packed double", bookmark_data::PACKED | bookmark_data::DOUBLE);
+	data_type->addItem("Data: byte", bookmark_data::BYTE);
+	data_type->addItem("Data: word", bookmark_data::WORD);
+	data_type->addItem("Data: long", bookmark_data::LONG);
+	data_type->addItem("Data: double", bookmark_data::DOUBLE);
 	
 	init_grid_layout();
 	editor->get_buffer()->set_bookmark_map(&bookmarks);
@@ -96,7 +97,7 @@ void bookmark_panel::add_clicked()
 	bookmark.color = color_button->palette().button().color();
 	bookmark.size = size_input->text().toInt();
 	bookmark.description = description;
-	bookmark.data_type = (bookmark_data_types)data_type->currentIndex();
+	bookmark.data_type = (bookmark_data::types)data_type->currentData().toInt();
 	
 	add_bookmark(address_input->text(), bookmark);
 	bookmarks.insert(address_input->text(), bookmark);

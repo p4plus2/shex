@@ -12,16 +12,37 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 	data = buffer->range(region.get_start_aligned(), region.get_end_aligned());
 	delta = 0;
 	
+	const bookmark_map *bookmarks = buffer->get_bookmark_map();
 	while(delta < data.size() && error.isEmpty()){
+		int opcode_address = delta;
+		const QString address = buffer->get_formatted_address(get_base()+delta);
+		if(bookmarks->contains(address)){
+			bookmark_data bookmark = bookmarks->value(address);
+			if(bookmark.data_type & bookmark_data::CODE &&
+			   !(bookmark.data_type & bookmark_data::UNKNOWN)){
+				set_flags(bookmark.data_type);
+			}else if(!(bookmark.data_type & bookmark_data::CODE)){
+				bool packed = bookmark.data_type & bookmark_data::PACKED;
+				int width = 0; //byte
+				if(bookmark.data_type & bookmark_data::WORD){
+					width = 1;
+				}else if(bookmark.data_type & bookmark_data::LONG){
+					width = 2;
+				}else if(bookmark.data_type & bookmark_data::DOUBLE){
+					width = 3;
+				}
+				add_data(opcode_address, make_table(data, delta, bookmark.size, width, packed));
+				continue;
+			}
+		}
 		unsigned char hex = data.at(delta);
 		disassembler_core::opcode op = get_opcode(hex);	
 		if(abort_unlikely(hex)){
 			error = "Unlikely opcode detected, aborting!";
 		}
-		
 		delta++;
 		decode_name_args(op.name);
-		add_mnemonic(get_base()+delta, op.name);
+		add_data(opcode_address, op.name);
 		
 		if(delta > data.size()){
 			error = "Disassembly range too small, last opcode may be invalid.";
@@ -42,9 +63,9 @@ QString disassembler_core::add_label(int destination)
 	return b.label;
 }
 
-void disassembler_core::add_mnemonic(int destination, QString mnemonic)
+void disassembler_core::add_data(int destination, QString data)
 {
-	disassembly_list[destination].mnemonic = mnemonic;
+	disassembly_list[get_base()+destination].data = data;
 }
 
 QString disassembler_core::disassembly_text()
@@ -54,8 +75,8 @@ QString disassembler_core::disassembly_text()
 		if(!b.label.isEmpty()){
 			text += b.label % ":\n";
 		}
-		if(!b.mnemonic.isEmpty()){
-			text += (label_id > 0 ? "\t" : "") % b.mnemonic % "\n";
+		if(!b.data.isEmpty()){
+			text += (label_id > 0 ? "\t" : "") % b.data % "\n";
 		}
 	}
 	return text;
@@ -100,18 +121,21 @@ QString disassembler_core::make_table(QByteArray &data, int start, int size, int
 	const int packed_size[] = {8, 8, 9, 8};
 	QString table;
 	table.reserve(data.size() * 6);  // echo to hold ", $FF\n" for every byte
-	for(int i = start; i < start+size; i += width+1){
+	add_label(start);
+	add_label(start+size);
+	for(int i = 0; i < size && i < start+data.size(); i += width+1){
 		if(!packed || !(i % packed_size[width])){
 			table.chop(3);
-			table += '\n' % prefix[width];
+			table += "\n\t" % prefix[width];
 		}
 		
 		unsigned int table_value = 0;
 		for(int j = width; j >= 0; j--){
-			table_value |= (unsigned char)data.at(i+j) << (j * 8);
+			table_value |= (unsigned char)data.at(start+i+j) << (j * 8);
 		}
 		table += QString::number(table_value, 16).rightJustified((width+1)*2, '0') % ", $";
 	}
 	table.chop(3);
-	return table.remove(0, 1);
+	delta += size;
+	return table.remove(0, 2);
 }

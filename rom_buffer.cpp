@@ -228,8 +228,8 @@ QString ROM_buffer::get_formatted_address(int address) const
 	if(address < 0){
 		return QString("NOT:ROM");
 	}
-	return QString::number(bank, 16).rightJustified(2, '0').toUpper() +
-			":" + QString::number(word,16).rightJustified(4, '0').toUpper();
+	return '$' + QString::number(bank, 16).rightJustified(2, '0').toUpper() +
+			':' + QString::number(word,16).rightJustified(4, '0').toUpper();
 }
 
 

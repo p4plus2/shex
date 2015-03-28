@@ -28,6 +28,7 @@ class disassembler_panel : public QPlainTextEdit, public abstract_panel
 	private:
 		void layout_adjust();
 		disassembler_core *active_core(){ return cores[disassembler_cores->currentText()]; }
+		void update_width();
 		
 		QWidget *core_layout = new QWidget(this);
 		QVBoxLayout *box = new QVBoxLayout();	
