@@ -146,8 +146,6 @@ void disassembler_core::add_data(int destination, QString data, block::data_form
 
 void disassembler_core::make_table(QByteArray &data, int start, int size, int width, bool packed)
 {
-	QString table;
-	table.reserve(data.size() * 6);  // echo to hold ", $FF\n" for every byte
 	add_label(get_base() + start);
 	add_label(get_base() + start + size);
 	for(int i = 0; i < size && i < start+data.size(); i += width+1){
