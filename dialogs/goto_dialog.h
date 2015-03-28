@@ -1,6 +1,8 @@
 #ifndef GOTO_DIALOG_H
 #define GOTO_DIALOG_H
 
+#include <QRadioButton>
+
 #include "abstract_dialog.h"
 
 class goto_dialog : public abstract_dialog

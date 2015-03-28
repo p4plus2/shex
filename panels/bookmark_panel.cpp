@@ -41,7 +41,6 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	
 	update_button->hide();
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
-	code_button->setChecked(true);
 	address_input->setInputMask("$HH:HHHH");
 	size_input->setInputMask("999999");
 	
@@ -50,6 +49,19 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	
 	size_input->setMinimumWidth(metrics.width("2222222") + input_padding);
 	size_input->setMaximumWidth(metrics.width("2222222") + input_padding);
+	
+	data_type->addItem("Code: 8 bit A, 8 bit index");
+	data_type->addItem("Code: 8 bit A, 16 bit index");
+	data_type->addItem("Code: 16 bit A, 8 bit index");
+	data_type->addItem("Code: 16 bit A, 16 bit index");
+	data_type->addItem("Data: packed byte");
+	data_type->addItem("Data: packed word");
+	data_type->addItem("Data: packed long");
+	data_type->addItem("Data: packed double");
+	data_type->addItem("Data: byte");
+	data_type->addItem("Data: word");
+	data_type->addItem("Data: long");
+	data_type->addItem("Data: double");
 	
 	init_grid_layout();
 	editor->get_buffer()->set_bookmark_map(&bookmarks);
@@ -84,7 +96,7 @@ void bookmark_panel::add_clicked()
 	bookmark.color = color_button->palette().button().color();
 	bookmark.size = size_input->text().toInt();
 	bookmark.description = description;
-	bookmark.code = code_button->isChecked();
+	bookmark.data_type = (bookmark_data_types)data_type->currentIndex();
 	
 	add_bookmark(address_input->text(), bookmark);
 	bookmarks.insert(address_input->text(), bookmark);
@@ -129,8 +141,7 @@ void bookmark_panel::row_clicked(QModelIndex index)
 	description_input->setPlainText(bookmark.description);
 	set_color_button(bookmark.color);
 	address_input->setText(address_index.data().toString());
-	code_button->setChecked(bookmark.code);
-	data_button->setChecked(!bookmark.code);
+	data_type->setCurrentIndex(bookmark.data_type);
 }
 
 void bookmark_panel::create_bookmark(int start, int end, const ROM_buffer *buffer)
@@ -138,11 +149,12 @@ void bookmark_panel::create_bookmark(int start, int end, const ROM_buffer *buffe
 	size_input->setText(QString::number(end - start));
 	description_input->setPlainText("");
 	address_input->setText(buffer->get_formatted_address(start));
-	code_button->setChecked(true);
 	
 	show();
-	state = true;
-	toggle_event(BOOKMARKS);
+	if(!state){
+		state = true;
+		toggle_event(BOOKMARKS);
+	}
 }
 
 QLayout *bookmark_panel::get_layout()
@@ -172,8 +184,7 @@ void bookmark_panel::init_grid_layout()
 	grid->addWidget(size_label, 0, 2, 1, 1, Qt::AlignRight);
 	grid->addWidget(size_input, 0, 3);
 	grid->addWidget(description_label, 1, 0, 1, 2);
-	grid->addWidget(code_button, 1, 2, 1, 1, Qt::AlignRight);
-	grid->addWidget(data_button, 1, 3, 1, 1);
+	grid->addWidget(data_type, 1, 2, 1, 2, Qt::AlignRight);
 	grid->addWidget(description_input, 2, 0, 1, 4);
 	grid->addWidget(color_label, 3, 0, 1, 1, Qt::AlignRight);
 	grid->addWidget(color_button, 3, 1);

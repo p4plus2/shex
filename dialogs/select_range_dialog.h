@@ -1,6 +1,8 @@
 #ifndef select_range_DIALOG_H
 #define select_range_DIALOG_H
 
+#include <QRadioButton>
+
 #include "abstract_dialog.h"
 
 class select_range_dialog : public abstract_dialog

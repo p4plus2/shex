@@ -9,17 +9,32 @@
 #include <QColormap>
 #include <QLabel>
 #include <QLineEdit>
-#include <QRadioButton>
+#include <QComboBox>
 
 #include "abstract_panel.h"
 #include "panel_manager.h"
 
 class ROM_buffer;
 
+enum bookmark_data_types{
+	CODE_A8_I8,
+	CODE_A8_I16,
+	CODE_A16_I8,
+	CODE_A16_I16,
+	DATA_PACKED_BYTE,
+	DATA_PACKED_WORD,
+	DATA_PACKED_LONG,
+	DATA_PACKED_DOUBLE,
+	DATA_BYTE,
+	DATA_WORD,
+	DATA_LONG,
+	DATA_DOUBLE
+};
+
 struct bookmark_data{
 	int address;
 	int size;
-	bool code;
+	bookmark_data_types data_type;
 	QString description;		
 	QColor color;
 };
@@ -71,8 +86,7 @@ class bookmark_panel : public QTableView, public abstract_panel
 		QPushButton *color_button = new QPushButton(this);
 		QLabel *color_label = new QLabel("Color: ", this);
 		
-		QRadioButton *code_button = new QRadioButton("Code", this);
-		QRadioButton *data_button = new QRadioButton("Data", this);
+		QComboBox *data_type = new QComboBox(this);
 		                
 		QPlainTextEdit *description_input = new QPlainTextEdit(this);
 		QLabel *description_label = new QLabel("Description: ", this);

@@ -3,6 +3,7 @@
 
 #include <QComboBox>
 #include <QButtonGroup>
+#include <QRadioButton>
 
 #include "abstract_dialog.h"
 

@@ -22,8 +22,10 @@ disassembler_panel::disassembler_panel(panel_manager *parent, hex_editor *editor
 void disassembler_panel::disassemble(selection selection_area, const ROM_buffer *buffer)
 {
 	setPlainText(active_core()->disassemble(selection_area, buffer));
-	state = true;
-	toggle_event(DISASSEMBLER);
+	if(!state){
+		state = true;
+		toggle_event(DISASSEMBLER);
+	}
 }
 
 // This method makes me very sad.
