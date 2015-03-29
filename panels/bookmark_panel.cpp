@@ -257,6 +257,7 @@ bool bookmark_panel::read_json(QString file_path)
 		return false;
 	}
 	bookmarks.clear();
+	model->clear();
 	foreach(QJsonValue value, json.array()){
 		if(!value.isObject()){
 			return false;

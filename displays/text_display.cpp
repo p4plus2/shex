@@ -87,13 +87,14 @@ void text_display::paintEvent(QPaintEvent *event)
 	}else{
 		cursor_position = nibble_to_screen(get_cursor_nibble());
 	}
-	
+	QColor selection_color = palette().color(QPalette::Active, QPalette::Highlight).lighter();
+	selection_color.setAlpha(170);
 	if(!selection_area.is_active()){
 		painter.setClipping(false);
 		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
-		painter.fillRect(active_line, palette().color(QPalette::Highlight).lighter());
+		painter.fillRect(active_line, selection_color);
 	}else{
-		paint_selection(painter, selection_area, palette().color(QPalette::Active, QPalette::Highlight));
+		paint_selection(painter, selection_area, selection_color);
 	}
 	painter.setClipping(false);
 	if(cursor_state && focusPolicy() != Qt::NoFocus){
