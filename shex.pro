@@ -9,7 +9,7 @@ QT       += core gui widgets
 TARGET = shex
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
         main_window.cpp \

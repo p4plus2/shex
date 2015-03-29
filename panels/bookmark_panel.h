@@ -66,6 +66,7 @@ class bookmark_panel : public QTableView, public abstract_panel
 		void set_color_button(QColor color);
 		void layout_adjust();
 		int check_address(QString address);
+		bool read_json(QString file_path);
 		
 		QWidget *input_area = new QWidget(this);
 		

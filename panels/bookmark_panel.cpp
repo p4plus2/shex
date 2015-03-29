@@ -1,6 +1,10 @@
 #include <QHeaderView>
 #include <QColorDialog>
 #include <QMenu>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include "bookmark_panel.h"
 #include "hex_editor.h"
@@ -70,6 +74,8 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &bookmark_panel::customContextMenuRequested, this, &bookmark_panel::context_menu);
+	
+	read_json("./test.json");
 }
 
 void bookmark_panel::color_clicked()
@@ -150,7 +156,7 @@ void bookmark_panel::row_clicked(QModelIndex index)
 	description_input->setPlainText(bookmark.description);
 	set_color_button(bookmark.color);
 	address_input->setText(address_index.data().toString());
-	data_type->setCurrentIndex(bookmark.data_type);
+	data_type->setCurrentIndex(data_type->findData(bookmark.data_type));
 }
 
 void bookmark_panel::row_double_clicked(QModelIndex index)
@@ -237,6 +243,46 @@ int bookmark_panel::check_address(QString address)
 		return clean;
 	}
 	return -1;
+}
+
+bool bookmark_panel::read_json(QString file_path)
+{
+	QFile file(file_path);
+	if (!file.open(QIODevice::ReadOnly)){
+		return false;
+	}
+	QByteArray file_data = file.readAll();
+	QJsonDocument json = QJsonDocument::fromJson(file_data);
+	if(!json.isArray()){
+		return false;
+	}
+	bookmarks.clear();
+	foreach(QJsonValue value, json.array()){
+		if(!value.isObject()){
+			return false;
+		}
+		QJsonObject bookmark_json = value.toObject();
+		
+		if(!bookmark_json["address"].isDouble() ||
+		   !bookmark_json["size"].isDouble() ||
+		   !bookmark_json["description"].isString() ||
+		   !bookmark_json["type"].isDouble() ||
+		   !bookmark_json["color"].isDouble()){
+			return false;
+		}
+		bookmark_data bookmark;
+		bookmark.address = bookmark_json["address"].toInt();
+		bookmark.size = bookmark_json["size"].toInt();
+		bookmark.description = bookmark_json["description"].toString();
+		bookmark.data_type = (bookmark_data::types)bookmark_json["type"].toInt();
+		bookmark.color = QColor(bookmark_json["color"].toInt());
+		
+		QString address = active_editor->get_buffer()->get_formatted_address(
+		                        active_editor->get_buffer()->snes_to_pc(bookmark.address));
+		bookmarks[address] = bookmark;
+		add_bookmark(address, bookmark);
+	}
+	return true;
 }
 
 bool bookmark_panel::state = false;

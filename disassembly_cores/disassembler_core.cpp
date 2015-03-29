@@ -67,7 +67,7 @@ QString disassembler_core::add_label(int destination)
 
 QString disassembler_core::disassembly_text()
 {
-	const QString prefix[] = {"db ", "dw ", "dl ", "dd "};
+	const QString prefix[] = {"\tdb ", "\tdw ", "\tdl ", "\tdd "};
 	QString text;
 	QString table_line;
 	table_line.reserve(42);
