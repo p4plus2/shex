@@ -179,6 +179,8 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 	panel->connect_to_editor(editor);
 	menu_controller->connect_to_widget(editor, EDITOR_EVENT);
 	menu_controller->group_connect_to_widget(panel, PANEL_EVENT);
+	
+	editor->update_window();
 }
 
 void main_window::create_new_tab(QString name, bool new_file)

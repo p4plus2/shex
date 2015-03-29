@@ -77,8 +77,8 @@ void hex_editor::scroll_mode_changed()
 void hex_editor::update_window()
 {
 	if(!scroll_mode){
-		emit update_slider(offset / text_display::get_columns());
 		emit update_range(get_max_lines()+1);
+		emit update_slider(offset / text_display::get_columns());
 	}else{
 		emit update_range(height());
 	}
@@ -124,6 +124,7 @@ void hex_editor::update_undo_action(bool direction)
 
 void hex_editor::goto_offset(int address)
 {
+	qDebug() << address;
 	if(!buffer->is_active()){
 		return;
 	}
