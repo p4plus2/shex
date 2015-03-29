@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QFileDialog>
 
 #include "bookmark_panel.h"
 #include "hex_editor.h"
@@ -74,8 +75,6 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &bookmark_panel::customContextMenuRequested, this, &bookmark_panel::context_menu);
-	
-	read_json("./test.json");
 }
 
 void bookmark_panel::color_clicked()
@@ -99,8 +98,12 @@ void bookmark_panel::context_menu(const QPoint& position)
 	QMenu menu;
 	if(indexAt(position).isValid()){
 		menu.addAction("Delete", this, SLOT(delete_item()));
-		menu.exec(mapToGlobal(position));
+		menu.addSeparator();
 	}
+	menu.addAction("Open Bookmark Library", this, SLOT(read_json()));
+	menu.addAction("Save Bookmark Library", this, SLOT(write_json()));
+	menu.addAction("Save Bookmark Library As", this, SLOT(write_as_json()));
+	menu.exec(mapToGlobal(position));
 }
 
 void bookmark_panel::add_clicked()
@@ -245,22 +248,28 @@ int bookmark_panel::check_address(QString address)
 	return -1;
 }
 
-bool bookmark_panel::read_json(QString file_path)
+void bookmark_panel::read_json()
 {
-	QFile file(file_path);
+	QString name = QFileDialog::getOpenFileName(this, "Open Bookmark library", QDir::currentPath(), 
+                                            "Shex Bookmark Library (*.sbl);;JSON files (*.json);;All files(*)");
+	if(name == ""){
+		return; //user canceled or gave an invalid file
+	}
+	QFile file(name);
 	if (!file.open(QIODevice::ReadOnly)){
-		return false;
+		return;  //Not a chance recovering from this one
 	}
 	QByteArray file_data = file.readAll();
 	QJsonDocument json = QJsonDocument::fromJson(file_data);
 	if(!json.isArray()){
-		return false;
+		return; //abandon hope
 	}
+	file_name = name; //Don't change the name until we are about to actually load data
 	bookmarks.clear();
-	model->clear();
+	model->setRowCount(0);
 	foreach(QJsonValue value, json.array()){
 		if(!value.isObject()){
-			return false;
+			continue; //Ignore this object
 		}
 		QJsonObject bookmark_json = value.toObject();
 		
@@ -269,7 +278,7 @@ bool bookmark_panel::read_json(QString file_path)
 		   !bookmark_json["description"].isString() ||
 		   !bookmark_json["type"].isDouble() ||
 		   !bookmark_json["color"].isDouble()){
-			return false;
+			continue; //Ignore this object
 		}
 		bookmark_data bookmark;
 		bookmark.address = bookmark_json["address"].toInt();
@@ -283,7 +292,38 @@ bool bookmark_panel::read_json(QString file_path)
 		bookmarks[address] = bookmark;
 		add_bookmark(address, bookmark);
 	}
-	return true;
+}
+
+void bookmark_panel::write_json(bool save_as)
+{
+	if(save_as || file_name.isEmpty()){
+		QString filter = "Shex Bookmark Library (*.sbl);;JSON files (*.json);;All files(*)";
+		file_name = QFileDialog::getSaveFileName(this, "Save Bookmark library", QDir::currentPath(), 
+							filter, &filter, QFileDialog::DontUseNativeDialog);
+	}
+	
+	QFile file(file_name);
+	if (file_name.isEmpty() || !file.open(QIODevice::WriteOnly)){
+		return;  //Not a chance recovering from this one
+	}
+	QJsonArray json_data;
+	foreach(bookmark_data bookmark, bookmarks){
+		json_data.append(QJsonObject{
+		                          {"address", bookmark.address},
+		                          {"size", bookmark.size},
+		                          {"description", bookmark.description},
+		                          {"type", bookmark.data_type},
+		                          {"color", (int)bookmark.color.rgb()},
+		                  });
+	}
+	QJsonDocument json;
+	json.setArray(json_data);
+	file.write(json.toJson());
+}
+
+void bookmark_panel::write_as_json()
+{
+	write_json(true);
 }
 
 bool bookmark_panel::state = false;

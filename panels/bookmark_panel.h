@@ -58,6 +58,9 @@ class bookmark_panel : public QTableView, public abstract_panel
 		void row_clicked(QModelIndex index);
 		void row_double_clicked(QModelIndex index);
 		void delete_item();
+		void read_json();
+		void write_json(bool select_name = false);
+		void write_as_json();
 		
 		void create_bookmark(int start, int end, const ROM_buffer *buffer);
 		
@@ -66,7 +69,6 @@ class bookmark_panel : public QTableView, public abstract_panel
 		void set_color_button(QColor color);
 		void layout_adjust();
 		int check_address(QString address);
-		bool read_json(QString file_path);
 		
 		QWidget *input_area = new QWidget(this);
 		
@@ -94,6 +96,9 @@ class bookmark_panel : public QTableView, public abstract_panel
 		
 		QLineEdit *size_input = new QLineEdit(this);
 		QLabel *size_label = new QLabel("Size: ", this);
+		
+		bool can_save = false;
+		QString file_name = "";
 		
 		static const int input_padding = 12;
 		static bool state;
