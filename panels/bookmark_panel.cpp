@@ -138,7 +138,7 @@ void bookmark_panel::update_clicked()
 		return;
 	}
 	for(int i = 0; i < row; i++){
-		QModelIndex address_index = model->index(i, 0, QModelIndex());
+		QModelIndex address_index = model->index(i, 0);
 		if(address_index.data().toString() == address_input->text()){
 			model->removeRow(i);
 			break;
@@ -151,8 +151,8 @@ void bookmark_panel::update_clicked()
 void bookmark_panel::row_clicked(QModelIndex index)
 {	
 	active_row = index.row();
-	QModelIndex address_index = model->index(active_row, 0, QModelIndex());
-	
+	QModelIndex address_index = model->index(active_row, 0);
+
 	bookmark_data bookmark = bookmarks[address_index.data().toString()];
 	
 	size_input->setText(QString::number(bookmark.size));
@@ -165,7 +165,7 @@ void bookmark_panel::row_clicked(QModelIndex index)
 void bookmark_panel::row_double_clicked(QModelIndex index)
 {	
 	active_row = index.row();
-	QModelIndex address_index = model->index(active_row, 0, QModelIndex());
+	QModelIndex address_index = model->index(active_row, 0);
 	active_editor->goto_offset(check_address(address_index.data().toString()));
 }
 
@@ -201,8 +201,8 @@ void bookmark_panel::add_bookmark(QString address, bookmark_data bookmark)
 {
 	model->setItem(row, 0, new QStandardItem(address));
 	QStandardItem *color = new QStandardItem();
-	color->setBackground(QBrush(bookmark.color));
-	color->setForeground(QBrush(bookmark.color));
+	color->setBackground(bookmark.color);
+	color->setForeground(bookmark.color);
 	color->setText(bookmark.color.name());
 	model->setItem(row, 1, color);
 	model->setItem(row, 2, new QStandardItem(bookmark.description));
@@ -252,11 +252,8 @@ void bookmark_panel::read_json()
 {
 	QString name = QFileDialog::getOpenFileName(this, "Open Bookmark library", QDir::currentPath(), 
                                             "Shex Bookmark Library (*.sbl);;JSON files (*.json);;All files(*)");
-	if(name == ""){
-		return; //user canceled or gave an invalid file
-	}
 	QFile file(name);
-	if (!file.open(QIODevice::ReadOnly)){
+	if(name == "" || !file.open(QIODevice::ReadOnly)){
 		return;  //Not a chance recovering from this one
 	}
 	QByteArray file_data = file.readAll();

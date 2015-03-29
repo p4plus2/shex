@@ -14,7 +14,7 @@ class isa_65c816 : public disassembler_core
 		explicit isa_65c816(QObject *parent = 0);
 		~isa_65c816();
 		QGridLayout *core_layout();
-		static QString id(){ return "65c186"; }
+		static QString id(){ return "65c816"; }
 		
 	signals:
 		void A_changed(bool);
