@@ -78,7 +78,7 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 			I_state = (operand & 0x10) ? data.at(delta-1) == (char)0xC2 : I_state;
 		case 'c':
 			size++;
-			return "$" + get_hex(operand & 0x0000FF, 2);	
+			return "#$" + get_hex(operand & 0x0000FF, 2);	
 		default:
 			qFatal("Invalid name decode arg");
 	}

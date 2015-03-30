@@ -40,7 +40,7 @@ bool main_window::close_tab(int i)
 	if(editor->can_save()){
 		typedef QMessageBox message;
 		QString name = editor->get_file_name();
-		int button = message::warning(this, "Save", "Do you wish to save any unsaved changed to " + name, 
+		int button = message::warning(this, "Save", "Do you wish to save any unsaved changes to " + name + "?", 
 		                              message::Yes | message::No | message::Cancel, message::Yes);
 		switch(button){
 			case message::Yes:
