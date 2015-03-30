@@ -101,6 +101,7 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_action<dialog_event>("&Character map editor", MAP_EDITOR, hotkey("Alt+c"), menu);
 	add_action<panel_event>("Disassembly panel toggle", DISASSEMBLER, hotkey("Alt+d"), menu, true);
 	add_action<panel_event>("Bookmark panel toggle", BOOKMARKS, hotkey("Alt+b"), menu, true);
+	menu->addSeparator();
 	
 	menu->addMenu(find_menu("&Copy style"));
 	menu = find_menu("&Copy style");
@@ -113,6 +114,10 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_group_action<editor_event>("&Long table", ASM_LONG_TABLE, hotkey("Alt+6"), menu, copy_group);
 	add_group_action<editor_event>("&C source", C_SOURCE, hotkey("Alt+7"), menu, copy_group);
 	enable_checkable(copy_group);
+	
+	menu = find_menu("&Options");
+	menu->addSeparator();
+	add_action<dialog_event>("&Settings", SETTINGS, hotkey("Ctrl+o"), menu);
 
 	menu = find_menu("&Help");
 	add_action<window_event>("&Version", VERSION, hotkey("Alt+v"), menu);

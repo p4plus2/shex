@@ -40,6 +40,7 @@ enum dialog_events{
         EXPAND,
         METADATA_EDITOR,
         MAP_EDITOR,
+	SETTINGS,
 	DIALOG_EVENT_MAX
 };
 

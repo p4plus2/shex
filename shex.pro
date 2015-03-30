@@ -43,7 +43,8 @@ SOURCES += main.cpp\
     panels/bookmark_panel.cpp \
     panels/disassembler_panel.cpp \
     object_group.cpp \
-    settings_manager.cpp
+    settings_manager.cpp \
+    dialogs/settings_dialog.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -82,7 +83,8 @@ HEADERS  += main_window.h \
     panels/bookmark_panel.h \
     object_group.h \
     settings_manager.h \
-    events/settings_event.h
+    events/settings_event.h \
+    dialogs/settings_dialog.h
 
 OTHER_FILES += \
     version.sh
