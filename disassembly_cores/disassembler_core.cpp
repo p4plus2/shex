@@ -71,7 +71,7 @@ QString disassembler_core::disassembly_text()
 	QString text;
 	QString table_line;
 	table_line.reserve(42);
-	foreach(block b, disassembly_list){
+	for(const auto &b : disassembly_list){
 		if(!b.label.isEmpty() || table_line.length() > 42){
 			table_line.chop(2);
 			text += table_line % '\n' % b.label;

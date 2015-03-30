@@ -100,8 +100,7 @@ void main_window::open()
 {
 	QStringList file_list = QFileDialog::getOpenFileNames(this, "Open file(s)", QDir::homePath(),
 	                                                      "ROM files (*.smc *.sfc);;All files(*.*)");
-	QString file_name;
-	foreach(file_name, file_list){
+	for(auto &file_name : file_list){
 		create_new_tab(file_name);
 	}
 }

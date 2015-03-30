@@ -19,7 +19,7 @@ void object_group::remove_from_group(QObject *object)
 
 bool object_group::event(QEvent *e)
 {
-	foreach(QObject *object, group){
+	for(auto &object : group){
 		QApplication::sendEvent(object, e);
 	}
 	return true;

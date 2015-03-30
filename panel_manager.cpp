@@ -8,7 +8,7 @@ panel_manager::panel_manager(hex_editor *parent) : QWidget(parent)
 	panel_map[DISASSEMBLER] = new disassembler_panel(this, parent);
 	panel_map[BOOKMARKS] = new bookmark_panel(this, parent);
 	
-	foreach(abstract_panel *panel, panel_map){
+	for(auto &panel : panel_map){
 		layout->addWidget(panel->get_display());
 		panel->toggle_display(panel->display_state());
 	}
@@ -17,7 +17,7 @@ panel_manager::panel_manager(hex_editor *parent) : QWidget(parent)
 void panel_manager::init_displays()
 {
 	setLayout(layout);
-	foreach(abstract_panel *panel, panel_map){
+	for(auto &panel : panel_map){
 		panel->init_display();
 	}	
 }

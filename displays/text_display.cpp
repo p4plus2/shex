@@ -73,7 +73,7 @@ void text_display::paintEvent(QPaintEvent *event)
 	painter.setClipping(true);
 	const bookmark_map *bookmarks = buffer->get_bookmark_map();
 	if(bookmarks){
-		foreach(bookmark_data bookmark, *bookmarks){
+		for(const auto &bookmark : *bookmarks){
 			selection bookmark_selection = selection::create_selection(
 							buffer->snes_to_pc(bookmark.address), bookmark.size);
 			paint_selection(painter, bookmark_selection, bookmark.color);

@@ -34,7 +34,7 @@ void dialog_manager::connect_to_editor(hex_editor *editor)
 
 void dialog_manager::set_active_editor(hex_editor *editor)
 {
-	foreach(abstract_dialog *dialog, dialog_map){
+	for(auto &dialog : dialog_map){
 		dialog->set_active_editor(editor);
 		dialog->refresh();
 	}

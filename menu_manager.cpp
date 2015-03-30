@@ -32,7 +32,7 @@ void menu_manager::create_menus()
 	menu_list.append(new QMenu("&Options"));
 	menu_list.append(new QMenu("&Help"));
 	
-	foreach(QMenu *menu, menu_list){
+	for(auto &menu : menu_list){
 		connect(menu, &QMenu::aboutToShow, this, [=](){ check_enabled(menu); });
 		menu_bar->addMenu(menu);
 	}
@@ -125,7 +125,7 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 
 QMenu *menu_manager::find_menu(QString id)
 {
-	foreach(QMenu *menu, menu_list){
+	for(auto &menu : menu_list){
 		if(menu->title() == id){
 			return menu;
 		}
@@ -137,7 +137,7 @@ QMenu *menu_manager::find_menu(QString id)
 void menu_manager::enable_checkable(QActionGroup *group)
 {
 	QList<QAction *> actions = group->actions();
-	foreach(QAction *current, actions){
+	for(auto &current : actions){
 		current->setCheckable(true);
 	}
 	actions.first()->setChecked(true);
@@ -153,7 +153,7 @@ void menu_manager::post_event(QEvent *event)
 
 void menu_manager::check_enabled(QMenu *menu)
 {
-	foreach(QAction *action, menu->actions()){
+	for(auto &action : menu->actions()){
 		if(!action->isSeparator() && !action->menu()){
 			dynamic_cast<abstract_menu_item *>(action)->check_enabled();
 		}
@@ -162,7 +162,7 @@ void menu_manager::check_enabled(QMenu *menu)
 
 menu_manager::~menu_manager()
 {
-	foreach(QMenu *menu, menu_list){
+	for(auto &menu : menu_list){
 		delete menu;
 	}
 }

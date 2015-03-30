@@ -171,7 +171,7 @@ void bookmark_panel::row_double_clicked(QModelIndex index)
 
 void bookmark_panel::delete_item()
 {
-	foreach(QModelIndex i, selectionModel()->selectedRows()){
+	for(const auto &i : selectionModel()->selectedRows()){
 		bookmarks.remove(i.data().toString());
 		model->removeRow(i.row());
 	}
@@ -264,7 +264,7 @@ void bookmark_panel::read_json()
 	file_name = name; //Don't change the name until we are about to actually load data
 	bookmarks.clear();
 	model->setRowCount(0);
-	foreach(QJsonValue value, json.array()){
+	for(const auto &value : json.array()){
 		if(!value.isObject()){
 			continue; //Ignore this object
 		}
@@ -304,7 +304,7 @@ void bookmark_panel::write_json(bool save_as)
 		return;  //Not a chance recovering from this one
 	}
 	QJsonArray json_data;
-	foreach(bookmark_data bookmark, bookmarks){
+	for(const auto &bookmark : bookmarks){
 		json_data.append(QJsonObject{
 		                          {"address", bookmark.address},
 		                          {"size", bookmark.size},
