@@ -7,6 +7,7 @@
 #include "displays/address_display.h"
 #include "debug.h"
 #include "utility.h"
+#include "settings_manager.h"
 
 hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file) :
         QWidget(parent)
@@ -45,6 +46,8 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	layout->addWidget(ascii, 1, 2);
 	layout->setRowStretch(1, 1);
 	setLayout(layout);
+	
+	settings_manager::add_listener(this);
 }
 
 void hex_editor::set_focus()
@@ -348,7 +351,7 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 		//more hotkeys here if needed
 		return;
 	}
-
+	
 	switch(event->key()){
 		case Qt::Key_Backspace:
 			move_cursor_nibble((cursor_nibble - 2) & ~1);
@@ -395,6 +398,9 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 
 bool hex_editor::event(QEvent *event)
 {
+	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
+		qDebug() << ((settings_event *)event)->data().second;
+	}
 	if(event->type() != (QEvent::Type)EDITOR_EVENT){
 		return QWidget::event(event);
 	}

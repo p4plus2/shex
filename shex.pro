@@ -42,7 +42,8 @@ SOURCES += main.cpp\
     panel_manager.cpp \
     panels/bookmark_panel.cpp \
     panels/disassembler_panel.cpp \
-    object_group.cpp
+    object_group.cpp \
+    settings_manager.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -79,7 +80,9 @@ HEADERS  += main_window.h \
     panel_manager.h \
     panels/disassembler_panel.h \
     panels/bookmark_panel.h \
-    object_group.h
+    object_group.h \
+    settings_manager.h \
+    events/settings_event.h
 
 OTHER_FILES += \
     version.sh
