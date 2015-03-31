@@ -9,7 +9,9 @@ QT       += core gui widgets
 TARGET = shex
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -Wextra 
+#-fsanitize=memory -fno-omit-frame-pointer -fsanitize-blacklist=blacklist.txt
+#QMAKE_LFLAGS += -fsanitize=memory
 
 SOURCES += main.cpp\
         main_window.cpp \

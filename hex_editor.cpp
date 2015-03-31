@@ -160,7 +160,7 @@ void hex_editor::select_range(int start, int end)
 	offset = clamp(offset, 0, buffer->size() - text_display::get_rows_by_columns());
 	
 	selection_area.set_start(start * 2);
-	selection_area.set_end(end * 2);
+	selection_area.set_end(end * 2 + 1);
 	update_window();
 }
 
