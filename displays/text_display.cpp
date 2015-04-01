@@ -69,8 +69,8 @@ void text_display::paintEvent(QPaintEvent *event)
 	QColor text = palette().color(QPalette::WindowText);
 	painter.setPen(text);
 	painter.setFont(font);
-	painter.setClipRegion(event->region());
 	painter.setClipping(true);
+	
 	const bookmark_map *bookmarks = buffer->get_bookmark_map();
 	if(bookmarks){
 		for(const auto &bookmark : *bookmarks){
@@ -81,26 +81,25 @@ void text_display::paintEvent(QPaintEvent *event)
 	}
 	
 	selection selection_area = get_selection();
-	QPoint cursor_position;
-	if(selection_area.is_active()){
-		cursor_position = nibble_to_screen(selection_area.get_end_aligned());
-	}else{
-		cursor_position = nibble_to_screen(get_cursor_nibble());
-	}
+	
 	QColor selection_color = palette().color(QPalette::Active, QPalette::Highlight).lighter();
 	selection_color.setAlpha(170);
-	if(!selection_area.is_active()){
-		painter.setClipping(false);
-		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
-		painter.fillRect(active_line, selection_color);
-	}else{
+	if(selection_area.is_active()){
 		paint_selection(painter, selection_area, selection_color);
 	}
-	painter.setClipping(false);
-	if(cursor_state && focusPolicy() != Qt::NoFocus){
-		painter.fillRect(cursor_position.x(), cursor_position.y(), cursor_width, font_height, text);
-	}
 	
+	painter.setClipRegion(event->region());
+	
+	if(!selection_area.is_active()){
+		painter.setClipping(false);
+		QPoint cursor_position = nibble_to_screen(get_cursor_nibble());
+		if(cursor_state && focusPolicy() != Qt::NoFocus){
+			painter.fillRect(cursor_position.x(), cursor_position.y(), cursor_width, font_height, text);
+		}
+		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
+		painter.fillRect(active_line, selection_color);
+	}
+
 	int byte_count = get_rows() * get_columns() + get_offset();
 	for(int i = get_offset(), row = 0; i < byte_count; i += get_columns(), row++){
 		int real_row = i / get_columns();
@@ -136,8 +135,8 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area,
 	}
 	
 	if(position2.x() < width()){
-		area -= QRect(position2.x(), position2.y(), 
-		              get_line_characters() * font_width - position2.x(), font_height);
+		area -= QRect(position2.x() - font_width, position2.y(), 
+		              (get_line_characters() + 1) * font_width - position2.x(), font_height);
 	}
 	painter.setClipRegion(area);
 	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
