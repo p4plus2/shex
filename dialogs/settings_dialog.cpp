@@ -1,15 +1,35 @@
+#include <type_traits>
+
 #include "settings_dialog.h"
+#include "rom_buffer.h"
+#include "utility.h"
 
 settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 {
-	QGridLayout *layout = new QGridLayout(this);
-
-	layout->addWidget(refresh_button, 4, 1);
-	layout->addWidget(apply_button, 4, 2);
-	setLayout(layout);
-	
 	connect(refresh_button, &QPushButton::clicked, this, &settings_dialog::refresh);
 	connect(apply_button, &QPushButton::clicked, this, &settings_dialog::apply);
+	
+	auto null_validator = [](auto value){ return value; };
+	auto font_validator = [](auto value){ return clamp(value, 6, 15); };
+	
+	setting<QNumbEdit>("Editor font size", "editor/font", font_validator, QApplication::font().pointSize());
+	setting<QCheckBox>("Do not prompt on size change:", "editor/size_change", null_validator, false);
+	setting<QCheckBox>("Move cursor with mouse wheel:", "editor/wheel_cursor", null_validator, false);
+	
+	setting<QComboBox>("Default copy type", "buffer/copy", null_validator, QVariant(SPACES), [](auto copy){
+				copy->addItem("No space", NO_SPACES);
+				copy->addItem("Spaces", SPACES);
+				copy->addItem("Hex format", HEX_FORMAT);
+				copy->addItem("Word table", ASM_WORD_TABLE);
+				copy->addItem("Byte table", ASM_BYTE_TABLE);
+				copy->addItem("Long table", ASM_LONG_TABLE);
+				copy->addItem("C source", C_SOURCE);
+			});
+	
+	int row = layout->rowCount();
+	layout->addWidget(refresh_button, row, 0);
+	layout->addWidget(apply_button, row, 1);
+	setLayout(layout);
 }
 
 void settings_dialog::refresh()
@@ -17,27 +37,34 @@ void settings_dialog::refresh()
 	
 }
 
-#include <QFontDatabase>
 void settings_dialog::apply()
 {
-	QFontDatabase database;
-	qDebug() << QFont::AnyStyle;
-	qDebug() << QFont::SansSerif;
-	qDebug() << QFont::Serif;
-	qDebug() << QFont::TypeWriter;
-	qDebug() << QFont::OldEnglish;
-	qDebug() << QFont::Monospace;
-	qDebug() << QFont::Fantasy;
-	qDebug() << QFont::Cursive;
-	qDebug() << QFont::System;
-	
-	for(const auto &family : database.families()){
-		QFont font(family);
-		QFontInfo info(font);
-		qDebug() << family << info.styleHint();
-		
-		if(info.styleHint() == QFont::TypeWriter){
-			qDebug() << family;
+	for(auto & function : setting_functions){
+		function();
+	}
+}
+
+template <typename T, typename V, typename D, typename I>
+void settings_dialog::setting(QString name, QString key, V validator, D default_data, I initializer)
+{
+	QLabel *label = new QLabel(name, this);
+	T *widget = new T(this);
+	initializer(widget);
+	QVariant stored_data = settings.get(key);
+	if(stored_data.isValid()){
+		if(std::is_same<D, QVariant>::value){
+			conditional_variant_copy(default_data, stored_data);
+		}else{
+			default_data = stored_data.value<D>();	
 		}
 	}
+	
+	set_default(widget, default_data);
+	setting_functions.append([this, widget, key, validator](){
+		settings.set(key, validator(get_data(widget).template value<D>()));
+	});
+	
+	int row = layout->rowCount();
+	layout->addWidget(label, row, 0);
+	layout->addWidget(widget, row, 1);
 }

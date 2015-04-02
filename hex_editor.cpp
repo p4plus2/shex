@@ -393,13 +393,15 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 void hex_editor::wheelEvent(QWheelEvent *event)
 {
 	int steps = -event->delta() / 8 / 15;
-	move_cursor_nibble(text_display::get_columns() * 2 * steps);
+	//move_cursor_nibble(text_display::get_columns() * 2 * steps);
+	set_offset(offset + text_display::get_columns() * 2 * steps);
+	update_window();
 }
 
 bool hex_editor::event(QEvent *event)
 {
 	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
-		qDebug() << ((settings_event *)event)->data().second;
+		//qDebug() << ((settings_event *)event)->data().second;
 	}
 	if(event->type() != (QEvent::Type)EDITOR_EVENT){
 		return QWidget::event(event);

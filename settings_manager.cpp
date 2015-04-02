@@ -1,4 +1,5 @@
 #include "settings_manager.h"
+#include "debug.h"
 
 void settings_manager::set(const QString &key, const QVariant &value)
 {
@@ -6,6 +7,7 @@ void settings_manager::set(const QString &key, const QVariant &value)
 	setValue(key, value);
 	settings_event event(key, value, old_value);
 	listeners.distribute_event(&event);
+	qDebug() << key << value;
 }
 
 QVariant settings_manager::get(const QString &key)

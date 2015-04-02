@@ -18,4 +18,12 @@ T clamp(T value, T low, T high)
 	       value;
 }
 
+template <typename T1, typename T2> void conditional_variant_copy(T1 &a, T2 &b){ Q_UNUSED(a); Q_UNUSED(b); }
+template <typename T = QVariant> void conditional_variant_copy(T &a, T &b)
+{
+	int type = a.type();
+	a = b;
+	a.convert(type);
+}
+
 #endif // UTILITY_H
