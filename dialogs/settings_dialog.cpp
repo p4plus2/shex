@@ -1,4 +1,5 @@
 #include <type_traits>
+#include <QColorDialog>
 
 #include "settings_dialog.h"
 #include "rom_buffer.h"
@@ -12,7 +13,20 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 	auto null_validator = [](auto value){ return value; };
 	auto font_validator = [](auto value){ return clamp(value, 6, 15); };
 	
-	setting<QNumbEdit>("Editor font size", "editor/font", font_validator, QApplication::font().pointSize());
+	auto make_color = [&](auto value){
+		value->setAutoFillBackground(true);
+		value->setFlat(true);
+		connect(value, &QPushable::clicked, this, [=](){
+			QColor color = QColorDialog::getColor();
+			if(color.isValid()){
+				set_default(value, color);
+			}
+		});
+	};
+	
+	QColor highlight_color = QApplication::palette().color(QPalette::Active, QPalette::Highlight).lighter();
+	
+	setting<QLineEdit>("Editor font size", "editor/font", font_validator, QApplication::font().pointSize());
 	setting<QCheckBox>("Do not prompt on size change:", "editor/size_change", null_validator, false);
 	setting<QCheckBox>("Move cursor with mouse wheel:", "editor/wheel_cursor", null_validator, false);
 	
@@ -25,6 +39,7 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 				copy->addItem("Long table", ASM_LONG_TABLE);
 				copy->addItem("C source", C_SOURCE);
 			});
+	setting<QPushable>("Highlight color", "display/highlight", null_validator, highlight_color, make_color);
 	
 	int row = layout->rowCount();
 	layout->addWidget(refresh_button, row, 0);
@@ -67,4 +82,13 @@ void settings_dialog::setting(QString name, QString key, V validator, D default_
 	int row = layout->rowCount();
 	layout->addWidget(label, row, 0);
 	layout->addWidget(widget, row, 1);
+}
+
+void settings_dialog::set_color(QPushable *widget, QColor color)
+{
+	QPalette palette;
+	widget->setText(color.name()); 
+	palette.setColor(QPalette::Button, color); 
+	palette.setColor(QPalette::ButtonText, color);
+	widget->setPalette(palette); 
 }
