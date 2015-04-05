@@ -117,7 +117,7 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	
 	menu = find_menu("&Options");
 	menu->addSeparator();
-	add_action<dialog_event>("&Settings", SETTINGS, hotkey("Ctrl+o"), menu);
+	add_action<dialog_event>("&Settings", SETTINGS, hotkey("Alt+o"), menu);
 
 	menu = find_menu("&Help");
 	add_action<window_event>("&Version", VERSION, hotkey("Alt+v"), menu);

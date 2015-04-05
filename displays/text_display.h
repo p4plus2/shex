@@ -48,6 +48,7 @@ class text_display : public QWidget
 		
 		virtual void paintEvent(QPaintEvent *event);
 		virtual void paint_selection(QPainter &painter, selection &selection_area, const QColor &color);
+		virtual bool event(QEvent *event);
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);
 		virtual void mouseReleaseEvent(QMouseEvent *event);
@@ -56,7 +57,7 @@ class text_display : public QWidget
 		
 		virtual int screen_to_nibble(QPoint position, bool byte_align = false) = 0;
 		virtual QPoint nibble_to_screen(int nibble) = 0;
-		virtual int get_line_characters() = 0;
+		virtual int get_line_characters() const = 0;
 		virtual void get_line(int start, int end, QTextStream &stream) = 0;
 	signals:
 		void character_typed(unsigned char key, bool update_byte);
@@ -74,8 +75,9 @@ class text_display : public QWidget
 		int scroll_speed = 1;
 		static const int scroll_timer_speed = 20;
 		
-		static const int default_font_size = 14;
 		static const int cursor_width = 1;
+		static int default_font_size;
+		static QColor selection_color;
 		
 		static int font_width;
 		static int font_height;
@@ -83,6 +85,8 @@ class text_display : public QWidget
 		
 		static int rows;
 		static int columns;
+		
+		void update_size();
 };
 
 #endif // TEXT_DISPLAY_H

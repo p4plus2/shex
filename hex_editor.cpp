@@ -47,7 +47,9 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	layout->setRowStretch(1, 1);
 	setLayout(layout);
 	
-	settings_manager::add_listener(this);
+	settings_manager::add_listener(this, {"editor/wheel_cursor",
+	                                      "buffer/size_change"
+	                               });
 }
 
 void hex_editor::set_focus()
@@ -127,7 +129,6 @@ void hex_editor::update_undo_action(bool direction)
 
 void hex_editor::goto_offset(int address)
 {
-	qDebug() << address;
 	if(!buffer->is_active()){
 		return;
 	}
@@ -401,7 +402,7 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 bool hex_editor::event(QEvent *event)
 {
 	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
-		//qDebug() << ((settings_event *)event)->data().second;
+		qDebug() <<((settings_event *)event)->data().first << ((settings_event *)event)->data().second;
 	}
 	if(event->type() != (QEvent::Type)EDITOR_EVENT){
 		return QWidget::event(event);

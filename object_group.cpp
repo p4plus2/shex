@@ -17,6 +17,13 @@ void object_group::remove_from_group(QObject *object)
 	group.removeOne(object);
 }
 
+void object_group::distribute_static_result_event(QEvent *e)
+{
+	if(group.size() > 0){
+		QApplication::sendEvent(group.first(), e);
+	}
+}
+
 bool object_group::event(QEvent *e)
 {
 	for(auto &object : group){

@@ -26,11 +26,11 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 	
 	QColor highlight_color = QApplication::palette().color(QPalette::Active, QPalette::Highlight).lighter();
 	
-	setting<QLineEdit>("Editor font size", "editor/font", font_validator, QApplication::font().pointSize());
-	setting<QCheckBox>("Do not prompt on size change:", "editor/size_change", null_validator, false);
+	setting<QLineEdit>("Editor font size", "display/font", font_validator, QApplication::font().pointSize());
+	setting<QCheckBox>("Do not prompt on size change:", "buffer/size_change", null_validator, false);
 	setting<QCheckBox>("Move cursor with mouse wheel:", "editor/wheel_cursor", null_validator, false);
 	
-	setting<QComboBox>("Default copy type", "buffer/copy", null_validator, QVariant(SPACES), [](auto copy){
+	setting<QComboBox>("Default copy type:", "buffer/copy", null_validator, QVariant(SPACES), [](auto copy){
 				copy->addItem("No space", NO_SPACES);
 				copy->addItem("Spaces", SPACES);
 				copy->addItem("Hex format", HEX_FORMAT);
@@ -39,7 +39,7 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 				copy->addItem("Long table", ASM_LONG_TABLE);
 				copy->addItem("C source", C_SOURCE);
 			});
-	setting<QPushable>("Highlight color", "display/highlight", null_validator, highlight_color, make_color);
+	setting<QPushable>("Highlight color:", "display/highlight", null_validator, highlight_color, make_color);
 	
 	int row = layout->rowCount();
 	layout->addWidget(refresh_button, row, 0);

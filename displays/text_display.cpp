@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "text_display.h"
 #include "hex_editor.h"
+#include "settings_manager.h"
 
 text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)
@@ -17,10 +18,12 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	editor = parent;
 	setFocusPolicy(Qt::WheelFocus);
 	
-	QSize minimum(0, 0);
-	minimum.setHeight(rows*font_height);
-	setMinimumSize(minimum);
+	//update_size();
 	setAttribute(Qt::WA_StaticContents, true);
+	
+	settings_manager::add_persistent_listener(this, "display/font");
+	settings_manager::add_listener(this, "display/highlight");
+	selection_color = QApplication::palette().color(QPalette::Active, QPalette::Highlight).lighter();
 }
 
 void text_display::update_display()
@@ -44,10 +47,8 @@ void text_display::set_auto_scroll_speed(int speed)
 
 void text_display::font_setup()
 {
-	QSettings settings;
 	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-	int font_size = settings.value("font_size", default_font_size).toInt();
-	font.setPixelSize(font_size);
+	font.setPointSize(default_font_size);
 	
 	QFontMetrics font_info(font);
 	font_width = font_info.averageCharWidth();
@@ -82,7 +83,6 @@ void text_display::paintEvent(QPaintEvent *event)
 	
 	selection selection_area = get_selection();
 	
-	QColor selection_color = palette().color(QPalette::Active, QPalette::Highlight).lighter();
 	selection_color.setAlpha(170);
 	if(selection_area.is_active()){
 		paint_selection(painter, selection_area, selection_color);
@@ -141,6 +141,24 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area,
 	painter.setClipRegion(area);
 	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
 	                 position2.y() - position1.y() + font_height, color);
+}
+
+bool text_display::event(QEvent *event)
+{
+	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
+		settings_event *e = (settings_event *)event;
+		qDebug() << e->data().first << e->data().second;
+		if(e->data().first == "display/font"){
+			default_font_size = e->data().second.toInt();
+			font_setup();
+			update_size();
+		}else if(e->data().first == "display/highlight"){
+			selection_color = e->data().second.value<QColor>();
+		}
+		
+		return true;
+	}
+	return QWidget::event(event);
 }
 
 void text_display::mousePressEvent(QMouseEvent *event)
@@ -227,8 +245,30 @@ void text_display::timerEvent(QTimerEvent *event)
 	}
 }
 
+void text_display::update_size()
+{
+	//QSize minimum(0, 0);
+	//rows = size().height() / font_height;
+	//minimum.setHeight(qMax(size().height(), rows*font_height));
+	//minimum.setWidth(columns*font_width * get_line_characters());
+	//setMinimumSize(minimum);
+	//resize(minimum);
+	//updateGeometry();
+	setMinimumWidth(columns*font_width * get_line_characters());
+	parentWidget()->layout()->invalidate();
+        QWidget *parent = parentWidget();
+        while (parent) {
+		parent->adjustSize();
+		parent = parent->parentWidget();
+        }
+	
+}
+
 int text_display::columns = 16;
 int text_display::rows = 32;
 int text_display::font_height = 0;
 int text_display::font_width = 0;
 QFont text_display::font;
+
+int text_display::default_font_size = 9;
+QColor text_display::selection_color;

@@ -12,7 +12,7 @@ class address_display : public text_display
 		virtual void paintEvent(QPaintEvent *event);
 		virtual QSize sizeHint () const;
 		
-		virtual int get_line_characters(){ return line_characters; }
+		virtual int get_line_characters() const { return line_characters; }
 		virtual void get_line(int start, int end, QTextStream &stream);
 		
 		virtual int screen_to_nibble(QPoint position, bool byte_align = false);

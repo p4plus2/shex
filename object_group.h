@@ -13,6 +13,7 @@ class object_group : public QObject
 		
 	public slots:
 		void distribute_event(QEvent *e){ event(e); }
+		void distribute_static_result_event(QEvent *e);
 		
 	protected:
 		virtual bool event(QEvent *e);
