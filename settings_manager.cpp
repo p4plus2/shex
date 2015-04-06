@@ -13,6 +13,7 @@ void settings_manager::set(const QString &key, const QVariant &value)
 	if(persistent_listeners.contains(key)){
 		persistent_listeners[key]->distribute_event(&event);
 	}
+	references++;
 }
 
 QVariant settings_manager::get(const QString &key)
@@ -73,10 +74,17 @@ void settings_manager::add_listener_implementation(QObject *object, const QStrin
 	if(key.isEmpty()){
 		global_listeners.add_to_group(object);
 	}else{
-		if(!persistent_listeners.contains(key)){
+		if(!map.contains(key)){
 			map[key] = new object_group();
 		}
-		map[key]->add_to_group(object);
+		object_group *group = map[key];
+		group->add_to_group(object);
+		if(group->size() == 1){
+			settings_manager settings;
+			QVariant value = settings.get(key);
+			settings_event event(key, value, value);
+			group->distribute_static_result_event(&event);
+		}
 	}
 }
 
@@ -93,15 +101,19 @@ void settings_manager::remove_listener_implementation(QObject *object, const QSt
 
 settings_manager::~settings_manager()
 {
-	for(auto &listener : listeners){
-		delete listener;
-	}
-	
-	for(auto &listener : persistent_listeners){
-		delete listener;
+	references--;
+	if(!references){
+		for(auto &listener : listeners){
+			delete listener;
+		}
+		
+		for(auto &listener : persistent_listeners){
+			delete listener;
+		}
 	}
 }
 
 settings_manager::listener_map settings_manager::listeners;
 settings_manager::listener_map settings_manager::persistent_listeners;
 object_group settings_manager::global_listeners;
+int settings_manager::references = 0;

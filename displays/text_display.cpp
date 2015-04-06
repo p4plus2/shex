@@ -1,10 +1,10 @@
 #include <QPainter>
 #include <QSettings>
+#include <QTimer>
 
 #include "debug.h"
 #include "text_display.h"
 #include "hex_editor.h"
-#include "settings_manager.h"
 
 text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)
@@ -20,9 +20,10 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	
 	setAttribute(Qt::WA_StaticContents, true);
 	
-	settings_manager::add_persistent_listener(this, "display/font");
 	settings_manager::add_listener(this, "display/highlight");
-	selection_color = QApplication::palette().color(QPalette::Active, QPalette::Highlight).lighter();
+	QTimer::singleShot(0, this, [&](){
+		settings_manager::add_persistent_listener(this, "display/font");
+	});
 }
 
 void text_display::update_display()
@@ -248,9 +249,11 @@ void text_display::update_size()
 {
 	setMinimumWidth(font_width * get_line_characters());
 	qDebug() << font_width;
-	parentWidget()->layout()->invalidate();
-        QWidget *parent = parentWidget();
-        while (parent) {
+	QWidget *parent = parentWidget();
+	if(parent->layout()){
+		parent->layout()->invalidate();
+	}
+        while(parent){
 		parent->adjustSize();
 		parent = parent->parentWidget();
         }

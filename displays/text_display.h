@@ -9,6 +9,7 @@
 #include "rom_buffer.h"
 #include "hex_editor.h"
 #include "panels/bookmark_panel.h"
+#include "settings_manager.h"
 
 class QPainter;
 class QTextStream;

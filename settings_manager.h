@@ -28,6 +28,7 @@ class settings_manager : public QSettings
 		static listener_map listeners;
 		static listener_map persistent_listeners;
 		static object_group global_listeners;
+		static int references;
 		
 		static void add_listener_implementation(QObject *object, const QString &key, listener_map &map);
 		static void remove_listener_implementation(QObject *object, const QString &key, listener_map &map);
