@@ -18,7 +18,6 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	editor = parent;
 	setFocusPolicy(Qt::WheelFocus);
 	
-	//update_size();
 	setAttribute(Qt::WA_StaticContents, true);
 	
 	settings_manager::add_persistent_listener(this, "display/font");
@@ -247,14 +246,8 @@ void text_display::timerEvent(QTimerEvent *event)
 
 void text_display::update_size()
 {
-	//QSize minimum(0, 0);
-	//rows = size().height() / font_height;
-	//minimum.setHeight(qMax(size().height(), rows*font_height));
-	//minimum.setWidth(columns*font_width * get_line_characters());
-	//setMinimumSize(minimum);
-	//resize(minimum);
-	//updateGeometry();
-	setMinimumWidth(columns*font_width * get_line_characters());
+	setMinimumWidth(font_width * get_line_characters());
+	qDebug() << font_width;
 	parentWidget()->layout()->invalidate();
         QWidget *parent = parentWidget();
         while (parent) {

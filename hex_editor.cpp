@@ -50,6 +50,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	settings_manager::add_listener(this, {"editor/wheel_cursor",
 	                                      "buffer/size_change"
 	                               });
+	settings_manager::add_persistent_listener(this, "display/font");
 }
 
 void hex_editor::set_focus()
@@ -402,7 +403,12 @@ void hex_editor::wheelEvent(QWheelEvent *event)
 bool hex_editor::event(QEvent *event)
 {
 	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
-		qDebug() <<((settings_event *)event)->data().first << ((settings_event *)event)->data().second;
+		settings_event *e = (settings_event *)event;
+		qDebug() << e->data().first << e->data().second;
+		if(e->data().first == "display/font"){
+			address_header->setFont(text_display::get_font());
+			hex_header->setFont(text_display::get_font());
+		}
 	}
 	if(event->type() != (QEvent::Type)EDITOR_EVENT){
 		return QWidget::event(event);
