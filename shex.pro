@@ -46,7 +46,8 @@ SOURCES += main.cpp\
     panels/disassembler_panel.cpp \
     object_group.cpp \
     settings_manager.cpp \
-    dialogs/settings_dialog.cpp
+    dialogs/settings_dialog.cpp \
+    editor_font.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -86,7 +87,8 @@ HEADERS  += main_window.h \
     object_group.h \
     settings_manager.h \
     events/settings_event.h \
-    dialogs/settings_dialog.h
+    dialogs/settings_dialog.h \
+    editor_font.h
 
 OTHER_FILES += \
     version.sh

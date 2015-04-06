@@ -23,7 +23,7 @@ main_window::main_window(QWidget *parent)
 	setCentralWidget(widget);
 	tab_widget->setTabsClosable(true);
 	tab_widget->setMovable(true);
-	setMinimumSize(600, QApplication::desktop()->height() < 650 ? 330 : 660);
+	setMinimumSize(0, QApplication::desktop()->height() < 650 ? 330 : 660);
 	connect(tab_widget, &QTabWidget::tabCloseRequested, this, &main_window::close_tab);
 	connect(tab_widget, &QTabWidget::currentChanged, this, &main_window::changed_tab);
 	menu_controller->connect_to_widget(this, WINDOW_EVENT);

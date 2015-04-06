@@ -6,6 +6,7 @@
 #include "dialog_manager.h"
 #include "menu_manager.h"
 #include "rom_buffer.h"
+#include "editor_font.h"
 #include "debug.h"
 
 class hex_editor;
@@ -40,6 +41,7 @@ class main_window : public QMainWindow
 		dialog_manager *dialog_controller = new dialog_manager(this);
 		menu_manager *menu_controller = new menu_manager(this, menuBar(), undo_group);
 		int new_counter = 0;
+		editor_font *font = new editor_font(this);  //We just need an instance for sending events to
 		
 		static bool has_active_editors;
 

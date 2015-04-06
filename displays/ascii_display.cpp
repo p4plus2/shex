@@ -25,7 +25,7 @@ void ascii_display::keyPressEvent(QKeyEvent *event)
 
 QSize ascii_display::sizeHint () const
 {
-	return QSize(get_font_width() * line_characters, 200);
+	return QSize(editor_font::get_width() * line_characters, 200);
 }
 
 
@@ -43,8 +43,8 @@ void ascii_display::get_line(int start, int end, QTextStream &stream)
 int ascii_display::screen_to_nibble(QPoint position, bool byte_align)
 {
 	Q_UNUSED(byte_align); //ascii is already byte aligned
-	int x = position.x() / get_font_width();
-	int y = position.y() / get_font_height();
+	int x = position.x() / editor_font::get_width();
+	int y = position.y() / editor_font::get_height();
 	
 	int last_byte = (line_characters - 1);
 	if(x > last_byte){
@@ -60,5 +60,5 @@ QPoint ascii_display::nibble_to_screen(int nibble)
 	int y = nibble / (get_columns() * 2);
 	int x = nibble % (get_columns() * 2);
 	x /= 2;
-	return QPoint(x * get_font_width(), y * get_font_height());
+	return QPoint(x * editor_font::get_width(), y * editor_font::get_height());
 }

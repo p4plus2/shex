@@ -35,8 +35,8 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	connect(hex, &hex_display::character_typed, this, &hex_editor::handle_typed_character);
 	connect(ascii, &ascii_display::character_typed, this, &hex_editor::handle_typed_character);
 	
-	address_header->setFont(text_display::get_font());
-	hex_header->setFont(text_display::get_font());
+	address_header->setFont(editor_font::get_font());
+	hex_header->setFont(editor_font::get_font());
 	
 	QGridLayout *layout = new QGridLayout();
 	layout->addWidget(address_header, 0, 0, Qt::AlignBottom);
@@ -406,8 +406,8 @@ bool hex_editor::event(QEvent *event)
 		settings_event *e = (settings_event *)event;
 		qDebug() << e->data().first << e->data().second;
 		if(e->data().first == "display/font"){
-			address_header->setFont(text_display::get_font());
-			hex_header->setFont(text_display::get_font());
+			address_header->setFont(editor_font::get_font());
+			hex_header->setFont(editor_font::get_font());
 		}
 	}
 	if(event->type() != (QEvent::Type)EDITOR_EVENT){

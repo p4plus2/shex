@@ -9,10 +9,6 @@
 text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)
 {
-	if(!font_height){
-		font_setup();
-	}
-	
 	cursor_timer_id = startTimer(QApplication::cursorFlashTime());
 	
 	editor = parent;
@@ -21,9 +17,7 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	setAttribute(Qt::WA_StaticContents, true);
 	
 	settings_manager::add_listener(this, "display/highlight");
-	QTimer::singleShot(0, this, [&](){
-		settings_manager::add_persistent_listener(this, "display/font");
-	});
+	connect(editor_font::instance(), &editor_font::font_changed, this, &text_display::update_size);
 }
 
 void text_display::update_display()
@@ -45,16 +39,6 @@ void text_display::set_auto_scroll_speed(int speed)
 	}
 }
 
-void text_display::font_setup()
-{
-	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-	font.setPointSize(default_font_size);
-	
-	QFontMetrics font_info(font);
-	font_width = font_info.averageCharWidth();
-	font_height = font_info.height();
-}
-
 QPoint text_display::clip_mouse(int x, int y)
 {
 	x = (x < 0 || y < 0) ? 0 : x;
@@ -69,7 +53,7 @@ void text_display::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	QColor text = palette().color(QPalette::WindowText);
 	painter.setPen(text);
-	painter.setFont(font);
+	painter.setFont(editor_font::get_font());
 	painter.setClipping(true);
 	
 	const bookmark_map *bookmarks = buffer->get_bookmark_map();
@@ -94,9 +78,11 @@ void text_display::paintEvent(QPaintEvent *event)
 		painter.setClipping(false);
 		QPoint cursor_position = nibble_to_screen(get_cursor_nibble());
 		if(cursor_state && focusPolicy() != Qt::NoFocus){
-			painter.fillRect(cursor_position.x(), cursor_position.y(), cursor_width, font_height, text);
+			painter.fillRect(cursor_position.x(), cursor_position.y(), 
+			                 cursor_width, editor_font::get_height(), text);
 		}
-		QRect active_line(0, cursor_position.y(), get_line_characters() * font_width, font_height);
+		QRect active_line(0, cursor_position.y(), 
+		                  get_line_characters() * editor_font::get_width(), editor_font::get_height());
 		painter.fillRect(active_line, selection_color);
 	}
 
@@ -115,8 +101,8 @@ void text_display::paintEvent(QPaintEvent *event)
 			text->setTextFormat(Qt::PlainText);
 			row_cache.insert(real_row, text);
 		}
-		if(row * font_height >= event->rect().y()){
-			painter.drawStaticText(0, row * font_height, *row_cache.object(real_row));
+		if(row * editor_font::get_height() >= event->rect().y()){
+			painter.drawStaticText(0, row * editor_font::get_height(), *row_cache.object(real_row));
 		}
 	}
 }
@@ -128,31 +114,27 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area,
 	}
 	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start_aligned()));
 	QPoint position2 = clip_screen(nibble_to_screen(selection_area.get_end_aligned()));
-	QRegion area = QRect(0, position1.y(), get_line_characters() * font_width, 
-	                 position2.y() - position1.y() + font_height);
+	QRegion area = QRect(0, position1.y(), get_line_characters() * editor_font::get_width(), 
+	                 position2.y() - position1.y() + editor_font::get_height());
 	if(position1.x()){
-		area -= QRect(0, position1.y(), position1.x(), font_height);
+		area -= QRect(0, position1.y(), position1.x(), editor_font::get_height());
 	}
 	
 	if(position2.x() < width()){
-		area -= QRect(position2.x() - font_width, position2.y(), 
-		              (get_line_characters() + 1) * font_width - position2.x(), font_height);
+		area -= QRect(position2.x() - editor_font::get_width(), position2.y(), 
+		              (get_line_characters() + 1) * editor_font::get_width() - position2.x(), 
+		              editor_font::get_height());
 	}
 	painter.setClipRegion(area);
-	painter.fillRect(0, position1.y(), get_line_characters() * font_width, 
-	                 position2.y() - position1.y() + font_height, color);
+	painter.fillRect(0, position1.y(), get_line_characters() * editor_font::get_width(), 
+	                 position2.y() - position1.y() + editor_font::get_height(), color);
 }
 
 bool text_display::event(QEvent *event)
 {
 	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
 		settings_event *e = (settings_event *)event;
-		qDebug() << e->data().first << e->data().second;
-		if(e->data().first == "display/font"){
-			default_font_size = e->data().second.toInt();
-			font_setup();
-			update_size();
-		}else if(e->data().first == "display/highlight"){
+		if(e->data().first == "display/highlight"){
 			selection_color = e->data().second.value<QColor>();
 		}
 		
@@ -225,7 +207,7 @@ void text_display::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
 
-	rows = size().height() / font_height;
+	rows = size().height() / editor_font::get_height();
 }
 
 void text_display::timerEvent(QTimerEvent *event)
@@ -233,7 +215,7 @@ void text_display::timerEvent(QTimerEvent *event)
 	if(event->timerId() == cursor_timer_id){
 		cursor_state = !cursor_state;
 		QPoint screen = nibble_to_screen(get_cursor_nibble());
-		update(screen.x(), screen.y(), cursor_width, font_height);
+		update(screen.x(), screen.y(), cursor_width, editor_font::get_height());
 	}else if(event->timerId() == scroll_timer_id){
 		selection selection_area = get_selection();
 		set_offset(get_offset() + columns * scroll_direction * scroll_speed);
@@ -247,8 +229,9 @@ void text_display::timerEvent(QTimerEvent *event)
 
 void text_display::update_size()
 {
-	setMinimumWidth(font_width * get_line_characters());
-	qDebug() << font_width;
+	setMinimumWidth(editor_font::get_width() * get_line_characters());
+	setMaximumWidth(editor_font::get_width() * get_line_characters());
+	qDebug() << editor_font::get_width();
 	QWidget *parent = parentWidget();
 	if(parent->layout()){
 		parent->layout()->invalidate();
@@ -257,14 +240,9 @@ void text_display::update_size()
 		parent->adjustSize();
 		parent = parent->parentWidget();
         }
-	
 }
 
 int text_display::columns = 16;
 int text_display::rows = 32;
-int text_display::font_height = 0;
-int text_display::font_width = 0;
-QFont text_display::font;
 
-int text_display::default_font_size = 9;
 QColor text_display::selection_color;

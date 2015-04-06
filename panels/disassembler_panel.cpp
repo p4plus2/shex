@@ -58,7 +58,14 @@ QLayout *disassembler_panel::get_layout()
 void disassembler_panel::update_width()
 {
 	setMinimumWidth(document()->size().width());
-	updateGeometry();
+	QWidget *parent = parentWidget();
+	if(parent->layout()){
+		parent->layout()->invalidate();
+	}
+        while(parent){
+		parent->adjustSize();
+		parent = parent->parentWidget();
+        }
 }
 
 bool disassembler_panel::state = false;

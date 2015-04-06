@@ -10,6 +10,7 @@
 #include "hex_editor.h"
 #include "panels/bookmark_panel.h"
 #include "settings_manager.h"
+#include "editor_font.h"
 
 class QPainter;
 class QTextStream;
@@ -26,14 +27,9 @@ class text_display : public QWidget
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
 		static int get_rows_by_columns(){ return rows * columns; }
-		static QFont get_font(){ return font; }
 		virtual QSize minimumSizeHint() const { return sizeHint(); }
 	protected:
 		const ROM_buffer *buffer;
-		void font_setup();
-		
-		static int get_font_width(){ return font_width; }
-		static int get_font_height(){ return font_height; }
 
 		QPoint clip_mouse(int x, int y);
 		QPoint clip_screen(QPoint position){ return clip_mouse(position.x(), position.y()); }
@@ -62,6 +58,9 @@ class text_display : public QWidget
 		virtual void get_line(int start, int end, QTextStream &stream) = 0;
 	signals:
 		void character_typed(unsigned char key, bool update_byte);
+	
+	public slots:
+		void update_size();
 		
 	private:				
 		QCache<int, QStaticText> row_cache;
@@ -77,17 +76,10 @@ class text_display : public QWidget
 		static const int scroll_timer_speed = 20;
 		
 		static const int cursor_width = 1;
-		static int default_font_size;
 		static QColor selection_color;
-		
-		static int font_width;
-		static int font_height;
-		static QFont font;
 		
 		static int rows;
 		static int columns;
-		
-		void update_size();
 };
 
 #endif // TEXT_DISPLAY_H
