@@ -122,8 +122,8 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area,
 	}
 	
 	if(position2.x() < width()){
-		area -= QRect(position2.x() - editor_font::get_width(), position2.y(), 
-		              (get_line_characters() + 1) * editor_font::get_width() - position2.x(), 
+		area -= QRect(position2.x(), position2.y(), 
+		              get_line_characters() * editor_font::get_width() - position2.x(), 
 		              editor_font::get_height());
 	}
 	painter.setClipRegion(area);
