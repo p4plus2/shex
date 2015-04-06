@@ -27,6 +27,7 @@ class text_display : public QWidget
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
 		static int get_rows_by_columns(){ return rows * columns; }
+		virtual QSize sizeHint () const;
 		virtual QSize minimumSizeHint() const { return sizeHint(); }
 	protected:
 		const ROM_buffer *buffer;

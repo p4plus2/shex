@@ -23,12 +23,6 @@ void ascii_display::keyPressEvent(QKeyEvent *event)
 	}
 }
 
-QSize ascii_display::sizeHint () const
-{
-	return QSize(editor_font::get_width() * line_characters, 200);
-}
-
-
 void ascii_display::get_line(int start, int end, QTextStream &stream)
 {
 	for(int i = start; i < end; i++){

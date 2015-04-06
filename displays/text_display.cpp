@@ -40,6 +40,12 @@ void text_display::set_auto_scroll_speed(int speed)
 	}
 }
 
+QSize text_display::sizeHint () const
+{
+	const int pad = 2;
+	return QSize(editor_font::get_width() * get_line_characters() + pad, editor_font::get_height() * get_rows());
+}
+
 QPoint text_display::clip_mouse(int x, int y)
 {
 	x = (x < 0 || y < 0) ? 0 : x;
@@ -231,7 +237,6 @@ void text_display::timerEvent(QTimerEvent *event)
 void text_display::update_size()
 {
 	setMinimumWidth(editor_font::get_width() * get_line_characters());
-	setMaximumWidth(editor_font::get_width() * get_line_characters());
 	propagate_resize(this);
 }
 

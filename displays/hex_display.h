@@ -11,7 +11,6 @@ class hex_display : public text_display
 	protected:
 		virtual void paintEvent(QPaintEvent *event);
 		virtual void keyPressEvent(QKeyEvent *event);
-		virtual QSize sizeHint () const;
 		
 		virtual int get_line_characters() const { return line_characters; }
 		virtual void get_line(int start, int end, QTextStream &stream);

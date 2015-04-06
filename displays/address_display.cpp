@@ -12,12 +12,6 @@ void address_display::paintEvent(QPaintEvent *event)
 	text_display::paintEvent(event);
 }
 
-
-QSize address_display::sizeHint () const
-{
-	return QSize(editor_font::get_width() * line_characters, 200);
-}
-
 void address_display::get_line(int start, int end, QTextStream &stream)
 {
 	Q_UNUSED(end);

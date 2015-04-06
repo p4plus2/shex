@@ -33,8 +33,7 @@ main_window::main_window(QWidget *parent)
 	}
 	if(geometry.isValid()){
 		restoreGeometry(geometry.toByteArray());
-	}else{
-		setMinimumSize(0, QApplication::desktop()->height() < 650 ? 330 : 660);
+		tab_widget->resize(size());
 	}
 	
 	connect(tab_widget, &QTabWidget::tabCloseRequested, this, &main_window::close_tab);
@@ -201,6 +200,7 @@ void main_window::init_connections(hex_editor *editor, dynamic_scrollbar *scroll
 void main_window::create_new_tab(QString name, bool new_file)
 {
 	QWidget *widget = new QWidget(this);
+	QSize window_size = size();
 	hex_editor *editor = new hex_editor(widget, name, undo_group, new_file);
 	if(editor->load_error() != ""){
 		QMessageBox::critical(this, "Invalid ROM", editor->load_error(), QMessageBox::Ok);
@@ -221,9 +221,9 @@ void main_window::create_new_tab(QString name, bool new_file)
 	
 	tab_widget->setCurrentWidget(widget);
 	editor->set_focus();
-	setMinimumSize(tab_widget->minimumSize());
 	panel_controller->init_displays();
 	has_active_editors = true;
+	resize(window_size);
 }
 
 hex_editor *main_window::get_editor(int i) const

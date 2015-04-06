@@ -22,13 +22,6 @@ void hex_display::keyPressEvent(QKeyEvent *event)
 	}
 }
 
-QSize hex_display::sizeHint () const
-{
-	const int padding = 20;
-	return QSize(editor_font::get_width() * line_characters + padding, editor_font::get_height() * get_rows());
-}
-
-
 void hex_display::get_line(int start, int end, QTextStream &stream)
 {
 	for(int i = start; i < end; i++){
