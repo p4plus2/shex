@@ -45,6 +45,7 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 	layout->addWidget(refresh_button, row, 0);
 	layout->addWidget(apply_button, row, 1);
 	setLayout(layout);
+	apply();
 }
 
 void settings_dialog::refresh()
@@ -67,11 +68,14 @@ void settings_dialog::setting(QString name, QString key, V validator, D default_
 	initializer(widget);
 	QVariant stored_data = settings.get(key);
 	if(stored_data.isValid()){
+		qDebug() << "valid";
 		if(std::is_same<D, QVariant>::value){
 			conditional_variant_copy(default_data, stored_data);
 		}else{
 			default_data = stored_data.value<D>();	
 		}
+	}else{
+		qDebug() << default_data;
 	}
 	
 	set_default(widget, default_data);
