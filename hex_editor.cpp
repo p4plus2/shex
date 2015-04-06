@@ -1,4 +1,5 @@
 #include <QMenu>
+#include <QMessageBox>
 
 #include "hex_editor.h"
 #include "character_mapper.h"
@@ -48,7 +49,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	setLayout(layout);
 	
 	settings_manager::add_listener(this, {"editor/wheel_cursor",
-	                                      "buffer/size_change"
+	                                      "editor/size_change"
 	                               });
 	settings_manager::add_persistent_listener(this, "display/font");
 }
@@ -97,6 +98,9 @@ void hex_editor::update_window()
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 {
+	if(!validate_resize()){
+		return;
+	}
 	int start = selection_area.get_start();
 	int end = selection_area.get_end();
 	if(!selection_area.is_active()){
@@ -188,7 +192,7 @@ void hex_editor::context_menu(const QPoint& position)
 
 void hex_editor::cut()
 {
-	if(!selection_area.is_active()){
+	if(!selection_area.is_active() || !validate_resize()){
 		return;
 	}
 	
@@ -211,6 +215,9 @@ void hex_editor::copy()
 
 void hex_editor::paste(bool raw)
 {
+	if(!validate_resize()){
+		return;
+	}
 	if(!selection_area.is_active()){
 		buffer->paste(selection_area.get_start(), selection_area.get_end(), raw);
 	}else{
@@ -224,7 +231,11 @@ void hex_editor::paste(bool raw)
 
 void hex_editor::delete_text()
 {
+	if(!validate_resize()){
+		return;
+	}
 	if(!selection_area.is_active()){
+		move_cursor_nibble((cursor_nibble - 2) & ~1);
 		buffer->delete_text(cursor_nibble);
 	}else{
 		buffer->delete_text(selection_area.get_start(), selection_area.get_end());	
@@ -356,7 +367,6 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	
 	switch(event->key()){
 		case Qt::Key_Backspace:
-			move_cursor_nibble((cursor_nibble - 2) & ~1);
 			delete_text();
 		break;		
 		case Qt::Key_Home:
@@ -395,8 +405,11 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 void hex_editor::wheelEvent(QWheelEvent *event)
 {
 	int steps = -event->delta() / 8 / 15;
-	//move_cursor_nibble(text_display::get_columns() * 2 * steps);
-	set_offset(offset + text_display::get_columns() * 2 * steps);
+	if(wheel_cursor){
+		move_cursor_nibble(text_display::get_columns() * 2 * steps);
+	}else{
+		set_offset(offset + text_display::get_columns() * 2 * steps);
+	}
 	update_window();
 }
 
@@ -404,10 +417,13 @@ bool hex_editor::event(QEvent *event)
 {
 	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
 		settings_event *e = (settings_event *)event;
-		qDebug() << e->data().first << e->data().second;
 		if(e->data().first == "display/font"){
 			address_header->setFont(editor_font::get_font());
 			hex_header->setFont(editor_font::get_font());
+		}else if(e->data().first == "editor/wheel_cursor"){
+			wheel_cursor = e->data().second.toBool();
+		}else if(e->data().first == "editor/size_change"){
+			prompt_resize = e->data().second.toBool();
 		}
 	}
 	if(event->type() != (QEvent::Type)EDITOR_EVENT){
@@ -539,6 +555,16 @@ int hex_editor::get_max_lines()
 	return buffer->size() / text_display::get_columns() - text_display::get_rows() - 1;
 }
 
+bool hex_editor::validate_resize()
+{
+	if(prompt_resize){
+		return true;
+	}
+	QString prompt = "Changing the size of the ROM may render it unusable! Do you wish to continue?";
+	QMessageBox::StandardButton answer = QMessageBox::question(this, "Warning!", prompt);
+	return answer == QMessageBox::Yes;
+}
+
 hex_editor::~hex_editor()
 {
 	active_editor_selection = false;
@@ -548,3 +574,5 @@ hex_editor::~hex_editor()
 
 bool hex_editor::active_editor_selection = false;
 bool hex_editor::active_editor_clipboard_usable = false;
+bool hex_editor::wheel_cursor;
+bool hex_editor::prompt_resize;

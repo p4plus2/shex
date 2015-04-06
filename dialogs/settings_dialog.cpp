@@ -27,7 +27,7 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 	QColor highlight_color = QApplication::palette().color(QPalette::Active, QPalette::Highlight).lighter();
 	
 	setting<QLineEdit>("Editor font size", "display/font", font_validator, QApplication::font().pointSize());
-	setting<QCheckBox>("Do not prompt on size change:", "buffer/size_change", null_validator, false);
+	setting<QCheckBox>("Do not prompt on size change:", "editor/size_change", null_validator, false);
 	setting<QCheckBox>("Move cursor with mouse wheel:", "editor/wheel_cursor", null_validator, false);
 	
 	setting<QComboBox>("Default copy type:", "buffer/copy", null_validator, QVariant(SPACES), [](auto copy){
@@ -68,14 +68,11 @@ void settings_dialog::setting(QString name, QString key, V validator, D default_
 	initializer(widget);
 	QVariant stored_data = settings.get(key);
 	if(stored_data.isValid()){
-		qDebug() << "valid";
 		if(std::is_same<D, QVariant>::value){
 			conditional_variant_copy(default_data, stored_data);
 		}else{
 			default_data = stored_data.value<D>();	
 		}
-	}else{
-		qDebug() << default_data;
 	}
 	
 	set_default(widget, default_data);
