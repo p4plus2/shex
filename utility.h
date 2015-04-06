@@ -1,6 +1,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <QWidget>
+
 template<typename... A>
 struct resolve{ 
     template<typename C, typename F> 
@@ -24,6 +26,18 @@ template <typename T = QVariant> void conditional_variant_copy(T &a, T &b)
 	int type = a.type();
 	a = b;
 	a.convert(type);
+}
+
+inline void propagate_resize(QWidget *child)
+{
+	QWidget *parent = child->parentWidget();
+	if(parent->layout()){
+		parent->layout()->invalidate();
+	}
+	do{
+		parent->adjustSize();
+		parent = parent->parentWidget();
+	}while(parent);
 }
 
 #endif // UTILITY_H

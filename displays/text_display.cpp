@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "text_display.h"
 #include "hex_editor.h"
+#include "utility.h"
 
 text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)
@@ -231,15 +232,7 @@ void text_display::update_size()
 {
 	setMinimumWidth(editor_font::get_width() * get_line_characters());
 	setMaximumWidth(editor_font::get_width() * get_line_characters());
-	qDebug() << editor_font::get_width();
-	QWidget *parent = parentWidget();
-	if(parent->layout()){
-		parent->layout()->invalidate();
-	}
-        while(parent){
-		parent->adjustSize();
-		parent = parent->parentWidget();
-        }
+	propagate_resize(this);
 }
 
 int text_display::columns = 16;

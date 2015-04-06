@@ -25,8 +25,6 @@ class abstract_panel
 		
 	private:
 		QWidget *display = new QWidget;
-		
-		void layout_adjust();
 };
 
 #endif // ABSTRACT_PANEL_H
