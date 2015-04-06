@@ -82,7 +82,7 @@ QString disassembler_core::disassembly_text()
 		}
 		switch(b.format){
 			case block::CODE:
-				text += (label_id > 0 ? '\t' : '\0') % b.data % '\n';
+				text += (label_id > 0 ? "\t" : "") % b.data % '\n';
 			break;
 			case block::DATA_PACKED ... block::DATA_PACKED_END:
 				if(table_line.isEmpty()){
