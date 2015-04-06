@@ -106,10 +106,11 @@ settings_manager::~settings_manager()
 		for(auto &listener : listeners){
 			delete listener;
 		}
-		
+		listeners.clear();
 		for(auto &listener : persistent_listeners){
 			delete listener;
 		}
+		persistent_listeners.clear();
 	}
 }
 

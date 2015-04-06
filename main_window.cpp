@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "character_mapper.h"
 #include "panel_manager.h"
+#include "settings_manager.h"
 
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
@@ -23,7 +24,19 @@ main_window::main_window(QWidget *parent)
 	setCentralWidget(widget);
 	tab_widget->setTabsClosable(true);
 	tab_widget->setMovable(true);
-	setMinimumSize(0, QApplication::desktop()->height() < 650 ? 330 : 660);
+	
+	settings_manager settings;
+	QVariant geometry = settings.get("geometry");
+	QVariant state = settings.get("windowState");
+	if(state.isValid()){
+		restoreState(state.toByteArray());
+	}
+	if(geometry.isValid()){
+		restoreGeometry(geometry.toByteArray());
+	}else{
+		setMinimumSize(0, QApplication::desktop()->height() < 650 ? 330 : 660);
+	}
+	
 	connect(tab_widget, &QTabWidget::tabCloseRequested, this, &main_window::close_tab);
 	connect(tab_widget, &QTabWidget::currentChanged, this, &main_window::changed_tab);
 	menu_controller->connect_to_widget(this, WINDOW_EVENT);
@@ -161,6 +174,9 @@ void main_window::closeEvent(QCloseEvent *event)
 			return;
 		}
 	}
+	settings_manager settings;
+	settings.set("geometry", saveGeometry());
+	settings.set("windowState", saveState());
 	QApplication::quit();
 	QMainWindow::closeEvent(event);
 }
