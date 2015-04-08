@@ -98,7 +98,7 @@ void hex_editor::update_window()
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 {
-	if(!validate_resize()){
+	if(selection_area.is_active() && !validate_resize()){
 		return;
 	}
 	int start = selection_area.get_start();

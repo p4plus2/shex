@@ -2,6 +2,8 @@
 #define SETTINGS_MANAGER_H
 
 #include <QSettings>
+#include <memory>
+
 #include "object_group.h"
 #include "events/settings_event.h"
 
@@ -9,7 +11,6 @@ class settings_manager : public QSettings
 {
 	public:
 		using QSettings::QSettings;
-		~settings_manager();
 		
 		void set(const QString &key, const QVariant &value);
 		QVariant get(const QString &key);
@@ -28,7 +29,7 @@ class settings_manager : public QSettings
 		static listener_map listeners;
 		static listener_map persistent_listeners;
 		static object_group global_listeners;
-		static int references;
+		static QObject parent;
 		
 		static void add_listener_implementation(QObject *object, const QString &key, listener_map &map);
 		static void remove_listener_implementation(QObject *object, const QString &key, listener_map &map);

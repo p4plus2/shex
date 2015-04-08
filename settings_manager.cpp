@@ -13,7 +13,6 @@ void settings_manager::set(const QString &key, const QVariant &value)
 	if(persistent_listeners.contains(key)){
 		persistent_listeners[key]->distribute_event(&event);
 	}
-	references++;
 }
 
 QVariant settings_manager::get(const QString &key)
@@ -75,7 +74,7 @@ void settings_manager::add_listener_implementation(QObject *object, const QStrin
 		global_listeners.add_to_group(object);
 	}else{
 		if(!map.contains(key)){
-			map[key] = new object_group();
+			map.insert(key, new object_group(&parent));
 		}
 		object_group *group = map[key];
 		group->add_to_group(object);
@@ -99,22 +98,8 @@ void settings_manager::remove_listener_implementation(QObject *object, const QSt
 	}
 }
 
-settings_manager::~settings_manager()
-{
-	references--;
-	if(!references){
-		for(auto &listener : listeners){
-			delete listener;
-		}
-		listeners.clear();
-		for(auto &listener : persistent_listeners){
-			delete listener;
-		}
-		persistent_listeners.clear();
-	}
-}
 
 settings_manager::listener_map settings_manager::listeners;
 settings_manager::listener_map settings_manager::persistent_listeners;
 object_group settings_manager::global_listeners;
-int settings_manager::references = 0;
+QObject settings_manager::parent;

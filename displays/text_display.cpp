@@ -141,6 +141,7 @@ bool text_display::event(QEvent *event)
 {
 	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
 		settings_event *e = (settings_event *)event;
+		qDebug() << e->data().first;
 		if(e->data().first == "display/highlight"){
 			selection_color = e->data().second.value<QColor>();
 		}
