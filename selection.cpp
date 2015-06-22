@@ -70,7 +70,7 @@ int selection::byte_range()
 
 bool selection::is_active()
 {
-	return active;
+	return active && get_start_byte() != get_end_byte();
 }
 
 void selection::set_active(bool a)

@@ -30,7 +30,7 @@ void ROM_buffer::remove_copy_header()
 void ROM_buffer::save(QString path)
 {
 	QFileInfo info(ROM);
-	if(path != "" || path != info.absolutePath()){
+	if(path != "" && path != info.absolutePath()){
 		ROM.close();
 		ROM.setFileName(path);	
 		ROM.open(QFile::ReadWrite);

@@ -124,9 +124,9 @@ bool main_window::save(bool override_name, int target)
 	if(editor->new_file() || override_name){
 		name = QFileDialog::getSaveFileName(this, "Save", QDir::homePath(), 
 	                                            "ROM files (*.smc *.sfc);;All files(*.*)");
-	}
-	if(name == ""){
-		return false;
+		if(name == ""){
+			return false;
+		}
 	}
 	editor->save(name);
 	return true;
