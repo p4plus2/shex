@@ -36,7 +36,9 @@ class menu_manager : public QObject
 		template <typename T, typename S>
 		void add_toggle_action(QString text, S type, toggle_function toggle, hotkey key, QMenu *menu);
 		template <typename T, typename S>
-		void add_action(QString text, S type, hotkey key, QMenu *menu, bool check = false);
+		void add_action(QString text, S type, hotkey key, QMenu *menu);
+		template <typename T, typename S>
+		void add_check_action(QString text, S type, hotkey key, QMenu *menu);
 		template <typename T, typename S>
 		void add_group_action(QString text, S type, hotkey key, QMenu *menu, QActionGroup *group);
 };

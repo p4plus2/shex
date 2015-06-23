@@ -195,7 +195,7 @@ int ROM_metadata::pc_to_snes(int address) const
 		break;
 		case SA1ROM:
 			//$00-$1f; $20-$3f; $80-$9f; $a0-$bf; $c0-$cf; $d0-$df; $e0-$ef; $f0-$ff last 4 hirom
-			if (address>=0x800000){
+			if (address >= 0x800000){
 				return -1;
 			}
 			if(address < 0x400000){

@@ -46,9 +46,15 @@ void menu_manager::add_toggle_action(QString text, S type, toggle_function toggl
 }
 
 template <typename T, typename S>
-void menu_manager::add_action(QString text, S type, hotkey key, QMenu *menu, bool check)
+void menu_manager::add_action(QString text, S type, hotkey key, QMenu *menu)
 {
-	menu->addAction(new abstract_menu_item(text, new T(type), nullptr, key, this, check));
+	menu->addAction(new abstract_menu_item(text, new T(type), nullptr, key, this, false));
+}
+
+template <typename T, typename S>
+void menu_manager::add_check_action(QString text, S type, hotkey key, QMenu *menu)
+{
+	menu->addAction(new abstract_menu_item(text, new T(type), nullptr, key, this, true));
 }
 
 template <typename T, typename S>
@@ -59,60 +65,64 @@ void menu_manager::add_group_action(QString text, S type, hotkey key, QMenu *men
 
 void menu_manager::create_actions(QUndoGroup *undo_group)
 {
-	toggle_function active_editors = &main_window::active_editors;
+	toggle_function active_editors   = &main_window::active_editors;
+	toggle_function active_jump      = &hex_editor::active_jump;
+	toggle_function active_branch    = &hex_editor::active_branch;
+	toggle_function active_selection = &hex_editor::active_selection;
+	toggle_function clipboard_usable = &hex_editor::clipboard_usable;
 	
 	QMenu *menu = find_menu("&File");
-	add_action<window_event>("&New", NEW, hotkey::New, menu);
-	add_action<window_event>("&Open", OPEN, hotkey::Open, menu);
-	add_action<window_event>("&Save", SAVE, hotkey::Save, menu);
-	add_action<window_event>("&Save as", SAVE_AS, hotkey::SaveAs, menu);
+	add_action<window_event>       ("&New",       NEW,                       hotkey::New,    menu);
+	add_action<window_event>       ("&Open",      OPEN,                      hotkey::Open,   menu);
+	add_toggle_action<window_event>("&Save",      SAVE,      active_editors, hotkey::Save,   menu);
+	add_toggle_action<window_event>("&Save as",   SAVE_AS,   active_editors, hotkey::SaveAs, menu);
 	menu->addSeparator();
-	add_toggle_action<window_event>("&Close tab", CLOSE_TAB, active_editors, hotkey::Close, menu);
+	add_toggle_action<window_event>("&Close tab", CLOSE_TAB, active_editors, hotkey::Close,  menu);
 	add_action<window_event>("E&xit", CLOSE, hotkey::Quit, menu);
 
 	menu = find_menu("&Edit");
 	menu->addAction(new history_menu_item("U&ndo", new editor_event(UNDO), hotkey::Undo, this, undo_group));
 	menu->addAction(new history_menu_item("R&edo", new editor_event(REDO), hotkey::Redo, this, undo_group));
 	menu->addSeparator();
-	add_toggle_action<editor_event>("Cu&t", CUT, &hex_editor::active_selection, hotkey::Cut, menu);
-	add_toggle_action<editor_event>("&Copy", COPY, &hex_editor::active_selection, hotkey::Copy, menu);
-	add_toggle_action<editor_event>("&Paste", PASTE, &hex_editor::clipboard_usable, hotkey::Paste, menu);
-	add_toggle_action<editor_event>("&Delete", DELETE_TEXT, &hex_editor::active_selection, hotkey::Delete, menu);
+	add_toggle_action<editor_event>("Cu&t",          CUT,          active_selection, hotkey::Cut,       menu);
+	add_toggle_action<editor_event>("&Copy",         COPY,         active_selection, hotkey::Copy,      menu);
+	add_toggle_action<editor_event>("&Paste",        PASTE,        clipboard_usable, hotkey::Paste,     menu);
+	add_toggle_action<editor_event>("&Delete",       DELETE_TEXT,  active_selection, hotkey::Delete,    menu);
 	menu->addSeparator();
-	add_toggle_action<editor_event>("&Select all", SELECT_ALL, active_editors, hotkey::SelectAll, menu);
-	add_toggle_action<dialog_event>("Select &range", SELECT_RANGE, active_editors, hotkey("Ctrl+r"), menu);
+	add_toggle_action<editor_event>("&Select all",   SELECT_ALL,   active_editors,   hotkey::SelectAll, menu);
+	add_toggle_action<dialog_event>("Select &range", SELECT_RANGE, active_editors,   hotkey("Ctrl+r"),  menu);
 	menu->addSeparator();
-	add_toggle_action<dialog_event>("&Find/Replace", FIND_REPLACE, active_editors, hotkey("Ctrl+f"), menu);
+	add_toggle_action<dialog_event>("&Find/Replace", FIND_REPLACE, active_editors,   hotkey("Ctrl+f"),  menu);
 
 	menu = find_menu("&Navigation");
-	add_toggle_action<dialog_event>("&Goto offset", GOTO, active_editors, hotkey("Ctrl+g"), menu);
+	add_toggle_action<dialog_event>("&Goto offset",  GOTO,         active_editors,   hotkey("Ctrl+g"),  menu);
 	
 	menu = find_menu("&ROM utilities");
-	add_toggle_action<dialog_event>("&Expand ROM", EXPAND, active_editors, hotkey("Ctrl+e"), menu);
-	add_toggle_action<dialog_event>("&Metadata editor", METADATA_EDITOR, active_editors, hotkey("Ctrl+m"), menu);
+	add_toggle_action<dialog_event>("&Expand ROM",      EXPAND,          active_editors,   hotkey("Ctrl+e"), menu);
+	add_toggle_action<dialog_event>("&Metadata editor", METADATA_EDITOR, active_editors,   hotkey("Ctrl+m"), menu);
 	menu->addSeparator();
-	add_toggle_action<editor_event>("Follow b&ranch", BRANCH, active_editors, hotkey("Alt+j"), menu);
-	add_toggle_action<editor_event>("Follow &jump", JUMP, active_editors, hotkey("Ctrl+j"), menu);
-	add_toggle_action<editor_event>("&Disassemble", DISASSEMBLE, active_editors, hotkey("Ctrl+d"), menu);
-	add_toggle_action<editor_event>("&Bookmark", BOOKMARK, active_editors, hotkey("Ctrl+b"), menu);
+	add_toggle_action<editor_event>("Follow b&ranch",   BRANCH,          active_branch,    hotkey("Alt+j"),  menu);
+	add_toggle_action<editor_event>("Follow &jump",     JUMP,            active_jump,      hotkey("Ctrl+j"), menu);
+	add_toggle_action<editor_event>("&Disassemble",     DISASSEMBLE,     active_selection, hotkey("Ctrl+d"), menu);
+	add_toggle_action<editor_event>("&Bookmark",        BOOKMARK,        active_selection, hotkey("Ctrl+b"), menu);
 
 	menu = find_menu("&Options");
-	add_toggle_action<editor_event>("&Scrollbar toggle", SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);
-	add_action<dialog_event>("&Character map editor", MAP_EDITOR, hotkey("Alt+c"), menu);
-	add_action<panel_event>("Disassembly panel toggle", DISASSEMBLER, hotkey("Alt+d"), menu, true);
-	add_action<panel_event>("Bookmark panel toggle", BOOKMARKS, hotkey("Alt+b"), menu, true);
+	add_toggle_action<editor_event>("&Scrollbar toggle",     SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);
+	add_action<dialog_event>       ("&Character map editor", MAP_EDITOR,                  hotkey("Alt+c"), menu);
+	add_check_action<panel_event>  ("Disassembly panel",     DISASSEMBLER,                hotkey("Alt+d"), menu);
+	add_check_action<panel_event>  ("Bookmark panel",        BOOKMARKS,                   hotkey("Alt+b"), menu);
 	menu->addSeparator();
 	
 	menu->addMenu(find_menu("&Copy style"));
 	menu = find_menu("&Copy style");
 	QActionGroup *copy_group = new QActionGroup(menu);
-	add_group_action<editor_event>("&No space", NO_SPACES, hotkey("Alt+1"), menu, copy_group);
-	add_group_action<editor_event>("&Spaces", SPACES, hotkey("Alt+2"), menu, copy_group);
-	add_group_action<editor_event>("&Hex format", HEX_FORMAT, hotkey("Alt+3"), menu, copy_group);
+	add_group_action<editor_event>("&No space",   NO_SPACES,      hotkey("Alt+1"), menu, copy_group);
+	add_group_action<editor_event>("&Spaces",     SPACES,         hotkey("Alt+2"), menu, copy_group);
+	add_group_action<editor_event>("&Hex format", HEX_FORMAT,     hotkey("Alt+3"), menu, copy_group);
 	add_group_action<editor_event>("&Word table", ASM_WORD_TABLE, hotkey("Alt+5"), menu, copy_group);
 	add_group_action<editor_event>("&Byte table", ASM_BYTE_TABLE, hotkey("Alt+4"), menu, copy_group);
 	add_group_action<editor_event>("&Long table", ASM_LONG_TABLE, hotkey("Alt+6"), menu, copy_group);
-	add_group_action<editor_event>("&C source", C_SOURCE, hotkey("Alt+7"), menu, copy_group);
+	add_group_action<editor_event>("&C source",   C_SOURCE,       hotkey("Alt+7"), menu, copy_group);
 	enable_checkable(copy_group);
 	
 	menu = find_menu("&Options");
@@ -120,7 +130,7 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_action<dialog_event>("&Settings", SETTINGS, hotkey("Alt+o"), menu);
 
 	menu = find_menu("&Help");
-	add_action<window_event>("&Version", VERSION, hotkey("Alt+v"), menu);
+	add_action<window_event>("&Version",  VERSION,  hotkey("Alt+v"), menu);
 }
 
 QMenu *menu_manager::find_menu(QString id)

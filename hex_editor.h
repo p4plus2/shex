@@ -35,6 +35,8 @@ class hex_editor : public QWidget
 		inline void set_selection(selection s){ selection_area = s; update_window(); }
 		
 		static bool active_selection(){ return active_editor_selection; } 
+		static bool active_jump(){ return active_editor_follow_jump; } 
+		static bool active_branch(){ return active_editor_follow_branch; } 
 		static bool clipboard_usable(){ return active_editor_clipboard_usable; }
 		
 	signals:
@@ -95,6 +97,8 @@ class hex_editor : public QWidget
 		selection selection_area;
 		
 		static bool active_editor_selection;
+		static bool active_editor_follow_jump;
+		static bool active_editor_follow_branch;
 		static bool active_editor_has_focus;
 		static bool active_editor_clipboard_usable;
 		static bool wheel_cursor;

@@ -59,9 +59,9 @@ void hex_editor::set_focus()
 	emit update_status_text(get_status_text());
 	hex->setFocus();
 	buffer->set_active();
-	active_editor_selection = selection_area.is_active();
 	emit update_save_state(0);
 	clipboard_changed();
+	update_window();
 }
 
 void hex_editor::slider_update(int position)
@@ -94,6 +94,8 @@ void hex_editor::update_window()
 	hex->update_display();
 	address->update_display();
 	active_editor_selection = selection_area.is_active();
+	active_editor_follow_branch = follow_selection(true);
+	active_editor_follow_jump = follow_selection(false);
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
@@ -452,6 +454,12 @@ bool hex_editor::event(QEvent *event)
 		case editor_events::REDO:
 			update_undo_action(false);
 			return true;
+		case editor_events::BRANCH:
+			branch();
+			return true;
+		case editor_events::JUMP:
+			jump();
+			return true;
 		case editor_events::SELECT_ALL:
 			select_all();
 			return true;
@@ -568,11 +576,15 @@ bool hex_editor::validate_resize()
 hex_editor::~hex_editor()
 {
 	active_editor_selection = false;
+	active_editor_follow_branch = false;
+	active_editor_follow_jump = false;
 	active_editor_clipboard_usable = false;
 	delete buffer;
 }
 
 bool hex_editor::active_editor_selection = false;
+bool hex_editor::active_editor_follow_branch = false;
+bool hex_editor::active_editor_follow_jump = false;
 bool hex_editor::active_editor_clipboard_usable = false;
 bool hex_editor::wheel_cursor;
 bool hex_editor::prompt_resize;
