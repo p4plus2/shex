@@ -25,6 +25,7 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 	};
 	
 	QColor highlight_color = QApplication::palette().color(QPalette::Active, QPalette::Highlight).lighter();
+	QColor diff_color = QApplication::palette().color(QPalette::Active, QPalette::HighlightedText).darker();
 	
 	setting<QLineEdit>("Editor font size", "display/font", font_validator, QApplication::font().pointSize());
 	setting<QCheckBox>("Do not prompt on size change:", "editor/size_change", null_validator, false);
@@ -40,6 +41,7 @@ settings_dialog::settings_dialog(QWidget *parent) : abstract_dialog(parent)
 				copy->addItem("C source", C_SOURCE);
 			});
 	setting<QPushable>("Highlight color:", "display/highlight", null_validator, highlight_color, make_color);
+	setting<QPushable>("Diff color:", "display/diff", null_validator, diff_color, make_color);
 	
 	int row = layout->rowCount();
 	layout->addWidget(refresh_button, row, 0);

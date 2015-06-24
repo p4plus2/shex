@@ -26,7 +26,7 @@ void display_version_dialog()
 	#if defined(Q_OS_LINUX)
 		OS = \"Operating system: Linux\";
 	#elif defined(Q_OS_WIN32)
-		OS = \"Operating system: Window\";
+		OS = \"Operating system: Windows\";
 	#elif defined(Q_OS_MAC)
 		OS = \"Operating system: Mac\";
 	#else

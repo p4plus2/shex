@@ -17,7 +17,8 @@ text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
 	
 	setAttribute(Qt::WA_StaticContents, true);
 	
-	settings_manager::add_listener(this, "display/highlight");
+	settings_manager::add_listener(this, {"display/highlight",
+						"display/diff"});
 	connect(editor_font::instance(), &editor_font::font_changed, this, &text_display::update_size);
 }
 
@@ -69,6 +70,13 @@ void text_display::paintEvent(QPaintEvent *event)
 			selection bookmark_selection = selection::create_selection(
 							buffer->snes_to_pc(bookmark.address), bookmark.size);
 			paint_selection(painter, bookmark_selection, bookmark.color);
+		}
+	}
+	
+	if(editor->is_comparing()){
+		auto diffs = editor->get_diff();
+		for(auto &diff : *diffs){
+			paint_selection(painter, diff, diff_color);
 		}
 	}
 	
@@ -141,9 +149,10 @@ bool text_display::event(QEvent *event)
 {
 	if(event->type() == (QEvent::Type)SETTINGS_EVENT){
 		settings_event *e = (settings_event *)event;
-		qDebug() << e->data().first;
 		if(e->data().first == "display/highlight"){
 			selection_color = e->data().second.value<QColor>();
+		}else if(e->data().first == "display/diff"){
+			diff_color = e->data().second.value<QColor>();
 		}
 		
 		return true;
@@ -245,3 +254,4 @@ int text_display::columns = 16;
 int text_display::rows = 32;
 
 QColor text_display::selection_color;
+QColor text_display::diff_color;

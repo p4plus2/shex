@@ -28,7 +28,8 @@ class text_display : public QWidget
 		static int get_columns(){ return columns; }
 		static int get_rows_by_columns(){ return rows * columns; }
 		virtual QSize sizeHint () const;
-		virtual QSize minimumSizeHint() const { return sizeHint(); }
+		virtual QSize minimumSizeHint() const { return QSize(sizeHint().width(),
+								sizeHint().height() / (editor->is_comparing() + 1)); }
 	protected:
 		const ROM_buffer *buffer;
 
@@ -78,6 +79,7 @@ class text_display : public QWidget
 		
 		static const int cursor_width = 1;
 		static QColor selection_color;
+		static QColor diff_color;
 		
 		static int rows;
 		static int columns;

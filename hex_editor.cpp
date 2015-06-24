@@ -33,6 +33,11 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	hex = new hex_display(buffer, this);
 	ascii = new ascii_display(buffer, this);
 	
+	compare_buffer = new ROM_buffer("speedy2.sfc", new_file);
+	compare_address = new address_display(compare_buffer, this);
+	compare_hex = new hex_display(compare_buffer, this);
+	compare_ascii = new ascii_display(compare_buffer, this);
+	
 	connect(hex, &hex_display::character_typed, this, &hex_editor::handle_typed_character);
 	connect(ascii, &ascii_display::character_typed, this, &hex_editor::handle_typed_character);
 	
@@ -45,7 +50,13 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	layout->addWidget(address, 1, 0);
 	layout->addWidget(hex, 1, 1);
 	layout->addWidget(ascii, 1, 2);
+	
+	layout->addWidget(compare_address, 2, 0);
+	layout->addWidget(compare_hex, 2, 1);
+	layout->addWidget(compare_ascii, 2, 2);
+	
 	layout->setRowStretch(1, 1);
+	layout->setRowStretch(2, 1);
 	setLayout(layout);
 	
 	settings_manager::add_listener(this, {"editor/wheel_cursor",
@@ -93,6 +104,13 @@ void hex_editor::update_window()
 	ascii->update_display();
 	hex->update_display();
 	address->update_display();
+	
+	if(comparing){
+		compare_ascii->update_display();
+		compare_hex->update_display();
+		compare_address->update_display();
+	}
+	
 	active_editor_selection = selection_area.is_active();
 	active_editor_follow_branch = follow_selection(true);
 	active_editor_follow_jump = follow_selection(false);
@@ -364,6 +382,8 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	
 	if(event->modifiers() == Qt::ControlModifier){
 		//more hotkeys here if needed
+		if(event->key() == Qt::Key_K){
+		}
 		return;
 	}
 	
@@ -490,6 +510,35 @@ void hex_editor::handle_search_result(QString target, int result, bool mode)
 	select_range(start, buffer->pc_to_snes(result));
 }
 
+void hex_editor::calculate_diff()
+{
+	if(!diffs){
+		diffs = new QVector<selection>;
+	}
+	diffs->clear();
+	
+	int start = 0;
+	for(int i = 0; i < buffer->size() && i < compare_buffer->size(); i++){
+		if(buffer->at(i) != compare_buffer->at(i)){
+			continue;
+		}
+		if(start != i){
+			diffs->append(selection::create_selection(start, i - start));
+			start = i;
+		}
+		start++;
+	}
+}
+
+void hex_editor::update_save_state(int direction)
+{
+	save_state += direction;
+	emit save_state_changed(!save_state);
+	if(comparing){
+		calculate_diff();
+	}
+}
+
 QString hex_editor::get_status_text()
 {
 	QString text;
@@ -580,6 +629,7 @@ hex_editor::~hex_editor()
 	active_editor_follow_jump = false;
 	active_editor_clipboard_usable = false;
 	delete buffer;
+	delete diffs;
 }
 
 bool hex_editor::active_editor_selection = false;

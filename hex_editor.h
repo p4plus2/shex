@@ -19,6 +19,7 @@ class hex_editor : public QWidget
 		inline ROM_buffer *get_buffer(){ return buffer; }
 		inline int get_relative_position(int address){ return cursor_nibble / 2 + address; }
 		void set_focus();
+		inline QVector<selection> *get_diff(){ return diffs; }
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
 		inline bool new_file(){ return is_new; }
@@ -27,6 +28,8 @@ class hex_editor : public QWidget
 		
 		inline int get_offset(){ return offset; }
 		void set_offset(int o);
+		
+		inline bool is_comparing(){ return comparing; }
 		
 		inline int get_cursor_nibble(){ return cursor_nibble; }
 		inline void set_cursor_nibble(int byte){ cursor_nibble = byte; update_window(); }
@@ -83,9 +86,18 @@ class hex_editor : public QWidget
 	private:
 		ROM_buffer *buffer;
 		int offset = 0;
+		
 		hex_display *hex;
 		ascii_display *ascii;
 		address_display *address;
+		
+		bool comparing = true;
+		ROM_buffer *compare_buffer;
+		hex_display *compare_hex;
+		ascii_display *compare_ascii;
+		address_display *compare_address;
+		QVector<selection> *diffs = nullptr;
+		
 		QLabel *hex_header = new QLabel("00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
 		QLabel *address_header = new QLabel("Offset");
 
@@ -105,6 +117,8 @@ class hex_editor : public QWidget
 		static bool prompt_resize;
 		
 		void handle_search_result(QString target, int result, bool mode);
+		void calculate_diff();
+		void update_save_state(int direction);
 		QString get_status_text();
 		bool follow_selection(bool type);
 		void move_cursor_nibble(int delta);
@@ -112,7 +126,5 @@ class hex_editor : public QWidget
 		void search_error(int error, QString find = "", QString replace_with = "");
 		int get_max_lines();
 		bool validate_resize();
-	
-		inline void update_save_state(int direction){ save_state += direction; emit save_state_changed(!save_state); }
 };
 #endif // HEX_EDITOR_H
