@@ -7,9 +7,10 @@
 #include "object_group.h"
 #include "debug.h"
 
-menu_manager::menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u) :
+menu_manager::menu_manager(main_window *parent, QMenuBar *m, QUndoGroup *u) :
         QObject(parent)
 {
+	window = parent;
 	menu_bar = m;
 	create_menus();
 	create_actions(u);
@@ -66,11 +67,15 @@ void menu_manager::add_group_action(QString text, S type, hotkey key, QMenu *men
 
 void menu_manager::create_actions(QUndoGroup *undo_group)
 {
-	toggle_function active_editors   = &main_window::active_editors;
-	toggle_function active_jump      = &hex_editor::active_jump;
-	toggle_function active_branch    = &hex_editor::active_branch;
-	toggle_function active_selection = &hex_editor::active_selection;
-	toggle_function clipboard_usable = &hex_editor::clipboard_usable;
+	#define MENU_TEST(T) hex_editor *editor = menu_manager::window->get_active_editor(); \
+			return editor && editor->T
+	toggle_function active_editors    = []() -> bool { return menu_manager::window->get_active_editor(); };
+	toggle_function active_jump       = []() -> bool { MENU_TEST(follow_selection(false)); };
+	toggle_function active_branch     = []() -> bool { MENU_TEST(follow_selection(true)); };
+	toggle_function active_selection  = []() -> bool { MENU_TEST(is_selecting()); };
+	toggle_function active_compare    = []() -> bool { MENU_TEST(is_comparing()); };
+	toggle_function clipboard_usable  = []() -> bool { MENU_TEST(is_pasteable()); };
+	#undef MENU_TEST
 	
 	QMenu *menu = find_menu("&File");
 	add_action<window_event>       ("&New",     NEW,                     hotkey::New,    menu);
@@ -109,9 +114,9 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 
 	menu = find_menu("&Diff");
 	add_toggle_action<window_event>("&Open Compare",        OPEN_COMPARE,  active_editors, hotkey("Ctrl+k"), menu);
-	add_toggle_action<editor_event>("&Close Compare",       CLOSE_COMPARE, active_editors, hotkey("Alt+k"), menu);
-	add_toggle_action<editor_event>("&Previous difference", PREVIOUS,      active_editors, hotkey("Ctrl+,"), menu);
-	add_toggle_action<editor_event>("&Next difference",     NEXT,          active_editors, hotkey("Ctrl+."), menu);
+	add_toggle_action<editor_event>("&Close Compare",       CLOSE_COMPARE, active_compare, hotkey("Alt+k"),  menu);
+	add_toggle_action<editor_event>("&Previous difference", PREVIOUS,      active_compare, hotkey("Ctrl+,"), menu);
+	add_toggle_action<editor_event>("&Next difference",     NEXT,          active_compare, hotkey("Ctrl+."), menu);
 	
 	
 	menu = find_menu("&Options");
@@ -184,3 +189,5 @@ menu_manager::~menu_manager()
 		delete menu;
 	}
 }
+
+main_window *menu_manager::window = nullptr;

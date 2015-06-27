@@ -7,12 +7,13 @@
 #include "events/event_types.h"
 
 class QMenuBar;
+class main_window;
 
 class menu_manager : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit menu_manager(QObject *parent, QMenuBar *m, QUndoGroup *u);
+		explicit menu_manager(main_window *parent, QMenuBar *m, QUndoGroup *u);
 		~menu_manager();
 		void connect_to_widget(QObject *object, event_types event){ event_map[event] = object; }
 		void group_connect_to_widget(QObject *object, event_types event);
@@ -26,6 +27,7 @@ class menu_manager : public QObject
 		QMenuBar *menu_bar;
 		QList<QMenu *> menu_list;
 		QMap<event_types, QObject *> event_map;
+		static main_window *window;
 		
 		void create_menus();
 		void create_actions(QUndoGroup *undo_group);

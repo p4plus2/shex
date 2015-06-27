@@ -27,7 +27,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &hex_editor::customContextMenuRequested, this, &hex_editor::context_menu);
-	connect(qApp->clipboard(), &QClipboard::dataChanged, this, &hex_editor::clipboard_changed);
 	
 	address = new address_display(buffer, this);
 	hex = new hex_display(buffer, this);
@@ -65,7 +64,6 @@ void hex_editor::set_focus()
 	hex->setFocus();
 	buffer->set_active();
 	emit update_save_state(0);
-	clipboard_changed();
 	update_window();
 }
 
@@ -84,6 +82,23 @@ void hex_editor::compare(QString file)
 	
 	grid->setRowStretch(2, 1);
 	calculate_diff();
+}
+
+bool hex_editor::follow_selection(bool type)
+{
+	if(selection_area.is_active()){
+		int range = selection_area.byte_range();
+		if(type && (range == 1 || range == 2)){
+			return true;
+		}else if(!type && (range == 2 || range == 3)){
+			if(buffer->validate_address(buffer->jump_address(selection_area.get_end(),
+			   buffer->to_little_endian(buffer->range(selection_area.get_start(), 
+			   selection_area.get_end()))), false)){
+				return true;                
+			}
+		}
+	}
+	return false;
 }
 
 void hex_editor::slider_update(int position)
@@ -121,10 +136,6 @@ void hex_editor::update_window()
 		compare_hex->update_display();
 		compare_address->update_display();
 	}
-	
-	active_editor_selection = selection_area.is_active();
-	active_editor_follow_branch = follow_selection(true);
-	active_editor_follow_jump = follow_selection(false);
 }
 
 void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
@@ -569,23 +580,6 @@ QString hex_editor::get_status_text()
 	return text;
 }
 
-bool hex_editor::follow_selection(bool type)
-{
-	if(selection_area.is_active()){
-		int range = selection_area.byte_range();
-		if(type && (range == 1 || range == 2)){
-			return true;
-		}else if(!type && (range == 2 || range == 3)){
-			if(buffer->validate_address(buffer->jump_address(selection_area.get_end(),
-			   buffer->to_little_endian(buffer->range(selection_area.get_start(), 
-			   selection_area.get_end()))), false)){
-				return true;                
-			}
-		}
-	}
-	return false;
-}
-
 void hex_editor::move_cursor_nibble(int delta)
 {
 	cursor_nibble += delta;
@@ -635,17 +629,9 @@ bool hex_editor::validate_resize()
 
 hex_editor::~hex_editor()
 {
-	active_editor_selection = false;
-	active_editor_follow_branch = false;
-	active_editor_follow_jump = false;
-	active_editor_clipboard_usable = false;
 	delete buffer;
 	delete diffs;
 }
 
-bool hex_editor::active_editor_selection = false;
-bool hex_editor::active_editor_follow_branch = false;
-bool hex_editor::active_editor_follow_jump = false;
-bool hex_editor::active_editor_clipboard_usable = false;
 bool hex_editor::wheel_cursor;
 bool hex_editor::prompt_resize;

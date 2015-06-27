@@ -19,6 +19,7 @@ class main_window : public QMainWindow
 		
 	public:
 		main_window(QWidget *parent = 0);
+		hex_editor *get_active_editor();
 		~main_window();
 		
 	public slots:
@@ -29,7 +30,6 @@ class main_window : public QMainWindow
 		void open();
 		void compare_open();
 		bool save(bool override_name = false, int target = -1);
-		static inline bool active_editors(){ return has_active_editors; }
 		
 	protected:
 		virtual bool event(QEvent *event);
@@ -44,8 +44,6 @@ class main_window : public QMainWindow
 		int new_counter = 0;
 		editor_font *font = new editor_font(this);  //We just need an instance for sending events to
 		QString last_directory;
-		
-		static bool has_active_editors;
 
 		void init_connections(hex_editor *editor, dynamic_scrollbar *scrollbar, panel_manager *panel);
 		void create_new_tab(QString name, bool new_file = false);

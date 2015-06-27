@@ -20,6 +20,7 @@ class hex_editor : public QWidget
 		inline int get_relative_position(int address){ return cursor_nibble / 2 + address; }
 		void set_focus();
 		void compare(QString file);
+		bool follow_selection(bool type);
 		inline QVector<selection> *get_diff(){ return diffs; }
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
@@ -31,17 +32,14 @@ class hex_editor : public QWidget
 		void set_offset(int o);
 		
 		inline bool is_comparing(){ return comparing; }
+		inline bool is_selecting(){ return selection_area.is_active(); }
+		inline bool is_pasteable(){ return buffer->check_paste_data(); }
 		
 		inline int get_cursor_nibble(){ return cursor_nibble; }
 		inline void set_cursor_nibble(int byte){ cursor_nibble = byte; update_window(); }
 		
 		inline selection get_selection(){ return selection_area; }
 		inline void set_selection(selection s){ selection_area = s; update_window(); }
-		
-		static bool active_selection(){ return active_editor_selection; } 
-		static bool active_jump(){ return active_editor_follow_jump; } 
-		static bool active_branch(){ return active_editor_follow_branch; } 
-		static bool clipboard_usable(){ return active_editor_clipboard_usable; }
 		
 	signals:
 		void update_slider(int position);
@@ -76,8 +74,6 @@ class hex_editor : public QWidget
 		void search(QString find, bool direction, bool mode);
 		void replace(QString find, QString replace, bool direction, bool mode);
 		void replace_all(QString find, QString replace, bool mode);
-		
-		inline void clipboard_changed(){ active_editor_clipboard_usable = buffer->check_paste_data(); }
 
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event);
@@ -109,11 +105,6 @@ class hex_editor : public QWidget
 		int cursor_nibble = 0;
 		selection selection_area;
 		
-		static bool active_editor_selection;
-		static bool active_editor_follow_jump;
-		static bool active_editor_follow_branch;
-		static bool active_editor_has_focus;
-		static bool active_editor_clipboard_usable;
 		static bool wheel_cursor;
 		static bool prompt_resize;
 		
@@ -121,7 +112,6 @@ class hex_editor : public QWidget
 		void calculate_diff();
 		void update_save_state(int direction);
 		QString get_status_text();
-		bool follow_selection(bool type);
 		void move_cursor_nibble(int delta);
 		void update_nibble(char byte);
 		void search_error(int error, QString find = "", QString replace_with = "");

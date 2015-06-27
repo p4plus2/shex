@@ -54,6 +54,15 @@ main_window::main_window(QWidget *parent)
 #endif
 }
 
+hex_editor *main_window::get_active_editor()
+{
+	int current_tab = tab_widget->currentIndex();
+	if(current_tab != -1){
+		return get_editor(current_tab);
+	}
+	return nullptr;
+}
+
 bool main_window::close_tab(int i)
 {
 	hex_editor *editor = get_editor(i);
@@ -79,9 +88,6 @@ bool main_window::close_tab(int i)
 	QWidget *widget = tab_widget->widget(i);
 	tab_widget->removeTab(i);
 	delete widget;
-	if(!tab_widget->count()){
-		has_active_editors = false;
-	}
 	return true;
 }
 
@@ -249,7 +255,6 @@ void main_window::create_new_tab(QString name, bool new_file)
 	tab_widget->setCurrentWidget(widget);
 	editor->set_focus();
 	panel_controller->init_displays();
-	has_active_editors = true;
 	resize(window_size);
 }
 
@@ -263,4 +268,3 @@ main_window::~main_window()
 	character_mapper::delete_active_map();
 }
 
-bool main_window::has_active_editors = false;
