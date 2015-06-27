@@ -19,12 +19,16 @@ enum editor_events{
 	C_SOURCE,
 	UNDO,
 	REDO,
+	CLOSE_COMPARE,
+	NEXT,
+	PREVIOUS,
 	EDITOR_EVENT_MAX
 };
 
 enum window_events{
 	NEW = EDITOR_EVENT_MAX+1,
         OPEN,
+	OPEN_COMPARE,
         SAVE,
         SAVE_AS,
         CLOSE_TAB,

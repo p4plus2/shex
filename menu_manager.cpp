@@ -29,6 +29,7 @@ void menu_manager::create_menus()
 	menu_list.append(new QMenu("&Edit"));
 	menu_list.append(new QMenu("&Navigation"));
 	menu_list.append(new QMenu("&ROM utilities"));
+	menu_list.append(new QMenu("&Diff"));
 	menu_list.append(new QMenu("&Options"));
 	menu_list.append(new QMenu("&Help"));
 	
@@ -72,10 +73,10 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	toggle_function clipboard_usable = &hex_editor::clipboard_usable;
 	
 	QMenu *menu = find_menu("&File");
-	add_action<window_event>       ("&New",       NEW,                       hotkey::New,    menu);
-	add_action<window_event>       ("&Open",      OPEN,                      hotkey::Open,   menu);
-	add_toggle_action<window_event>("&Save",      SAVE,      active_editors, hotkey::Save,   menu);
-	add_toggle_action<window_event>("&Save as",   SAVE_AS,   active_editors, hotkey::SaveAs, menu);
+	add_action<window_event>       ("&New",     NEW,                     hotkey::New,    menu);
+	add_action<window_event>       ("&Open",    OPEN,                    hotkey::Open,   menu);
+	add_toggle_action<window_event>("&Save",    SAVE,    active_editors, hotkey::Save,   menu);
+	add_toggle_action<window_event>("S&ave as", SAVE_AS, active_editors, hotkey::SaveAs, menu);
 	menu->addSeparator();
 	add_toggle_action<window_event>("&Close tab", CLOSE_TAB, active_editors, hotkey::Close,  menu);
 	add_action<window_event>("E&xit", CLOSE, hotkey::Quit, menu);
@@ -106,6 +107,13 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_toggle_action<editor_event>("&Disassemble",     DISASSEMBLE,     active_selection, hotkey("Ctrl+d"), menu);
 	add_toggle_action<editor_event>("&Bookmark",        BOOKMARK,        active_selection, hotkey("Ctrl+b"), menu);
 
+	menu = find_menu("&Diff");
+	add_toggle_action<window_event>("&Open Compare",        OPEN_COMPARE,  active_editors, hotkey("Ctrl+k"), menu);
+	add_toggle_action<editor_event>("&Close Compare",       CLOSE_COMPARE, active_editors, hotkey("Alt+k"), menu);
+	add_toggle_action<editor_event>("&Previous difference", PREVIOUS,      active_editors, hotkey("Ctrl+,"), menu);
+	add_toggle_action<editor_event>("&Next difference",     NEXT,          active_editors, hotkey("Ctrl+."), menu);
+	
+	
 	menu = find_menu("&Options");
 	add_toggle_action<editor_event>("&Scrollbar toggle",     SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);
 	add_action<dialog_event>       ("&Character map editor", MAP_EDITOR,                  hotkey("Alt+c"), menu);
@@ -127,7 +135,7 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	
 	menu = find_menu("&Options");
 	menu->addSeparator();
-	add_action<dialog_event>("&Settings", SETTINGS, hotkey("Alt+o"), menu);
+	add_action<dialog_event>("&Preferences", SETTINGS, hotkey("Alt+p"), menu);
 
 	menu = find_menu("&Help");
 	add_action<window_event>("&Version",  VERSION,  hotkey("Alt+v"), menu);

@@ -11,6 +11,7 @@
 #include "character_mapper.h"
 #include "panel_manager.h"
 #include "settings_manager.h"
+#include "utility.h"
 
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
@@ -27,13 +28,20 @@ main_window::main_window(QWidget *parent)
 	
 	settings_manager settings;
 	QVariant geometry = settings.get("geometry");
-	QVariant state = settings.get("windowState");
+	QVariant state = settings.get("window_state");
+	QVariant saved_last_directory = settings.get("last_directory");
 	if(state.isValid()){
 		restoreState(state.toByteArray());
 	}
 	if(geometry.isValid()){
 		restoreGeometry(geometry.toByteArray());
 		tab_widget->resize(size());
+	}
+	
+	if(saved_last_directory.isValid()){
+		last_directory = saved_last_directory.toString();
+	}else{
+		last_directory = QDir::homePath();
 	}
 	
 	connect(tab_widget, &QTabWidget::tabCloseRequested, this, &main_window::close_tab);
@@ -110,10 +118,24 @@ void main_window::new_file()
 
 void main_window::open()
 {
-	QStringList file_list = QFileDialog::getOpenFileNames(this, "Open file(s)", QDir::homePath(),
+	QStringList file_list = QFileDialog::getOpenFileNames(this, "Open file(s)", last_directory,
 	                                                      "ROM files (*.smc *.sfc);;All files(*.*)");
 	for(auto &file_name : file_list){
 		create_new_tab(file_name);
+	}
+	
+	if(file_list.size()){
+		last_directory = absolute_path(file_list.at(0));
+	}
+}
+
+void main_window::compare_open()
+{
+	QString file = QFileDialog::getOpenFileName(this, "Open file to compare", last_directory,
+	                                                  "ROM files (*.smc *.sfc);;All files(*.*)");
+	if(!file.isNull()){
+		get_editor(tab_widget->currentIndex())->compare(file);
+		last_directory = absolute_path(file);
 	}
 }
 
@@ -122,11 +144,12 @@ bool main_window::save(bool override_name, int target)
 	hex_editor *editor = (target != -1 ) ? get_editor(target) : get_editor(tab_widget->currentIndex());
 	QString name = "";
 	if(editor->new_file() || override_name){
-		name = QFileDialog::getSaveFileName(this, "Save", QDir::homePath(), 
+		name = QFileDialog::getSaveFileName(this, "Save", last_directory, 
 	                                            "ROM files (*.smc *.sfc);;All files(*.*)");
 		if(name == ""){
 			return false;
 		}
+		last_directory = absolute_path(name);
 	}
 	editor->save(name);
 	return true;
@@ -143,6 +166,9 @@ bool main_window::event(QEvent *event)
 			return true;
 	        case OPEN:
 			open();
+			return true;
+		case OPEN_COMPARE:
+			compare_open();
 			return true;
 	        case SAVE:
 			save();
@@ -175,7 +201,8 @@ void main_window::closeEvent(QCloseEvent *event)
 	}
 	settings_manager settings;
 	settings.set("geometry", saveGeometry());
-	settings.set("windowState", saveState());
+	settings.set("window_state", saveState());
+	settings.set("last_directory", last_directory);
 	QApplication::quit();
 	QMainWindow::closeEvent(event);
 }

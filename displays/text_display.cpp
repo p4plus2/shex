@@ -10,6 +10,9 @@
 text_display::text_display(const ROM_buffer *b, hex_editor *parent) :
         QWidget(parent), buffer(b)
 {
+	if(!b->size()){
+		hide();
+	}
 	cursor_timer_id = startTimer(QApplication::cursorFlashTime());
 	
 	editor = parent;
@@ -45,6 +48,11 @@ QSize text_display::sizeHint () const
 {
 	const int pad = 2;
 	return QSize(editor_font::get_width() * get_line_characters() + pad, editor_font::get_height() * get_rows());
+}
+
+QSize text_display::minimumSizeHint() const
+{
+	return QSize(sizeHint().width(), sizeHint().height() / (editor->is_comparing() + 1)); 
 }
 
 QPoint text_display::clip_mouse(int x, int y)

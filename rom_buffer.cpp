@@ -5,18 +5,10 @@
 
 ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 {
-	ROM.setFileName(file_name);
 	if(!new_file){
-		ROM.open(QFile::ReadWrite);
-		buffer = ROM.readAll();
-		if(ROM.size() < 0x8000){
-			ROM_error = "The ROM is too small to be valid.";
-			return;
-		}
-		analyze();
+		open(file_name);
 	}else{
 		buffer.fill(0x00, 0x8000);
-		
 	}
 	qDebug() << ENUM_STRING(memory_mapper, get_mapper());
 }
@@ -25,6 +17,21 @@ void ROM_buffer::remove_copy_header()
 {
 	header_buffer = buffer.mid(0, header_size());
 	buffer.remove(0, header_size());
+}
+
+void ROM_buffer::open(QString path)
+{
+	if(ROM.isOpen()){
+		ROM.close();
+	}
+	ROM.setFileName(path);
+	ROM.open(QFile::ReadWrite);
+	buffer = ROM.readAll();
+	if(ROM.size() < 0x8000){
+		ROM_error = "The ROM is too small to be valid.";
+		return;
+	}
+	analyze();
 }
 
 void ROM_buffer::save(QString path)

@@ -30,10 +30,11 @@ class ROM_buffer : public ROM_metadata
 			INVALID_REPLACE = -3
 		};
 		
-		
+		ROM_buffer(){}
 		ROM_buffer(QString file_name, bool new_file = false);
 		virtual ~ROM_buffer(){}
 		virtual void remove_copy_header();
+		void open(QString path);
 		void save(QString path);
 		void initialize_undo(QUndoGroup *undo_group);
 		void cut(int start, int end, bool ascii_mode);

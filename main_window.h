@@ -27,6 +27,7 @@ class main_window : public QMainWindow
 		void file_save_state(bool clean);
 		void new_file();
 		void open();
+		void compare_open();
 		bool save(bool override_name = false, int target = -1);
 		static inline bool active_editors(){ return has_active_editors; }
 		
@@ -42,6 +43,7 @@ class main_window : public QMainWindow
 		menu_manager *menu_controller = new menu_manager(this, menuBar(), undo_group);
 		int new_counter = 0;
 		editor_font *font = new editor_font(this);  //We just need an instance for sending events to
+		QString last_directory;
 		
 		static bool has_active_editors;
 

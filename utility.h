@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <QWidget>
+#include <QDir>
 
 template<typename... A>
 struct resolve{ 
@@ -38,6 +39,12 @@ inline void propagate_resize(QWidget *child)
 		parent->adjustSize();
 		parent = parent->parentWidget();
 	}while(parent);
+}
+
+inline QString absolute_path(const QString file_path)
+{
+	QDir directory;
+	return directory.absoluteFilePath(file_path);
 }
 
 #endif // UTILITY_H

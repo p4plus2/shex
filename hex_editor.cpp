@@ -33,7 +33,6 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	hex = new hex_display(buffer, this);
 	ascii = new ascii_display(buffer, this);
 	
-	compare_buffer = new ROM_buffer("speedy2.sfc", new_file);
 	compare_address = new address_display(compare_buffer, this);
 	compare_hex = new hex_display(compare_buffer, this);
 	compare_ascii = new ascii_display(compare_buffer, this);
@@ -51,12 +50,7 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	layout->addWidget(hex, 1, 1);
 	layout->addWidget(ascii, 1, 2);
 	
-	layout->addWidget(compare_address, 2, 0);
-	layout->addWidget(compare_hex, 2, 1);
-	layout->addWidget(compare_ascii, 2, 2);
-	
 	layout->setRowStretch(1, 1);
-	layout->setRowStretch(2, 1);
 	setLayout(layout);
 	
 	settings_manager::add_listener(this, {"editor/wheel_cursor",
@@ -73,6 +67,23 @@ void hex_editor::set_focus()
 	emit update_save_state(0);
 	clipboard_changed();
 	update_window();
+}
+
+void hex_editor::compare(QString file)
+{
+	comparing = true;
+	compare_buffer->open(file);
+	QGridLayout *grid = (QGridLayout *)layout();
+	grid->addWidget(compare_address, 2, 0);
+	grid->addWidget(compare_hex, 2, 1);
+	grid->addWidget(compare_ascii, 2, 2);
+	
+	compare_address->show();
+	compare_ascii->show();
+	compare_hex->show();
+	
+	grid->setRowStretch(2, 1);
+	calculate_diff();
 }
 
 void hex_editor::slider_update(int position)

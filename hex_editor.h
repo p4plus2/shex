@@ -6,9 +6,9 @@
 #include "rom_buffer.h"
 #include "panels/bookmark_panel.h"
 
-class address_display;
-class ascii_display;
 class hex_display;
+class ascii_display;
+class address_display;
 
 class hex_editor : public QWidget
 {
@@ -19,6 +19,7 @@ class hex_editor : public QWidget
 		inline ROM_buffer *get_buffer(){ return buffer; }
 		inline int get_relative_position(int address){ return cursor_nibble / 2 + address; }
 		void set_focus();
+		void compare(QString file);
 		inline QVector<selection> *get_diff(){ return diffs; }
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
 		inline bool can_save(){ return save_state; }
@@ -91,11 +92,11 @@ class hex_editor : public QWidget
 		ascii_display *ascii;
 		address_display *address;
 		
-		bool comparing = true;
-		ROM_buffer *compare_buffer;
+		bool comparing = false;
+		ROM_buffer *compare_buffer = new ROM_buffer();
+		address_display *compare_address;
 		hex_display *compare_hex;
 		ascii_display *compare_ascii;
-		address_display *compare_address;
 		QVector<selection> *diffs = nullptr;
 		
 		QLabel *hex_header = new QLabel("00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
