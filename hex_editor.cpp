@@ -72,16 +72,69 @@ void hex_editor::compare(QString file)
 	comparing = true;
 	compare_buffer->open(file);
 	QGridLayout *grid = (QGridLayout *)layout();
-	grid->addWidget(compare_address, 2, 0);
-	grid->addWidget(compare_hex, 2, 1);
-	grid->addWidget(compare_ascii, 2, 2);
+	
+	//work around this eventually... but it works for now
+	address->setMaximumHeight(address->size().height() / 2 + 1);
+	hex->setMaximumHeight(hex->size().height() / 2 + 1);
+	ascii->setMaximumHeight(ascii->size().height() / 2 + 1);
+	address->setMaximumHeight(QWIDGETSIZE_MAX);
+	hex->setMaximumHeight(QWIDGETSIZE_MAX);
+	ascii->setMaximumHeight(QWIDGETSIZE_MAX);
 	
 	compare_address->show();
 	compare_ascii->show();
 	compare_hex->show();
 	
+	grid->addWidget(compare_address, 2, 0);
+	grid->addWidget(compare_hex, 2, 1);
+	grid->addWidget(compare_ascii, 2, 2);
+	
 	grid->setRowStretch(2, 1);
 	calculate_diff();
+}
+
+void hex_editor::close_compare()
+{
+	comparing = false;
+	QGridLayout *grid = (QGridLayout *)layout();
+	
+	compare_address->hide();
+	compare_ascii->hide();
+	compare_hex->hide();
+	grid->removeWidget(compare_address);
+	grid->removeWidget(compare_ascii);
+	grid->removeWidget(compare_hex);
+	compare_address->setParent(this);
+	compare_hex->setParent(this);
+	compare_ascii->setParent(this);
+	
+	grid->setRowStretch(2, 0);
+}
+
+void hex_editor::goto_diff(bool direction)
+{
+	int offset = -1;
+	for(auto &diff : *diffs){
+		if((direction && diff.get_start_byte() > get_offset()) ||
+		   (!direction && diff.get_start_byte() < get_offset())){
+			offset = diff.get_start_byte();
+		}else{
+			break;
+		}
+	}
+	if(offset == -1 && diffs->size()){
+		if(direction){
+			offset = diffs->first().get_start_byte();
+		}else{
+			offset = diffs->last().get_start_byte();
+		}
+	}
+	
+	if(offset != -1){
+		set_offset(offset);
+	}else{
+		update_status_text("No differences found!");
+	}
 }
 
 bool hex_editor::follow_selection(bool type)
@@ -513,6 +566,15 @@ bool hex_editor::event(QEvent *event)
 			return true;
 		case editor_events::SCROLL_MODE:
 			scroll_mode_changed();
+			return true;
+		case editor_events::CLOSE_COMPARE:
+			close_compare();
+			return true;
+		case editor_events::PREVIOUS:
+			goto_diff(false);
+			return true;
+		case editor_events::NEXT:
+			goto_diff(true);
 			return true;
 		default:
 			qDebug() << "Bad event" << type;

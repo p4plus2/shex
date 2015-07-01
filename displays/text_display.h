@@ -82,6 +82,7 @@ class text_display : public QWidget
 		
 		static int rows;
 		static int columns;
+		static bool comparing;
 };
 
 #endif // TEXT_DISPLAY_H

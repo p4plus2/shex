@@ -52,7 +52,7 @@ QSize text_display::sizeHint () const
 
 QSize text_display::minimumSizeHint() const
 {
-	return QSize(sizeHint().width(), sizeHint().height() / (editor->is_comparing() + 1)); 
+	return QSize(sizeHint().width(), sizeHint().height()); 
 }
 
 QPoint text_display::clip_mouse(int x, int y)
@@ -66,6 +66,8 @@ QPoint text_display::clip_mouse(int x, int y)
 
 void text_display::paintEvent(QPaintEvent *event)
 {
+	int offset = get_offset();
+	int end_offset = get_rows() * get_columns() + offset;
 	QPainter painter(this);
 	QColor text = palette().color(QPalette::WindowText);
 	painter.setPen(text);
@@ -77,6 +79,11 @@ void text_display::paintEvent(QPaintEvent *event)
 		for(const auto &bookmark : *bookmarks){
 			selection bookmark_selection = selection::create_selection(
 							buffer->snes_to_pc(bookmark.address), bookmark.size);
+			//non-sequential just skip
+			if(bookmark_selection.get_end_byte() < offset || 
+			   bookmark_selection.get_start_byte() > end_offset){
+				continue;
+			}
 			paint_selection(painter, bookmark_selection, bookmark.color);
 		}
 	}
@@ -84,6 +91,11 @@ void text_display::paintEvent(QPaintEvent *event)
 	if(editor->is_comparing()){
 		auto diffs = editor->get_diff();
 		for(auto &diff : *diffs){
+			if(diff.get_end_byte() < offset){
+				continue;
+			}else if(diff.get_start_byte() > end_offset){ //sequential, break early
+				break;
+			}
 			paint_selection(painter, diff, diff_color);
 		}
 	}
@@ -109,8 +121,7 @@ void text_display::paintEvent(QPaintEvent *event)
 		painter.fillRect(active_line, selection_color);
 	}
 
-	int byte_count = get_rows() * get_columns() + get_offset();
-	for(int i = get_offset(), row = 0; i < byte_count; i += get_columns(), row++){
+	for(int i = offset, row = 0; i < end_offset; i += get_columns(), row++){
 		int real_row = i / get_columns();
 		if(!row_cache.contains(real_row)){
 			int line_end = i + get_columns();	
@@ -147,6 +158,11 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area,
 		area -= QRect(position2.x(), position2.y(), 
 		              get_line_characters() * editor_font::get_width() - position2.x(), 
 		              editor_font::get_height());
+	}
+	
+	if(position2.y() >= get_rows() * editor_font::get_height()){
+		area -= QRect(0, get_rows() * editor_font::get_height(), 
+		              get_line_characters() * editor_font::get_width(), position2.y());
 	}
 	painter.setClipRegion(area);
 	painter.fillRect(0, position1.y(), get_line_characters() * editor_font::get_width(), 
@@ -231,7 +247,6 @@ void text_display::mouseReleaseEvent(QMouseEvent *event)
 void text_display::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);
-
 	rows = size().height() / editor_font::get_height();
 }
 
@@ -260,6 +275,7 @@ void text_display::update_size()
 
 int text_display::columns = 16;
 int text_display::rows = 32;
+bool text_display::comparing = false;
 
 QColor text_display::selection_color;
 QColor text_display::diff_color;
