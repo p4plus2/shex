@@ -113,13 +113,20 @@ void hex_editor::close_compare()
 
 void hex_editor::goto_diff(bool direction)
 {
+	if(!comparing){
+		return;
+	}
 	int offset = -1;
 	for(auto &diff : *diffs){
-		if((direction && diff.get_start_byte() > get_offset()) ||
-		   (!direction && diff.get_start_byte() < get_offset())){
+		if(direction && diff.get_start() > get_cursor_nibble()){
 			offset = diff.get_start_byte();
-		}else{
 			break;
+		}else if(!direction){
+			if(diff.get_start() < get_cursor_nibble()){
+				offset = diff.get_start_byte();
+			}else{
+				break;
+			}
 		}
 	}
 	if(offset == -1 && diffs->size()){
@@ -129,9 +136,9 @@ void hex_editor::goto_diff(bool direction)
 			offset = diffs->last().get_start_byte();
 		}
 	}
-	
+
 	if(offset != -1){
-		set_offset(offset);
+		goto_offset(buffer->pc_to_snes(offset));
 	}else{
 		update_status_text("No differences found!");
 	}
