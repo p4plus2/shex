@@ -22,6 +22,7 @@ class hex_editor : public QWidget
 		void compare(QString file);
 		void close_compare();
 		void goto_diff(bool direction);
+		QString generate_patch();
 		bool follow_selection(bool type);
 		inline QVector<selection> *get_diff(){ return diffs; }
 		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }

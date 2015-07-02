@@ -29,6 +29,7 @@ class main_window : public QMainWindow
 		void new_file();
 		void open();
 		void compare_open();
+		void generate_patch();
 		bool save(bool override_name = false, int target = -1);
 		
 	protected:

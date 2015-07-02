@@ -78,13 +78,13 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	#undef MENU_TEST
 	
 	QMenu *menu = find_menu("&File");
-	add_action<window_event>       ("&New",     NEW,                     hotkey::New,    menu);
-	add_action<window_event>       ("&Open",    OPEN,                    hotkey::Open,   menu);
+	add_action       <window_event>("&New",     NEW,                     hotkey::New,    menu);
+	add_action       <window_event>("&Open",    OPEN,                    hotkey::Open,   menu);
 	add_toggle_action<window_event>("&Save",    SAVE,    active_editors, hotkey::Save,   menu);
 	add_toggle_action<window_event>("S&ave as", SAVE_AS, active_editors, hotkey::SaveAs, menu);
 	menu->addSeparator();
 	add_toggle_action<window_event>("&Close tab", CLOSE_TAB, active_editors, hotkey::Close,  menu);
-	add_action<window_event>("E&xit", CLOSE, hotkey::Quit, menu);
+	add_action       <window_event>("E&xit",      CLOSE,                     hotkey::Quit,   menu);
 
 	menu = find_menu("&Edit");
 	menu->addAction(new history_menu_item("U&ndo", new editor_event(UNDO), hotkey::Undo, this, undo_group));
@@ -117,13 +117,13 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_toggle_action<editor_event>("&Close Compare",       CLOSE_COMPARE, active_compare, hotkey("Alt+k"),  menu);
 	add_toggle_action<editor_event>("&Previous difference", PREVIOUS,      active_compare, hotkey("Ctrl+,"), menu);
 	add_toggle_action<editor_event>("&Next difference",     NEXT,          active_compare, hotkey("Ctrl+."), menu);
-	
+	add_toggle_action<window_event>("&Generate Patch",      DIFF_PATCH,    active_compare, hotkey("Alt+g"),  menu);
 	
 	menu = find_menu("&Options");
 	add_toggle_action<editor_event>("&Scrollbar toggle",     SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);
-	add_action<dialog_event>       ("&Character map editor", MAP_EDITOR,                  hotkey("Alt+c"), menu);
-	add_check_action<panel_event>  ("Disassembly panel",     DISASSEMBLER,                hotkey("Alt+d"), menu);
-	add_check_action<panel_event>  ("Bookmark panel",        BOOKMARKS,                   hotkey("Alt+b"), menu);
+	add_action       <dialog_event>("&Character map editor", MAP_EDITOR,                  hotkey("Alt+c"), menu);
+	add_check_action <panel_event> ("Disassembly panel",     DISASSEMBLER,                hotkey("Alt+d"), menu);
+	add_check_action <panel_event> ("Bookmark panel",        BOOKMARKS,                   hotkey("Alt+b"), menu);
 	menu->addSeparator();
 	
 	menu->addMenu(find_menu("&Copy style"));
@@ -132,8 +132,8 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_group_action<editor_event>("&No space",   NO_SPACES,      hotkey("Alt+1"), menu, copy_group);
 	add_group_action<editor_event>("&Spaces",     SPACES,         hotkey("Alt+2"), menu, copy_group);
 	add_group_action<editor_event>("&Hex format", HEX_FORMAT,     hotkey("Alt+3"), menu, copy_group);
-	add_group_action<editor_event>("&Word table", ASM_WORD_TABLE, hotkey("Alt+5"), menu, copy_group);
 	add_group_action<editor_event>("&Byte table", ASM_BYTE_TABLE, hotkey("Alt+4"), menu, copy_group);
+	add_group_action<editor_event>("&Word table", ASM_WORD_TABLE, hotkey("Alt+5"), menu, copy_group);
 	add_group_action<editor_event>("&Long table", ASM_LONG_TABLE, hotkey("Alt+6"), menu, copy_group);
 	add_group_action<editor_event>("&C source",   C_SOURCE,       hotkey("Alt+7"), menu, copy_group);
 	enable_checkable(copy_group);

@@ -29,6 +29,7 @@ enum window_events{
 	NEW = EDITOR_EVENT_MAX+1,
         OPEN,
 	OPEN_COMPARE,
+	DIFF_PATCH,
         SAVE,
         SAVE_AS,
         CLOSE_TAB,

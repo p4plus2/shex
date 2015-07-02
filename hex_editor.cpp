@@ -144,6 +144,20 @@ void hex_editor::goto_diff(bool direction)
 	}
 }
 
+QString hex_editor::generate_patch()
+{
+	QString patch;
+	QTextStream stream(&patch);
+	for(auto &diff : *diffs){
+		int start = diff.get_start_byte();
+		stream << "ORG $" << QString::number(buffer->pc_to_snes(start), 16).rightJustified(6, '0').toUpper()
+		       << "\n"    << buffer->copy_format(start, diff.get_end_byte(), ROM_buffer::ASM_BYTE_TABLE) 
+		       << "\n\n";
+	}
+	
+	return patch.replace("\ndb", "\n\tdb");
+}
+
 bool hex_editor::follow_selection(bool type)
 {
 	if(selection_area.is_active()){

@@ -145,6 +145,23 @@ void main_window::compare_open()
 	}
 }
 
+void main_window::generate_patch()
+{
+	hex_editor *editor = get_editor(tab_widget->currentIndex());
+	if(!editor->is_comparing()){
+		return;
+	}
+	QString file_name = QFileDialog::getSaveFileName(this, "Save patch as", last_directory,
+	                                                  "ASM files (*.asm *.txt);;All files(*.*)");
+	if(!file_name.isNull()){
+		QString patch = editor->generate_patch();
+		QFile file(file_name);
+		file.open(QFile::WriteOnly);
+		file.write(patch.toLatin1());
+		last_directory = absolute_path(file_name);
+	}
+}
+
 bool main_window::save(bool override_name, int target)
 {
 	hex_editor *editor = (target != -1 ) ? get_editor(target) : get_editor(tab_widget->currentIndex());
@@ -175,6 +192,9 @@ bool main_window::event(QEvent *event)
 			return true;
 		case OPEN_COMPARE:
 			compare_open();
+			return true;
+		case DIFF_PATCH:
+			generate_patch();
 			return true;
 	        case SAVE:
 			save();

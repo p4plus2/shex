@@ -39,6 +39,7 @@ class ROM_buffer : public ROM_metadata
 		void initialize_undo(QUndoGroup *undo_group);
 		void cut(int start, int end, bool ascii_mode);
 		void copy(int start, int end, bool ascii_mode);
+		QString copy_format(int start, int end, copy_style style);
 		int paste(int start, int end = 0, bool raw = false);
 		void delete_text(int start, int end = 0);
 		void update_nibble(char byte, int position, int delete_start = 0, int delete_end = 0);

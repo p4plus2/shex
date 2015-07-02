@@ -79,12 +79,19 @@ void ROM_buffer::copy(int start, int end, bool ascii_mode)
 		clipboard->setText(text_data);
 		return;
 	}
+	
+	QString copy_data = copy_format(start, end, copy_type);
+	clipboard->setText(copy_data);
+}
+
+QString ROM_buffer::copy_format(int start, int end, copy_style style)
+{
 	QByteArray hex_data = buffer.mid(start, end-start).toHex().toUpper();
+	int nibble_count = hex_data.length();
 	QString copy_data;
 	QTextStream stream(&copy_data);
-	int nibble_count = hex_data.length();
 	
-	switch(copy_type){
+	switch(style){
 		case NO_SPACES:
 			copy_data = hex_data;
 		break;
@@ -103,26 +110,28 @@ void ROM_buffer::copy(int start, int end, bool ascii_mode)
 		case ASM_BYTE_TABLE:
 			for(int i = 0; i < nibble_count;){
 				stream << "db ";
-				for(int j = 0; j < 16 && i < nibble_count; j+=2, i+=2){
-					stream << '$' << hex_data[i] << hex_data[i+1] << ',';
+				for(int j = 0; j < 16 && i < nibble_count; j += 2, i += 2){
+					stream << '$' << hex_data[i] << hex_data[i+1] << ", ";
 				}
-				copy_data.chop(1);
+				copy_data.chop(2);
 				stream << '\n';
 			}
 			copy_data.chop(1);
 		break;
 		case ASM_WORD_TABLE:
-			for(int i = 0; i < nibble_count; i+=4){
-				stream << "dw $" << hex_data[i] << hex_data[i+1] 
-				       << hex_data[i+2] << hex_data[i+3] << '\n';
+			for(int i = 0; nibble_count - i >= 4; i += 4){
+				stream << "dw $" 
+				       << hex_data[i+2] << hex_data[i+3]
+				       << hex_data[i]   << hex_data[i+1] << '\n';
 			}
 			copy_data.chop(1);
 		break;
 		case ASM_LONG_TABLE:
-			for(int i = 0; i < nibble_count; i+=6){
-				stream << "dl $" << hex_data[i] << hex_data[i+1] 
+			for(int i = 0; nibble_count - i >= 6; i += 6){
+				stream << "dl $" 
+				       << hex_data[i+4] << hex_data[i+5] 
 				       << hex_data[i+2] << hex_data[i+3]
-				       << hex_data[i+4] << hex_data[i+5] << '\n';
+				       << hex_data[i]   << hex_data[i+1] << '\n';
 			}
 			copy_data.chop(1);
 		break;
@@ -140,7 +149,7 @@ void ROM_buffer::copy(int start, int end, bool ascii_mode)
 			stream << "\n};";
 		break;
 	}
-	clipboard->setText(copy_data);
+	return copy_data;
 }
 
 int ROM_buffer::paste(int start, int end, bool raw)
