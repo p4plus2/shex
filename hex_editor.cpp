@@ -478,8 +478,6 @@ void hex_editor::keyPressEvent(QKeyEvent *event)
 	
 	if(event->modifiers() == Qt::ControlModifier){
 		//more hotkeys here if needed
-		if(event->key() == Qt::Key_K){
-		}
 		return;
 	}
 	
