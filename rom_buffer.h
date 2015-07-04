@@ -69,11 +69,12 @@ class ROM_buffer : public ROM_metadata
 		QFile ROM;
 		QByteArray buffer;
 		QByteArray header_buffer;
-		QClipboard *clipboard = QApplication::clipboard();
 		QUndoStack *undo_stack;
-		static copy_style copy_type;
 		QString ROM_error = "";
 		const bookmark_map *bookmarks = nullptr;
+		
+		static copy_style copy_type;
+		static QClipboard *clipboard;
 		
 		QByteArray input_to_byte_array(QString input, int mode);
 };

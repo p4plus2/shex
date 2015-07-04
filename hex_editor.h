@@ -49,8 +49,6 @@ class hex_editor : public QWidget
 		void update_range(int value);
 		void update_status_text(QString text);
 		void toggle_scroll_mode(bool mode);
-		void selection_toggled(bool state);
-		void focused(bool has_focus);
 		void save_state_changed(bool save);
 		void send_disassemble_data(selection selection_area, const ROM_buffer *buffer);
 		void send_bookmark_data(int start, int end, const ROM_buffer *buffer);

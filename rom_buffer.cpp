@@ -10,6 +10,7 @@ ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 	}else{
 		buffer.fill(0x00, 0x8000);
 	}
+	clipboard = QApplication::clipboard(); //shared by all, but work around static initialization order
 	qDebug() << ENUM_STRING(memory_mapper, get_mapper());
 }
 
@@ -327,3 +328,4 @@ QByteArray ROM_buffer::input_to_byte_array(QString input, int mode)
 }
 
 ROM_buffer::copy_style ROM_buffer::copy_type = ROM_buffer::NO_SPACES;
+QClipboard *ROM_buffer::clipboard;
