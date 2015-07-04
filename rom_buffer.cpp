@@ -66,8 +66,6 @@ void ROM_buffer::cut(int start, int end, bool ascii_mode)
 
 void ROM_buffer::copy(int start, int end, bool ascii_mode)
 {	
-	start /= 2;
-	end /= 2;
 	if(ascii_mode){
 		QByteArray text_data = character_mapper::encode(buffer.mid(start, end-start));
 		for(int i = 0; i < text_data.length(); i++){
@@ -154,8 +152,6 @@ QString ROM_buffer::copy_format(int start, int end, copy_style style)
 
 int ROM_buffer::paste(int start, int end, bool raw)
 {
-	start /= 2;
-	end /= 2;
 	if(!check_paste_data()){
 		return 0;
 	}
@@ -186,8 +182,6 @@ int ROM_buffer::paste(int start, int end, bool raw)
 
 void ROM_buffer::delete_text(int start, int end)
 {
-	start /= 2;
-	end /= 2;
 	if(!end){
 		end = start + 1;
 	}

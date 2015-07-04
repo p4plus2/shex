@@ -312,8 +312,8 @@ void hex_editor::cut()
 		return;
 	}
 	
-	buffer->cut(selection_area.get_start(), selection_area.get_end(), ascii->hasFocus());
-	cursor_nibble = selection_area.get_start();
+	buffer->cut(selection_area.get_start_byte(), selection_area.get_end_byte(), ascii->hasFocus());
+	cursor_nibble = selection_area.get_start_byte();
 	selection_area.set_active(false);
 	update_window();
 	update_save_state(1);
@@ -325,7 +325,7 @@ void hex_editor::copy()
 		return;
 	}
 	
-	buffer->copy(selection_area.get_start(), selection_area.get_end(), ascii->hasFocus());
+	buffer->copy(selection_area.get_start_byte(), selection_area.get_end_byte(), ascii->hasFocus());
 	update_window();
 }
 
@@ -335,9 +335,9 @@ void hex_editor::paste(bool raw)
 		return;
 	}
 	if(!selection_area.is_active()){
-		buffer->paste(selection_area.get_start(), selection_area.get_end(), raw);
+		buffer->paste(selection_area.get_start_byte(), selection_area.get_end_byte(), raw);
 	}else{
-		int size = buffer->paste(cursor_nibble, 0, raw);
+		int size = buffer->paste(cursor_nibble / 2, 0, raw);
 		cursor_nibble = cursor_nibble + size;
 		selection_area.set_active(false);
 	}
@@ -354,7 +354,7 @@ void hex_editor::delete_text()
 		move_cursor_nibble((cursor_nibble - 2) & ~1);
 		buffer->delete_text(cursor_nibble);
 	}else{
-		buffer->delete_text(selection_area.get_start(), selection_area.get_end());	
+		buffer->delete_text(selection_area.get_start_byte(), selection_area.get_end_byte());	
 		selection_area.set_active(false);
 		cursor_nibble = selection_area.get_start();
 	}
