@@ -1,4 +1,5 @@
 #include "hex_display.h"
+#include "utility.h"
 #include "debug.h"
 
 void hex_display::paintEvent(QPaintEvent *event)
@@ -25,7 +26,7 @@ void hex_display::keyPressEvent(QKeyEvent *event)
 void hex_display::get_line(int start, int end, QTextStream &stream)
 {
 	for(int i = start; i < end; i++){
-		stream << QString::number((unsigned char)buffer->at(i),16).rightJustified(2, '0').toUpper() << " ";
+		stream << to_hex((unsigned char)buffer->at(i)) << " ";
 	}
 }
 

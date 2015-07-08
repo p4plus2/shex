@@ -1,12 +1,14 @@
 #include "rom_buffer.h"
 #include "undo_commands.h"
 #include "debug.h"
+#include "utility.h"
 #include "character_mapper.h"
 
 ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 {
 	if(!new_file){
 		open(file_name);
+		get_rats_tags();
 	}else{
 		buffer.fill(0x00, 0x8000);
 	}
@@ -239,8 +241,7 @@ QString ROM_buffer::get_formatted_address(int address) const
 	if(address < 0){
 		return QString("NOT:ROM");
 	}
-	return '$' + QString::number(bank, 16).rightJustified(2, '0').toUpper() +
-			':' + QString::number(word,16).rightJustified(4, '0').toUpper();
+	return '$' + to_hex(bank) + ':' + to_hex(word, 4);
 }
 
 
@@ -314,10 +315,26 @@ int ROM_buffer::replace_all(QString find, QString replace, bool mode)
 	return results;
 }
 
+QVector<int> ROM_buffer::get_rats_tags() const
+{
+	QVector<int> offsets;
+	
+	int position = 0;
+	do{
+		position = buffer.indexOf("STAR", position);
+		if((read_word(buffer, position+4) ^ read_word(buffer, position+6)) == 0xFFFF){
+			offsets.append(position);
+		}
+		position++;
+	}while(position > 0);
+	
+	return offsets;
+}
+
 QByteArray ROM_buffer::input_to_byte_array(QString input, int mode)
 {
 	if(mode){
-		QString hex = to_hex(input);
+		QString hex = get_hex(input);
 		if(hex.length() & 1){
 			return QByteArray();
 		}else{

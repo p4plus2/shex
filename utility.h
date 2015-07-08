@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <QWidget>
+#include <QLayout>
 #include <QDir>
 
 template<typename... A>
@@ -47,4 +48,22 @@ inline QString absolute_path(const QString file_path)
 	return directory.absoluteFilePath(file_path);
 }
 
+inline QString to_hex(int data, int pad = 2)
+{
+	QString hex = QString::number(data, 16).rightJustified(pad, '0').toUpper();
+	hex.truncate(pad);
+	return hex;
+}
+
+//add optional endian flip in the future maybe
+inline unsigned short read_word(const QByteArray &data, int offset)
+{
+	return (unsigned char)data.at(offset) | ((unsigned char)data.at(offset+1) << 8);
+}
+
+inline unsigned int read_long(const QByteArray &data, int offset)
+{
+	return (unsigned char)data.at(offset) | ((unsigned char)data.at(offset+1) << 8) | 
+						((unsigned char)data.at(offset+2) << 16);
+}
 #endif // UTILITY_H

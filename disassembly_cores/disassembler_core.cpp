@@ -1,5 +1,6 @@
 #include <QStringBuilder>
 
+#include "utility.h"
 #include "disassembler_core.h"
 #include "debug.h"
 
@@ -13,6 +14,8 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 	delta = 0;
 	
 	const bookmark_map *bookmarks = buffer->get_bookmark_map();
+	const QVector<int> rats_tags = buffer->get_rats_tags();
+
 	while(delta < data.size() && error.isEmpty()){
 		int opcode_address = delta;
 		const QString address = buffer->get_formatted_address(get_base()+delta);
@@ -34,6 +37,18 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 				make_table(data, delta, bookmark.size, width, packed);
 				continue;
 			}
+		}else if(rats_tags.contains(region.get_start_byte() + delta) && delta + 8 < data.size()){
+			add_data(delta, "STAR", block::DATA_STRING);
+			add_data(delta + 4, to_hex(read_word(data, delta + 4), 4), 
+						   (block::data_format)(block::DATA_UNPACKED + 1));
+			add_data(delta + 6, to_hex(read_word(data, delta + 6), 4), 
+						   (block::data_format)(block::DATA_UNPACKED + 1));
+			
+			add_label(get_base() + delta, "RATS_tag_");
+			delta += 8;
+			add_label(get_base() + delta, "RATS_start_");
+			add_label(get_base() + delta + read_word(data, delta - 4) + 1, "RATS_end_");
+			continue;
 		}
 		unsigned char hex = data.at(delta);
 		disassembler_core::opcode op = get_opcode(hex);	
@@ -53,12 +68,12 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 	return disassembly_text() + error;
 }
 
-QString disassembler_core::add_label(int destination)
+QString disassembler_core::add_label(int destination, QString prefix)
 {
 	block &b = disassembly_list[destination];
 	if(b.label.isEmpty()){
 		label_id++;
-		b.label = "label_" % address_to_label(destination) % ":\n";
+		b.label = (prefix.isEmpty() ? "label_" : prefix) % address_to_label(destination) % ":\n";
 	}
 	QString label(b.label);
 	label.chop(2);
@@ -92,6 +107,9 @@ QString disassembler_core::disassembly_text()
 			break;
 			case block::DATA_UNPACKED ... block::DATA_UNPACKED_END:
 				text += prefix[b.format - block::DATA_UNPACKED] % '$' % b.data % '\n';
+			break;
+			case block::DATA_STRING:
+				text += prefix[0] % '"' % b.data % "\"\n";
 			break;
 			default:
 				qDebug() << "Unknown formatter" << b.format;

@@ -1,6 +1,7 @@
 #include <QMessageBox>
 
 #include "rom_metadata.h"
+#include "utility.h"
 #include "debug.h"
 
 //Used super-famicom.hpp of nall by byuu as a reference
@@ -228,7 +229,7 @@ int ROM_metadata::pc_to_snes(int address) const
 bool ROM_metadata::validate_address(int address, bool error_method)
 {
 	address_error = "";
-	QString address_string = QString::number(address, 16).toUpper();
+	QString address_string = to_hex(address, 6);
 	if(address > 1 << 24){
 		address_error = "$" + address_string + " is out of the SNES's bounds!";
 	}else if(address < 0){

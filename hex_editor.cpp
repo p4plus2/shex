@@ -150,7 +150,7 @@ QString hex_editor::generate_patch()
 	QTextStream stream(&patch);
 	for(auto &diff : *diffs){
 		int start = diff.get_start_byte();
-		stream << "ORG $" << QString::number(buffer->pc_to_snes(start), 16).rightJustified(6, '0').toUpper()
+		stream << "ORG $" << to_hex(buffer->pc_to_snes(start), 6)
 		       << "\n"    << buffer->copy_format(start, diff.get_end_byte(), ROM_buffer::ASM_BYTE_TABLE) 
 		       << "\n\n";
 	}
@@ -563,10 +563,10 @@ bool hex_editor::event(QEvent *event)
 			ROM_buffer::set_copy_style((ROM_buffer::copy_style)(type-editor_events::NO_SPACES));
 			return true;
 		case editor_events::UNDO:
-			update_undo_action(true);
+			update_undo_action(false);
 			return true;
 		case editor_events::REDO:
-			update_undo_action(false);
+			update_undo_action(true);
 			return true;
 		case editor_events::BRANCH:
 			branch();
@@ -605,7 +605,7 @@ void hex_editor::handle_search_result(QString target, int result, bool mode)
 {
 	int start = buffer->pc_to_snes(result);
 	if(mode){
-		result += buffer->to_hex(target).length()/2;
+		result += buffer->get_hex(target).length()/2;
 	}else{
 		result += target.length();
 	}
@@ -654,7 +654,7 @@ QString hex_editor::get_status_text()
 		unsigned char byte = buffer->at(position);
 		
 		string_stream << "Current offset: " << buffer->get_formatted_address(position)
-		              << "    Hex: 0x" << QString::number(byte, 16).rightJustified(2, '0').toUpper()
+		              << "    Hex: 0x" << to_hex(byte)
 		              << "    Dec: " << QString::number(byte).rightJustified(3, '0')
 		              << "    Bin: %" << QString::number(byte, 2).rightJustified(8, '0');
 	}

@@ -1,4 +1,5 @@
 #include "isa_spc700.h"
+#include "utility.h"
 #include "debug.h"
 
 isa_spc700::isa_spc700(QObject *parent) :
@@ -72,7 +73,7 @@ QString isa_spc700::decode_name_arg(const char arg, int &size)
 
 QString isa_spc700::address_to_label(int address)
 {
-	return QString::number(address, 16).rightJustified(4, '0').toUpper();
+	return to_hex(address, 4);
 }
 
 disassembler_core::opcode isa_spc700::get_opcode(int op)

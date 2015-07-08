@@ -23,7 +23,7 @@ class disassembler_core : public QObject
 		const ROM_buffer *buffer;
 		int delta;
 		
-		QString add_label(int destination);
+		QString add_label(int destination, QString prefix = "");
 		QString disassembly_text();
 		void reset();
 		void decode_name_args(QString &name);
@@ -45,7 +45,8 @@ class disassembler_core : public QObject
 				DATA_PACKED = 1,
 				DATA_PACKED_END = 4,
 				DATA_UNPACKED = 5,
-				DATA_UNPACKED_END = 9
+				DATA_UNPACKED_END = 9,
+				DATA_STRING = 10
 			};
 			QString label = "";
 			QString data = "";

@@ -49,6 +49,7 @@ class ROM_buffer : public ROM_metadata
 		int search(QString find, int position, bool direction, bool mode);
 		int replace(QString find, QString replace, int position, bool direction, bool mode);
 		int replace_all(QString find, QString replace, bool mode);
+		QVector<int> get_rats_tags() const;
 		
 		inline QString get_file_name(){ QFileInfo info(ROM); return info.fileName();  }
 		inline virtual int size() const { return buffer.size(); }
@@ -57,7 +58,7 @@ class ROM_buffer : public ROM_metadata
 		inline bool check_paste_data(){ return clipboard->mimeData()->hasText(); }
 		inline void set_active(){ undo_stack->setActive(); }
 		inline bool is_active(){ return undo_stack->isActive(); }
-		inline QString to_hex(QString input) { return input.remove(QRegExp("[^0-9A-Fa-f]")); }
+		inline QString get_hex(QString input) { return input.remove(QRegExp("[^0-9A-Fa-f]")); }
 		inline QString load_error() { return ROM_error; }
 		static inline void set_copy_style(copy_style style){ copy_type = style; }
 		
