@@ -1,4 +1,5 @@
 #include "isa_65c816.h"
+#include "utility.h"
 #include "debug.h"
 
 isa_65c816::isa_65c816(QObject *parent) :
@@ -87,7 +88,7 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 
 QString isa_65c816::address_to_label(int address)
 {
-	return QString::number(buffer->pc_to_snes(address), 16).rightJustified(6, '0').toUpper();
+	return to_hex(buffer->pc_to_snes(address), 6);
 }
 
 disassembler_core::opcode isa_65c816::get_opcode(int op)
