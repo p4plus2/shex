@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "disassembly_cores/isa_65c816.h"
 #include "disassembly_cores/isa_spc700.h"
+#include "disassembly_cores/isa_gsu.h"
 #include "events/event_types.h"
 #include "utility.h"
 
@@ -10,6 +11,7 @@ disassembler_panel::disassembler_panel(panel_manager *parent, hex_editor *editor
 {
 	cores.insert(isa_65c816::id(), new isa_65c816(this));
 	cores.insert(isa_spc700::id(), new isa_spc700(this));
+	cores.insert(isa_gsu::id(), new isa_gsu(this));
         for(auto i = cores.begin(); i != cores.end(); i++){
 		disassembler_cores->addItem(i.key());
         }

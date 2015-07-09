@@ -147,6 +147,11 @@ QString disassembler_core::get_hex(int n, int bytes)
 	return QString::number(n, 16).rightJustified(bytes, '0').toUpper();
 }
 
+unsigned int disassembler_core::get_instruction()
+{
+	return (unsigned int)data.at(delta-1);
+}
+
 unsigned int disassembler_core::get_operand(int n)
 {
 	return delta+n < data.size() ? ((unsigned char)data.at(delta+n) << n*8) : 0;

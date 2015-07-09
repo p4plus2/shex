@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     object_group.cpp \
     settings_manager.cpp \
     dialogs/settings_dialog.cpp \
-    editor_font.cpp
+    editor_font.cpp \
+    disassembly_cores/isa_gsu.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -88,7 +89,8 @@ HEADERS  += main_window.h \
     settings_manager.h \
     events/settings_event.h \
     dialogs/settings_dialog.h \
-    editor_font.h
+    editor_font.h \
+    disassembly_cores/isa_gsu.h
 
 OTHER_FILES += \
     version.sh

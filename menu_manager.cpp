@@ -30,7 +30,7 @@ void menu_manager::create_menus()
 	menu_list.append(new QMenu("&Edit"));
 	menu_list.append(new QMenu("&Navigation"));
 	menu_list.append(new QMenu("&ROM utilities"));
-	menu_list.append(new QMenu("&Diff"));
+	menu_list.append(new QMenu("&Compare"));
 	menu_list.append(new QMenu("&Options"));
 	menu_list.append(new QMenu("&Help"));
 	
@@ -112,7 +112,7 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	add_toggle_action<editor_event>("&Disassemble",     DISASSEMBLE,     active_selection, hotkey("Ctrl+d"), menu);
 	add_toggle_action<editor_event>("&Bookmark",        BOOKMARK,        active_selection, hotkey("Ctrl+b"), menu);
 
-	menu = find_menu("&Diff");
+	menu = find_menu("&Compare");
 	add_toggle_action<window_event>("&Open Compare",        OPEN_COMPARE,  active_editors, hotkey("Ctrl+k"), menu);
 	add_toggle_action<editor_event>("&Close Compare",       CLOSE_COMPARE, active_compare, hotkey("Alt+k"),  menu);
 	add_toggle_action<editor_event>("&Previous difference", PREVIOUS,      active_compare, hotkey("Ctrl+,"), menu);
@@ -121,7 +121,7 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	
 	menu = find_menu("&Options");
 	add_toggle_action<editor_event>("&Scrollbar toggle",     SCROLL_MODE, active_editors, hotkey("Alt+s"), menu);
-	add_action       <dialog_event>("&Character map editor", MAP_EDITOR,                  hotkey("Alt+c"), menu);
+	add_action       <dialog_event>("&Character map editor", MAP_EDITOR,                  hotkey("Alt+m"), menu);
 	add_check_action <panel_event> ("Disassembly panel",     DISASSEMBLER,                hotkey("Alt+d"), menu);
 	add_check_action <panel_event> ("Bookmark panel",        BOOKMARKS,                   hotkey("Alt+b"), menu);
 	menu->addSeparator();

@@ -28,6 +28,7 @@ class disassembler_core : public QObject
 		void reset();
 		void decode_name_args(QString &name);
 		QString get_hex(int n, int bytes);
+		unsigned int get_instruction();
 		unsigned int get_operand(int n);
 		
 		virtual QString decode_name_arg(const char arg, int &size) = 0;
