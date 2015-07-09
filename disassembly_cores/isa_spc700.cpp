@@ -90,10 +90,6 @@ bool isa_spc700::abort_unlikely(int op)
 	return error_stop && unlikely.contains(op);
 }
 
-void isa_spc700::update_state()
-{
-}
-
 isa_spc700::~isa_spc700()
 {
 	delete stop;
