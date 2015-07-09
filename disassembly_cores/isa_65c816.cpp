@@ -85,8 +85,6 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 	return "";
 }
 
-#undef label_op
-
 QString isa_65c816::address_to_label(int address)
 {
 	return QString::number(buffer->pc_to_snes(address), 16).rightJustified(6, '0').toUpper();

@@ -59,8 +59,6 @@ QString isa_gsu::decode_name_arg(const char arg, int &size)
 	return "";
 }
 
-#undef label_op
-
 QString isa_gsu::address_to_label(int address)
 {
 	return QString::number(buffer->pc_to_snes(address), 16).rightJustified(6, '0').toUpper();
@@ -88,11 +86,6 @@ bool isa_gsu::abort_unlikely(int op)
 void isa_gsu::update_state()
 {
 	set_alt->setText(QString::number(alt_state));
-}
-
-void isa_gsu::set_flags(bookmark_data::types type)
-{
-	Q_UNUSED(type)
 }
 
 isa_gsu::~isa_gsu()

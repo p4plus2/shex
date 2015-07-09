@@ -29,7 +29,7 @@ class isa_gsu : public disassembler_core
 		int get_base();
 		bool abort_unlikely(int op);
 		void update_state();
-		void set_flags(bookmark_data::types type);
+		void set_flags(bookmark_data::types type){ Q_UNUSED(type); }
 	private:		
 		int alt_state = 0;
 		bool error_stop = false;

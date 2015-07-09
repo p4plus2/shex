@@ -12,8 +12,7 @@ isa_spc700::isa_spc700(QObject *parent) :
 
 void isa_spc700::update_base(QString new_base)
 {
-	bool ok; //ignorable, input mask ensures valid data
-	base = new_base.toInt(&ok, 16);
+	base = new_base.toInt(nullptr, 16);
 }
 
 QGridLayout *isa_spc700::core_layout()
