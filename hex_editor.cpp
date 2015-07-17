@@ -224,7 +224,7 @@ void hex_editor::handle_typed_character(unsigned char key, bool update_byte)
 	}
 	
 	if(update_byte){
-		buffer->update_byte(key, cursor_nibble/2, start, end);
+		buffer->update_byte(key, cursor_nibble / 2, start, end);
 	}else{
 		buffer->update_nibble(key, cursor_nibble, start, end);
 	}

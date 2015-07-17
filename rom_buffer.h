@@ -51,19 +51,22 @@ class ROM_buffer : public ROM_metadata
 		int replace_all(QString find, QString replace, bool mode);
 		QVector<int> get_rats_tags() const;
 		
-		inline QString get_file_name(){ QFileInfo info(ROM); return info.fileName();  }
-		inline virtual int size() const { return buffer.size(); }
-		inline virtual char at(int index) const { return index == size() ? 0 : buffer.at(index); }
-		inline QByteArray range(int start, int end) const { return buffer.mid(start/2, (end-start)/2); }
-		inline bool check_paste_data(){ return clipboard->mimeData()->hasText(); }
-		inline void set_active(){ undo_stack->setActive(); }
-		inline bool is_active(){ return undo_stack->isActive(); }
-		inline QString get_hex(QString input) { return input.remove(QRegExp("[^0-9A-Fa-f]")); }
-		inline QString load_error() { return ROM_error; }
-		static inline void set_copy_style(copy_style style){ copy_type = style; }
+		virtual int size() const { return buffer.size(); }
+		virtual char at(int index) const { return index == size() ? 0 : buffer.at(index); }
 		
-		inline const bookmark_map *get_bookmark_map() const { return bookmarks; }
-		inline void set_bookmark_map(const bookmark_map *b){ bookmarks = b; }
+		void set_active(){ undo_stack->setActive(); }
+		bool is_active(){ return undo_stack->isActive(); }
+		bool check_paste_data(){ return clipboard->mimeData()->hasText(); }
+		QString get_hex(QString input) { return input.remove(QRegExp("[^0-9A-Fa-f]")); }
+		QString load_error() { return ROM_error; }
+		QString get_file_name(){ QFileInfo info(ROM); return info.fileName();  }
+		QByteArray range(int start, int end) const { return buffer.mid(start/2, (end-start)/2); }
+		
+		const bookmark_map *get_bookmark_map() const { return bookmarks; }
+		void set_bookmark_map(const bookmark_map *b){ bookmarks = b; }
+		
+		static void set_copy_style(copy_style style){ copy_type = style; }
+		
 		
 
 	private:

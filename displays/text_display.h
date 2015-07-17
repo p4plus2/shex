@@ -22,11 +22,14 @@ class text_display : public QWidget
 		explicit text_display(const ROM_buffer *b, hex_editor *parent = 0);
 		void update_display();
 		void set_auto_scroll_speed(int speed);
-		inline void invalidate_cache(){ row_cache.clear(); }
-		inline void disable_cursor_timer() { killTimer(cursor_timer_id); }
+		
+		void invalidate_cache(){ row_cache.clear(); }
+		void disable_cursor_timer() { killTimer(cursor_timer_id); }
+		
 		static int get_rows(){ return rows; }
 		static int get_columns(){ return columns; }
 		static int get_rows_by_columns(){ return rows * columns; }
+		
 		virtual QSize sizeHint () const;
 		virtual QSize minimumSizeHint() const;
 	protected:
@@ -35,14 +38,14 @@ class text_display : public QWidget
 		QPoint clip_mouse(int x, int y);
 		QPoint clip_screen(QPoint position){ return clip_mouse(position.x(), position.y()); }
 		
-		inline int get_offset(){ return editor->get_offset(); }
-		inline void set_offset(int o){ editor->set_offset(o); }
+		int get_offset(){ return editor->get_offset(); }
+		void set_offset(int o){ editor->set_offset(o); }
 		
-		inline int get_cursor_nibble(){ return editor->get_cursor_nibble(); }
-		inline void set_cursor_nibble(int byte){ editor->set_cursor_nibble(byte); }
+		int get_cursor_nibble(){ return editor->get_cursor_nibble(); }
+		void set_cursor_nibble(int byte){ editor->set_cursor_nibble(byte); }
 		
-		inline selection get_selection(){ return editor->get_selection(); }
-		inline void set_selection(selection s){ editor->set_selection(s); }
+		selection get_selection(){ return editor->get_selection(); }
+		void set_selection(selection s){ editor->set_selection(s); }
 		
 		virtual void paintEvent(QPaintEvent *event);
 		virtual void paint_selection(QPainter &painter, selection &selection_area, const QColor &color);

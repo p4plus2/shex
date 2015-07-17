@@ -18,7 +18,7 @@ class isa_spc700 : public disassembler_core
 		static QString id(){ return "SPC700"; }
 
 	public slots:
-		inline void toggle_error_stop(bool state){ error_stop = state; }
+		void toggle_error_stop(bool state){ error_stop = state; }
 		void update_base(QString new_base);
 
 	protected:

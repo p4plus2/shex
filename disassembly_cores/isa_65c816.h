@@ -21,9 +21,9 @@ class isa_65c816 : public disassembler_core
 		void I_changed(bool);
 		
 	public slots:
-		inline void toggle_A(bool state){ A_state = state; }
-		inline void toggle_I(bool state){ I_state = state; }
-		inline void toggle_error_stop(bool state){ error_stop = state; }
+		void toggle_A(bool state){ A_state = state; }
+		void toggle_I(bool state){ I_state = state; }
+		void toggle_error_stop(bool state){ error_stop = state; }
 
 	protected:
 		QString decode_name_arg(const char arg, int &size);

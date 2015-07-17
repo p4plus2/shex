@@ -120,7 +120,7 @@ class ROM_metadata {
 		virtual char at(int index) const = 0;
 		virtual void update_byte(char byte, int position, int delete_start = 0, int delete_end = 0) = 0;
 		
-		inline QString get_address_error(){ return address_error; }
+		QString get_address_error(){ return address_error; }
 	private:
 		void read_header();
 		unsigned int find_header();

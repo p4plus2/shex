@@ -35,7 +35,7 @@ main_window::main_window(QWidget *parent)
 	}
 	if(geometry.isValid()){
 		restoreGeometry(geometry.toByteArray());
-		resize(0, size().height());
+		resize(600, size().height());
 		tab_widget->resize(size());
 	}
 	

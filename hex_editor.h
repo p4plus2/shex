@@ -16,33 +16,34 @@ class hex_editor : public QWidget
 	public:
 		explicit hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_group, bool new_file = false);
 		~hex_editor();
-		inline ROM_buffer *get_buffer(){ return buffer; }
-		inline int get_relative_position(int address){ return cursor_nibble / 2 + address; }
 		void set_focus();
 		void compare(QString file);
 		void close_compare();
 		void goto_diff(bool direction);
 		QString generate_patch();
 		bool follow_selection(bool type);
-		inline QVector<selection> *get_diff(){ return diffs; }
-		inline void save(QString path) { buffer->save(path); update_save_state(-save_state); }
-		inline bool can_save(){ return save_state; }
-		inline bool new_file(){ return is_new; }
-		inline QString load_error() { return ROM_error; }
-		QString get_file_name() { return buffer->get_file_name(); }
 		
-		inline int get_offset(){ return offset; }
+		ROM_buffer *get_buffer(){ return buffer; }
+		QVector<selection> *get_diff(){ return diffs; }
+		QString load_error() { return ROM_error; }
+		QString get_file_name() { return buffer->get_file_name(); }
+		int get_relative_position(int address){ return cursor_nibble / 2 + address; }
+		void save(QString path) { buffer->save(path); update_save_state(-save_state); }
+		bool can_save(){ return save_state; }
+		bool new_file(){ return is_new; }
+		
+		bool is_comparing(){ return comparing; }
+		bool is_selecting(){ return selection_area.is_active(); }
+		bool is_pasteable(){ return buffer->check_paste_data(); }
+		
+		int get_offset(){ return offset; }
 		void set_offset(int o);
 		
-		inline bool is_comparing(){ return comparing; }
-		inline bool is_selecting(){ return selection_area.is_active(); }
-		inline bool is_pasteable(){ return buffer->check_paste_data(); }
+		int get_cursor_nibble(){ return cursor_nibble; }
+		void set_cursor_nibble(int byte){ cursor_nibble = byte; update_window(); }
 		
-		inline int get_cursor_nibble(){ return cursor_nibble; }
-		inline void set_cursor_nibble(int byte){ cursor_nibble = byte; update_window(); }
-		
-		inline selection get_selection(){ return selection_area; }
-		inline void set_selection(selection s){ selection_area = s; update_window(); }
+		selection get_selection(){ return selection_area; }
+		void set_selection(selection s){ selection_area = s; update_window(); }
 		
 	signals:
 		void update_slider(int position);

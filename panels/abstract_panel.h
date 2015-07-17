@@ -19,7 +19,7 @@ class abstract_panel
 		void toggle_event(panel_events event);
 		
 		void init_display(){ display->setLayout(get_layout()); }
-		inline QWidget *get_display(){ return display; }
+		QWidget *get_display(){ return display; }
 	protected:
 		hex_editor *active_editor;
 		

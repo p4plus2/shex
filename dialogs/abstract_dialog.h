@@ -19,7 +19,7 @@ class abstract_dialog : public QDialog
 	protected:
 		hex_editor *active_editor;
 		
-		inline bool validate_address(int addr){ return active_editor->get_buffer()->validate_address(addr); }
+		bool validate_address(int addr){ return active_editor->get_buffer()->validate_address(addr); }
 		
 };
 

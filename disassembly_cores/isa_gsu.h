@@ -18,8 +18,8 @@ class isa_gsu : public disassembler_core
 		static QString id(){ return "gsu"; }
 		
 	public slots:
-		inline void change_alt(const QString &text){ alt_state = text.toInt(); }
-		inline void toggle_error_stop(bool state){ error_stop = state; }
+		void change_alt(const QString &text){ alt_state = text.toInt(); }
+		void toggle_error_stop(bool state){ error_stop = state; }
 
 	protected:
 		QString decode_name_arg(const char arg, int &size);
