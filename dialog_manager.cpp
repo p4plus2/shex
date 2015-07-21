@@ -6,6 +6,7 @@
 #include "dialogs/metadata_editor_dialog.h"
 #include "dialogs/map_editor_dialog.h"
 #include "dialogs/settings_dialog.h"
+#include "dialogs/how_to_use_dialog.h"
 #include "hex_editor.h"
 
 dialog_manager::dialog_manager(QWidget *parent) :
@@ -18,6 +19,7 @@ dialog_manager::dialog_manager(QWidget *parent) :
 	dialog_map[FIND_REPLACE] = new find_replace_dialog(parent);
 	dialog_map[MAP_EDITOR] = new map_editor_dialog(parent);
 	dialog_map[SETTINGS] = new settings_dialog(parent);
+	dialog_map[HOW_TO_USE] = new how_to_use_dialog(parent);
 }
 
 void dialog_manager::connect_to_editor(hex_editor *editor)

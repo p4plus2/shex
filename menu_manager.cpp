@@ -140,10 +140,11 @@ void menu_manager::create_actions(QUndoGroup *undo_group)
 	
 	menu = find_menu("&Options");
 	menu->addSeparator();
-	add_action<dialog_event>("&Preferences", SETTINGS, hotkey("Alt+p"), menu);
+	add_action<dialog_event>("&Preferences", SETTINGS,    hotkey("Alt+p"),      menu);
 
 	menu = find_menu("&Help");
-	add_action<window_event>("&Version",  VERSION,  hotkey("Alt+v"), menu);
+	add_action<dialog_event>("&How to use",  HOW_TO_USE,  hotkey::HelpContents, menu);
+	add_action<window_event>("&Version",     VERSION,     hotkey("Alt+v"),      menu);
 }
 
 QMenu *menu_manager::find_menu(QString id)
