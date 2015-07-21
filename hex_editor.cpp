@@ -45,9 +45,14 @@ hex_editor::hex_editor(QWidget *parent, QString file_name, QUndoGroup *undo_grou
 	QGridLayout *layout = new QGridLayout();
 	layout->addWidget(address_header, 0, 0, Qt::AlignBottom);
 	layout->addWidget(hex_header, 0, 1, Qt::AlignBottom);
+	
 	layout->addWidget(address, 1, 0);
 	layout->addWidget(hex, 1, 1);
 	layout->addWidget(ascii, 1, 2);
+	
+	layout->addWidget(compare_address, 2, 0);
+	layout->addWidget(compare_hex, 2, 1);
+	layout->addWidget(compare_ascii, 2, 2);
 	
 	layout->setRowStretch(1, 1);
 	setLayout(layout);
@@ -85,10 +90,6 @@ void hex_editor::compare(QString file)
 	compare_ascii->show();
 	compare_hex->show();
 	
-	grid->addWidget(compare_address, 2, 0);
-	grid->addWidget(compare_hex, 2, 1);
-	grid->addWidget(compare_ascii, 2, 2);
-	
 	grid->setRowStretch(2, 1);
 	calculate_diff();
 }
@@ -101,12 +102,6 @@ void hex_editor::close_compare()
 	compare_address->hide();
 	compare_ascii->hide();
 	compare_hex->hide();
-	grid->removeWidget(compare_address);
-	grid->removeWidget(compare_ascii);
-	grid->removeWidget(compare_hex);
-	compare_address->setParent(this);
-	compare_hex->setParent(this);
-	compare_ascii->setParent(this);
 	
 	grid->setRowStretch(2, 0);
 }
