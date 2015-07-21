@@ -96,3 +96,6 @@ HEADERS  += main_window.h \
 
 OTHER_FILES += \
     version.sh
+
+DISTFILES += \
+    shex.supp

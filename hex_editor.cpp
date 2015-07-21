@@ -706,6 +706,7 @@ bool hex_editor::validate_resize()
 hex_editor::~hex_editor()
 {
 	delete buffer;
+	delete compare_buffer;
 	delete diffs;
 }
 

@@ -1,5 +1,6 @@
 *.o
 shex
+*.supp
 *.smc
 *.sfc
 *.swp
