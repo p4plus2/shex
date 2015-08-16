@@ -21,7 +21,7 @@ disassembler_panel::disassembler_panel(panel_manager *parent, hex_editor *editor
 	setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 	connect(disassembler_cores, resolve<int>::from(&QComboBox::activated), 
 	        this, &disassembler_panel::update_core_layout);
-	connect(this, &disassembler_panel::textChanged, this, &disassembler_panel::update_width);
+	//connect(this, &disassembler_panel::textChanged, this, &disassembler_panel::update_width);
 }
 
 void disassembler_panel::disassemble(selection selection_area, const ROM_buffer *buffer)

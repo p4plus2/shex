@@ -258,8 +258,8 @@ int ROM_metadata::branch_address(int address, QByteArray branch) const
 		char relative_branch = branch[0];
 		return (address & 0xFF0000) | ((word + relative_branch + 1) & 0xFFFF);
 	}
-	short relative_branch = branch[0] & 0x00FF;
-	relative_branch |= (branch[1] & 0x00FF) << 8;
+	short relative_branch = branch[1] & 0x00FF;
+	relative_branch |= (branch[0] & 0x00FF) << 8;
 	return (address & 0xFF0000) | ((word + relative_branch + 1) & 0xFFFF);
 }
 

@@ -27,6 +27,7 @@ QString isa_65c816::label_op(int offset, int size, V validator)
 {
 	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(offset, size).toLatin1()));
 	int address = buffer->snes_to_pc((buffer->*validator)(delta*2+region.get_start_aligned(), little_endian));
+	qDebug() << address;
 	if(address < (region.get_start_byte()) || address > (region.get_end_byte())){
 		return '$' + get_hex(offset, size);
 	}
@@ -129,7 +130,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
         {"BRK %c"},
 	{"ORA (%b,X)"},
 	{"COP %c"},
-	{"ORA %b"},
+	{"ORA %b,s"},
 	{"TSB %b"},
 	{"ORA %b"},
 	{"ASL %b"},
@@ -193,7 +194,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 	{"RTI"},
 	{"EOR (%b,X)"},
 	{"WDM %b"},
-	{"EOR %b"},
+	{"EOR %b,S"},
 	{"MVN %w"},
 	{"EOR %b"},
 	{"LSR %b"},
@@ -225,7 +226,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 	{"RTS"},
 	{"ADC (%b,X)"},
 	{"PER %w"},
-	{"ADC %b"},
+	{"ADC %b,S"},
 	{"STZ %b"},
 	{"ADC %b"},
 	{"ROR %b"},
@@ -353,7 +354,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 	{"CPX %i"},
 	{"SBC (%b,X)"},
 	{"SEP %f"},
-	{"SBC %b"},
+	{"SBC %b,S"},
 	{"CPX %b"},
 	{"SBC %b"},
 	{"INC %b"},

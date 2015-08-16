@@ -49,7 +49,8 @@ SOURCES += main.cpp\
     dialogs/settings_dialog.cpp \
     editor_font.cpp \
     disassembly_cores/isa_gsu.cpp \
-    dialogs/how_to_use_dialog.cpp
+    dialogs/how_to_use_dialog.cpp \
+    mapper.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -92,7 +93,8 @@ HEADERS  += main_window.h \
     dialogs/settings_dialog.h \
     editor_font.h \
     disassembly_cores/isa_gsu.h \
-    dialogs/how_to_use_dialog.h
+    dialogs/how_to_use_dialog.h \
+    mapper.h
 
 OTHER_FILES += \
     version.sh

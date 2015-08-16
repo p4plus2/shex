@@ -174,6 +174,7 @@ void bookmark_panel::delete_item()
 	for(const auto &i : selectionModel()->selectedRows()){
 		bookmarks.remove(i.data().toString());
 		model->removeRow(i.row());
+		row--;
 	}
 }
 
