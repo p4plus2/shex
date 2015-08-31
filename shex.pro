@@ -50,7 +50,7 @@ SOURCES += main.cpp\
     editor_font.cpp \
     disassembly_cores/isa_gsu.cpp \
     dialogs/how_to_use_dialog.cpp \
-    mapper.cpp
+    rom_mapper.cpp
 
 HEADERS  += main_window.h \
     hex_editor.h \
@@ -94,7 +94,7 @@ HEADERS  += main_window.h \
     editor_font.h \
     disassembly_cores/isa_gsu.h \
     dialogs/how_to_use_dialog.h \
-    mapper.h
+    rom_mapper.h
 
 OTHER_FILES += \
     version.sh

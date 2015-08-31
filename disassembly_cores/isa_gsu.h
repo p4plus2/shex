@@ -24,6 +24,7 @@ class isa_gsu : public disassembler_core
 	protected:
 		QString decode_name_arg(const char arg, int &size);
 		QString address_to_label(int address);
+		QString format_data_value(int size, int value, bool is_pointer);
 		template <typename V> QString label_op(int offset, int size, V validator);
 		opcode get_opcode(int op);
 		int get_base();

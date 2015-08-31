@@ -34,7 +34,7 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 				}else if(bookmark.data_type & bookmark_data::DOUBLE){
 					width = 3;
 				}
-				make_table(data, delta, bookmark.size, width, packed);
+				make_table(data, delta, bookmark.size, width, packed, bookmark.data_is_pointer);
 				continue;
 			}
 		}else if(rats_tags.contains(region.get_start_byte() + delta) && delta + 8 < data.size()){
@@ -103,10 +103,10 @@ QString disassembler_core::disassembly_text()
 				if(table_line.isEmpty()){
 					table_line = prefix[b.format - block::DATA_PACKED];
 				}
-				table_line += '$' % b.data % ", ";
+				table_line += b.data % ", ";
 			break;
 			case block::DATA_UNPACKED ... block::DATA_UNPACKED_END:
-				text += prefix[b.format - block::DATA_UNPACKED] % '$' % b.data % '\n';
+				text += prefix[b.format - block::DATA_UNPACKED] % b.data % '\n';
 			break;
 			case block::DATA_STRING:
 				text += prefix[0] % '"' % b.data % "\"\n";
@@ -142,11 +142,6 @@ void disassembler_core::decode_name_args(QString &name)
 	}
 }
 
-QString disassembler_core::get_hex(int n, int bytes)
-{
-	return QString::number(n, 16).rightJustified(bytes, '0').toUpper();
-}
-
 unsigned int disassembler_core::get_instruction()
 {
 	return (unsigned int)data.at(delta-1);
@@ -163,7 +158,7 @@ void disassembler_core::add_data(int destination, QString data, block::data_form
 	disassembly_list[get_base()+destination].format = format;
 }
 
-void disassembler_core::make_table(QByteArray &data, int start, int size, int width, bool packed)
+void disassembler_core::make_table(QByteArray &data, int start, int size, int width, bool packed, bool is_pointer)
 {
 	add_label(get_base() + start);
 	add_label(get_base() + start + size);
@@ -172,8 +167,8 @@ void disassembler_core::make_table(QByteArray &data, int start, int size, int wi
 		for(int j = width; j >= 0 && (i + j + start) < data.size(); j--){
 			table_value |= (unsigned char)data.at(start+i+j) << (j * 8);
 		}
-		add_data(start+i, QString::number(table_value, 16).rightJustified((width+1)*2, '0').toUpper(),
-				  (block::data_format)((packed ? block::DATA_PACKED : block::DATA_UNPACKED) + width));
+		add_data(start+i, format_data_value(width, table_value, is_pointer),
+			  (block::data_format)((packed ? block::DATA_PACKED : block::DATA_UNPACKED) + width));
 	}
 	delta += size;
 }

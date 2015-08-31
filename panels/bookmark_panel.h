@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QCheckBox>
 
 #include "abstract_panel.h"
 #include "panel_manager.h"
@@ -32,6 +33,7 @@ struct bookmark_data{
 	int address;
 	int size;
 	types data_type;
+	bool data_is_pointer;
 	QString description;		
 	QColor color;
 };
@@ -87,6 +89,7 @@ class bookmark_panel : public QTableView, public abstract_panel
 		QLabel *color_label = new QLabel("Color: ", this);
 		
 		QComboBox *data_type = new QComboBox(this);
+		QCheckBox *is_pointer = new QCheckBox("Is the data a pointer table", this);
 		                
 		QPlainTextEdit *description_input = new QPlainTextEdit(this);
 		QLabel *description_label = new QLabel("Description: ", this);

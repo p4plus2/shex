@@ -1,4 +1,5 @@
 #include "isa_gsu.h"
+#include "utility.h"
 
 isa_gsu::isa_gsu(QObject *parent) :
         disassembler_core(parent)
@@ -20,10 +21,10 @@ QGridLayout *isa_gsu::core_layout()
 template <typename V> 
 QString isa_gsu::label_op(int offset, int size, V validator)
 {
-	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(offset, size).toLatin1()));
+	QByteArray little_endian = QByteArray::fromHex(QByteArray(to_hex(offset, size).toLatin1()));
 	int address = buffer->snes_to_pc((buffer->*validator)(delta*2+region.get_start_aligned(), little_endian));
 	if(address < (region.get_start_byte()) || address > (region.get_end_byte())){
-		return '$' + get_hex(offset, size);
+		return '$' + to_hex(offset, size);
 	}
 	return add_label(address);
 }
@@ -36,13 +37,13 @@ QString isa_gsu::decode_name_arg(const char arg, int &size)
 	switch(arg){
 		case 'W':
 			size += 2;
-			return get_hex((operand & 0x00FFFF) << 1, 4);
+			return to_hex((operand & 0x00FFFF) << 1, 4);
 		case 'w':
 			size += 2;
-			return get_hex(operand & 0x00FFFF, 4);
+			return to_hex(operand & 0x00FFFF, 4);
 		case 'b':
 			size++;
-			return get_hex(operand & 0x0000FF, 2);	
+			return to_hex(operand & 0x0000FF, 2);	
 		case 'r':
 			size++;
 			return label_op(operand & 0x0000FF, 2, &ROM_buffer::branch_address);
@@ -61,7 +62,16 @@ QString isa_gsu::decode_name_arg(const char arg, int &size)
 
 QString isa_gsu::address_to_label(int address)
 {
-	return QString::number(buffer->pc_to_snes(address), 16).rightJustified(6, '0').toUpper();
+	return to_hex(buffer->pc_to_snes(address), 6);
+}
+
+QString isa_gsu::format_data_value(int size, int value, bool is_pointer)
+{
+	if(!is_pointer){
+		return '$' + to_hex(value, (size+1)*2);
+	}else{
+		return label_op(value, (size+1)*2, &ROM_buffer::jump_address);
+	}
 }
 
 disassembler_core::opcode isa_gsu::get_opcode(int op)

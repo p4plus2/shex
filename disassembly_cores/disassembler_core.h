@@ -27,12 +27,12 @@ class disassembler_core : public QObject
 		QString disassembly_text();
 		void reset();
 		void decode_name_args(QString &name);
-		QString get_hex(int n, int bytes);
 		unsigned int get_instruction();
 		unsigned int get_operand(int n);
 		
 		virtual QString decode_name_arg(const char arg, int &size) = 0;
 		virtual QString address_to_label(int address) = 0;
+		virtual QString format_data_value(int size, int value, bool is_pointer) = 0;
 		virtual opcode get_opcode(int op) = 0;
 		virtual int get_base() = 0;
 		virtual bool abort_unlikely(int op) = 0;
@@ -58,7 +58,7 @@ class disassembler_core : public QObject
 		int label_id;
 		
 		void add_data(int destination, QString data, block::data_format format);
-		void make_table(QByteArray &data, int start, int size, int width, bool packed);
+		void make_table(QByteArray &data, int start, int size, int width, bool packed, bool is_pointer);
 };
 
 #endif // DISASSEMBLER_CORE_H

@@ -32,6 +32,7 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	horizontalHeader()->resizeSection(0, address_width);
 	horizontalHeader()->resizeSection(1, color_width);
 	horizontalHeader()->setStretchLastSection(true);
+	horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
 
 	color_button->setAutoFillBackground(true);
 	color_button->setFlat(true);
@@ -69,6 +70,8 @@ bookmark_panel::bookmark_panel(panel_manager *parent, hex_editor *editor) :
 	data_type->addItem("Data: word", bookmark_data::WORD);
 	data_type->addItem("Data: long", bookmark_data::LONG);
 	data_type->addItem("Data: double", bookmark_data::DOUBLE);
+	
+	is_pointer->setLayoutDirection(Qt::RightToLeft);
 	
 	init_grid_layout();
 	editor->get_buffer()->set_bookmark_map(&bookmarks);
@@ -120,6 +123,7 @@ void bookmark_panel::add_clicked()
 	bookmark.size = size_input->text().toInt();
 	bookmark.description = description;
 	bookmark.data_type = (bookmark_data::types)data_type->currentData().toInt();
+	bookmark.data_is_pointer = is_pointer->isChecked();
 	
 	add_bookmark(address_input->text(), bookmark);
 	bookmarks.insert(address_input->text(), bookmark);
@@ -146,6 +150,8 @@ void bookmark_panel::update_clicked()
 	}
 	row--;
 	add_clicked();
+	model->sort(horizontalHeader()->sortIndicatorSection(), horizontalHeader()->sortIndicatorOrder());
+	scrollTo(currentIndex());
 }
 
 void bookmark_panel::row_clicked(QModelIndex index)
@@ -160,6 +166,7 @@ void bookmark_panel::row_clicked(QModelIndex index)
 	set_color_button(bookmark.color);
 	address_input->setText(address_index.data().toString());
 	data_type->setCurrentIndex(data_type->findData(bookmark.data_type));
+	is_pointer->setChecked(bookmark.data_is_pointer);
 }
 
 void bookmark_panel::row_double_clicked(QModelIndex index)
@@ -217,13 +224,18 @@ void bookmark_panel::init_grid_layout()
 	grid->addWidget(address_input, 0, 1);
 	grid->addWidget(size_label, 0, 2, 1, 1, Qt::AlignRight);
 	grid->addWidget(size_input, 0, 3);
+	
 	grid->addWidget(description_label, 1, 0, 1, 2);
 	grid->addWidget(data_type, 1, 2, 1, 2, Qt::AlignRight);
-	grid->addWidget(description_input, 2, 0, 1, 4);
-	grid->addWidget(color_label, 3, 0, 1, 1, Qt::AlignRight);
-	grid->addWidget(color_button, 3, 1);
-	grid->addWidget(add_button, 3, 2, 1, 2);
-	grid->addWidget(update_button, 3, 2, 1, 2);
+	
+	grid->addWidget(is_pointer, 2, 0, 1, 4);
+	
+	grid->addWidget(description_input, 3, 0, 1, 4);
+	
+	grid->addWidget(color_label, 4, 0, 1, 1, Qt::AlignRight);
+	grid->addWidget(color_button, 4, 1);
+	grid->addWidget(add_button, 4, 2, 1, 2);
+	grid->addWidget(update_button, 4, 2, 1, 2);
 	
 	
 	input_area->setLayout(grid);
@@ -275,6 +287,7 @@ void bookmark_panel::read_json()
 		   !bookmark_json["size"].isDouble() ||
 		   !bookmark_json["description"].isString() ||
 		   !bookmark_json["type"].isDouble() ||
+		   !bookmark_json["is_pointer"].isBool() ||
 		   !bookmark_json["color"].isDouble()){
 			continue; //Ignore this object
 		}
@@ -283,6 +296,7 @@ void bookmark_panel::read_json()
 		bookmark.size = bookmark_json["size"].toInt();
 		bookmark.description = bookmark_json["description"].toString();
 		bookmark.data_type = (bookmark_data::types)bookmark_json["type"].toInt();
+		bookmark.data_is_pointer = bookmark_json["is_pointer"].toInt();
 		bookmark.color = QColor(bookmark_json["color"].toInt());
 		
 		QString address = active_editor->get_buffer()->get_formatted_address(
@@ -311,6 +325,7 @@ void bookmark_panel::write_json(bool save_as)
 		                          {"size", bookmark.size},
 		                          {"description", bookmark.description},
 		                          {"type", bookmark.data_type},
+		                          {"is_pointer", bookmark.data_is_pointer},
 		                          {"color", (int)bookmark.color.rgb()},
 		                  });
 	}

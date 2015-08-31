@@ -33,32 +33,32 @@ QString isa_spc700::decode_name_arg(const char arg, int &size)
 	switch(arg){
 		case 'b':
 			size++;
-			return "$" + get_hex(operand & 0x0000FF, 2);
+			return "$" + to_hex(operand & 0x0000FF, 2);
 		case 'w':
 			size += 2;
-			return "$" + get_hex(operand & 0x00FFFF, 4);
+			return "$" + to_hex(operand & 0x00FFFF, 4);
 		// m and i are a pair always used together
 		case 'm':
-			return "$" + get_hex(operand & 0x001FFF, 4);
+			return "$" + to_hex(operand & 0x001FFF, 4);
 		case 'i':
 			size += 2;
-			return "$" + get_hex((operand & 0x00E000) >> 13, 2);
+			return "$" + to_hex((operand & 0x00E000) >> 13, 2);
 		case 'c':
 			size += 2;
-			return "$"  + get_hex((operand & 0x00FF00) >> 8, 2) +
-			       "#$" + get_hex((operand & 0x0000FF) >> 0, 2);
+			return "$"  + to_hex((operand & 0x00FF00) >> 8, 2) +
+			       "#$" + to_hex((operand & 0x0000FF) >> 0, 2);
 		case 'r':
 			size++;
 			operand &= 0xFF;
 			if(relative < 0 || relative > data.size()){
-				return '$' + get_hex(operand & 0xFF, 2);
+				return '$' + to_hex(operand & 0xFF, 2);
 			}
 			return add_label(relative + base);
 		case 'j':
 			size += 2;
 			operand &= 0xFFFF;
 			if(operand < base || operand > base + data.size()){
-				return '$' + get_hex(operand, 4);
+				return '$' + to_hex(operand, 4);
 			}
 			return add_label(operand);
 		default:
@@ -70,6 +70,18 @@ QString isa_spc700::decode_name_arg(const char arg, int &size)
 QString isa_spc700::address_to_label(int address)
 {
 	return to_hex(address, 4);
+}
+
+QString isa_spc700::format_data_value(int size, int value, bool is_pointer)
+{
+	if(!is_pointer){
+		return '$' + to_hex(value, (size+1)*2);
+	}else{
+		if((unsigned int)value < base || (unsigned int)value > base + data.size()){
+			return '$' + to_hex(value, 4);
+		}
+		return add_label(value);
+	}
 }
 
 disassembler_core::opcode isa_spc700::get_opcode(int op)

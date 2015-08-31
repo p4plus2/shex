@@ -2,6 +2,7 @@
 #define ROM_metadata_H
 
 #include <QObject>
+#include "rom_mapper.h"
 
 class ROM_metadata {
 		Q_GADGET
@@ -46,17 +47,6 @@ class ROM_metadata {
 		enum region{
 			NTSC,
 			PAL
-		};
-		
-		enum memory_mapper{
-			LOROM,
-			HIROM,
-			EXLOROM,
-			EXHIROM,
-			SUPERFXROM,
-			SA1ROM,
-			SPC7110ROM,
-			SDD1ROM
 		};
 		
 		enum DSP1_memory_mapper{
@@ -139,7 +129,7 @@ class ROM_metadata {
 		unsigned char rom_type = 0x00;
 		unsigned char rom_size = 0x00;
 		
-		memory_mapper mapper = LOROM;
+		ROM_mapper mapper;
 		bool chips[NO_CHIPS] = {0};
 };
 #endif // ROM_metadata_H

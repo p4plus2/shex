@@ -25,11 +25,10 @@ QGridLayout *isa_65c816::core_layout()
 template <typename V> 
 QString isa_65c816::label_op(int offset, int size, V validator)
 {
-	QByteArray little_endian = QByteArray::fromHex(QByteArray(get_hex(offset, size).toLatin1()));
+	QByteArray little_endian = QByteArray::fromHex(QByteArray(to_hex(offset, size).toLatin1()));
 	int address = buffer->snes_to_pc((buffer->*validator)(delta*2+region.get_start_aligned(), little_endian));
-	qDebug() << address;
 	if(address < (region.get_start_byte()) || address > (region.get_end_byte())){
-		return '$' + get_hex(offset, size);
+		return '$' + to_hex(offset, size);
 	}
 	return add_label(address);
 }
@@ -42,13 +41,13 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 	switch(arg){
 		case 'l':
 			size += 3;
-			return "$" + get_hex(operand & 0xFFFFFF, 6);
+			return "$" + to_hex(operand & 0xFFFFFF, 6);
 		case 'w':
 			size += 2;
-			return "$" + get_hex(operand & 0x00FFFF, 4);
+			return "$" + to_hex(operand & 0x00FFFF, 4);
 		case 'b':
 			size++;
-			return "$" + get_hex(operand & 0x0000FF, 2);	
+			return "$" + to_hex(operand & 0x0000FF, 2);	
 		case 'r':
 			size++;
 			return label_op(operand & 0x0000FF, 2, &ROM_buffer::branch_address);
@@ -64,23 +63,23 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 		case 'a':
 			size += 1 + A_state;
 			if(A_state){
-				return "#$" + get_hex(operand & 0x00FFFF, 4);	
+				return "#$" + to_hex(operand & 0x00FFFF, 4);	
 			}else{
-				return "#$" + get_hex(operand & 0x0000FF, 2);	
+				return "#$" + to_hex(operand & 0x0000FF, 2);	
 			}
 		case 'i':
 			size += 1 + I_state;
 			if(I_state){
-				return "#$" + get_hex(operand & 0x00FFFF, 4);	
+				return "#$" + to_hex(operand & 0x00FFFF, 4);	
 			}else{
-				return "#$" + get_hex(operand & 0x0000FF, 2);	
+				return "#$" + to_hex(operand & 0x0000FF, 2);	
 			}
 		case 'f':
 			A_state = (operand & 0x20) ? data.at(delta-1) == (char)0xC2 : A_state;
 			I_state = (operand & 0x10) ? data.at(delta-1) == (char)0xC2 : I_state;
 		case 'c':
 			size++;
-			return "#$" + get_hex(operand & 0x0000FF, 2);	
+			return "#$" + to_hex(operand & 0x0000FF, 2);	
 		default:
 			qFatal("Invalid name decode arg");
 	}
@@ -90,6 +89,15 @@ QString isa_65c816::decode_name_arg(const char arg, int &size)
 QString isa_65c816::address_to_label(int address)
 {
 	return to_hex(buffer->pc_to_snes(address), 6);
+}
+
+QString isa_65c816::format_data_value(int size, int value, bool is_pointer)
+{
+	if(!is_pointer){
+		return '$' + to_hex(value, (size+1)*2);
+	}else{
+		return label_op(value, (size+1)*2, &ROM_buffer::jump_address);
+	}
 }
 
 disassembler_core::opcode isa_65c816::get_opcode(int op)

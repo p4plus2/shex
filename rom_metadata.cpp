@@ -40,9 +40,9 @@ ROM_metadata::region ROM_metadata::get_cart_region()
 	return (get_header_field(CART_REGION) < 2 || get_header_field(CART_REGION) >= 13) ? NTSC : PAL;
 }
 
-ROM_metadata::memory_mapper ROM_metadata::get_mapper()
+memory_mapper ROM_metadata::get_mapper()
 {
-	return mapper;
+	return mapper.get_type();
 }
 
 ROM_metadata::DSP1_memory_mapper ROM_metadata::get_dsp1_mapper()
@@ -123,107 +123,12 @@ QByteArray ROM_metadata::to_little_endian(QByteArray bytes) const
 
 int ROM_metadata::snes_to_pc(int address) const
 {
-	switch(mapper){
-		case LOROM:
-			if((address & 0xF00000) == 0x700000 || !(address & 0x408000)){
-				return -1;
-			}
-			
-			return ((address & 0x7F0000) >> 1 | (address & 0x7FFF));
-		case HIROM:
-			if((address & 0xFE0000) == 0x7E0000 || !(address & 0x408000)){
-				return -1;
-			}
-			return address & 0x3FFFFF;
-		case EXLOROM:
-			return -1;
-		break;
-		case EXHIROM:
-			return -1;
-		break;
-		case SA1ROM:
-			if(address < 0xC00000){
-				if((address & 0xF00000) == 0x700000 || !(address & 0x408000)){
-					return -1;
-				}
-				if(address & 0x800000){
-					address -= 0x400000;
-				}
-				return ((address & 0x7F0000) >> 1 | (address & 0x7FFF));
-			}else{
-				return (address & 0x3FFFFF) + 0x400000;
-			}
-		break;
-		case SPC7110ROM:
-			return -1;
-		break;
-		case SUPERFXROM:
-			if((address&0xF00000) == 0x700000 || !(address & 0x408000)){
-				return -1;
-			}else if((address & 0x408000) == 0x008000){  //00-3f,80-bf:8000-ffff
-				address &= 0x7FFFFF;
-			}else if((address & 0x600000) == 0x400000){ //40-5f,c0-df:0000-ffff	
-				 address = (((address << 1) & 0x3F0000) | 0x008000 | (address & 0x007FFF));
-			}
-			return (address & 0x7F0000) >> 1 | (address & 0x7FFF);
-		break;
-		case SDD1ROM:
-			return -1;
-		break;
-		default:
-			return -1;
-	}
+	return mapper.snes_to_pc(address);
 }
 
 int ROM_metadata::pc_to_snes(int address) const
 {
-	switch(mapper){
-		case LOROM:
-			if (address >= 0x400000){
-				return -1;
-			}
-			return ((address << 1) & 0x7F0000) | (address & 0x7FFF) | 0x8000;
-		case HIROM:
-			if(address >= 0x400000){
-				return -1;
-			}
-			return address | 0xC00000;
-		case EXLOROM:
-			return -1;
-		break;
-		case EXHIROM:
-			return -1;
-		break;
-		case SA1ROM:
-			//$00-$1f; $20-$3f; $80-$9f; $a0-$bf; $c0-$cf; $d0-$df; $e0-$ef; $f0-$ff last 4 hirom
-			if (address >= 0x800000){
-				return -1;
-			}
-			if(address < 0x400000){
-				address = ((address<<1) & 0x7F0000) | (address & 0x7FFF) | 0x8000;
-				if(address & 0xC00000){
-					address += 0x400000;
-				}
-				return address;
-			}else{
-				return (address - 0x400000) | 0xC00000;
-			}
-		break;
-		case SPC7110ROM:
-			return -1;
-		break;
-		case SUPERFXROM:
-			if(address >= 0x380000){
-				return ((address << 1) & 0x7F0000) | ((address | 0x8000) & 0xFFFF) | 0x800000;
-			}
-			return ((address << 1) & 0x7F0000) | ((address | 0x8000) & 0xFFFF);
-		break;
-		case SDD1ROM:
-			return -1;
-		break;
-		default:
-		return -1;
-	}
+	return mapper.pc_to_snes(address);
 }
 
 bool ROM_metadata::validate_address(int address, bool error_method)
@@ -237,7 +142,8 @@ bool ROM_metadata::validate_address(int address, bool error_method)
 	}else if(snes_to_pc(address) > size()){
 		address_error = "$" + address_string + " is larger than the ROM's size!";
 	}else if(snes_to_pc(address) < 0 || !address){
-		address_error = "$" + address_string + " is not a valid "+ mapper_strings[mapper].second +" address!";
+		address_error = "$" + address_string + " is not a valid " + 
+		                mapper_strings[mapper.get_type()].second +" address!";
 	}
 	
 	if(address_error != "" && error_method){
@@ -441,21 +347,21 @@ void ROM_metadata::find_chips()
 void ROM_metadata::find_mapper()
 {
 	if(has_chip(SUPERFX)){
-		mapper = SUPERFXROM;
+		mapper.set_type(SUPERFXROM);
 	}else if(has_chip(SA1)){
-		mapper = SA1ROM;
+		mapper.set_type(SA1ROM);
 	}else if(has_chip(SPC7110)){
-		mapper = SPC7110ROM;
+		mapper.set_type(SPC7110ROM);
 	}else if(has_chip((SDD1))){
-		mapper = SDD1ROM;
+		mapper.set_type(SDD1ROM);
 	}else if(header_index == 0x40ffc0){
-		mapper = EXHIROM;
+		mapper.set_type(EXHIROM);
 	}else if(header_index == 0x7fc0 && (size() >= 0x401000 || mapper_id == 0x32)){
-		mapper = EXLOROM;
+		mapper.set_type(EXLOROM);
 	}else if(header_index == 0xffc0){
-		mapper = HIROM;
+		mapper.set_type(HIROM);
 	}else{
-		mapper = LOROM;
+		mapper.set_type(LOROM);
 	}
 }
 
@@ -492,15 +398,15 @@ const QPair <ROM_metadata::region, QString> ROM_metadata::region_strings[] = {
 	{ROM_metadata::PAL, "PAL"}
 };
 
-const QPair <ROM_metadata::memory_mapper, QString> ROM_metadata::mapper_strings[] = {
-	{ROM_metadata::LOROM, "LOROM"},
-	{ROM_metadata::HIROM, "HIROM"},
-	{ROM_metadata::EXLOROM, "ExLOROM"},
-	{ROM_metadata::EXHIROM, "ExHIROM"},
-	{ROM_metadata::SUPERFXROM, "SuperFX ROM"},
-	{ROM_metadata::SA1ROM, "SA1 ROM"},
-	{ROM_metadata::SPC7110ROM, "SPC7110 ROM"},
-	{ROM_metadata::SDD1ROM, "SDD1 ROM"}
+const QPair <memory_mapper, QString> ROM_metadata::mapper_strings[] = {
+	{LOROM, "LOROM"},
+	{HIROM, "HIROM"},
+	{EXLOROM, "ExLOROM"},
+	{EXHIROM, "ExHIROM"},
+	{SUPERFXROM, "SuperFX ROM"},
+	{SA1ROM, "SA1 ROM"},
+	{SPC7110ROM, "SPC7110 ROM"},
+	{SDD1ROM, "SDD1 ROM"}
 };
 
 const QPair <ROM_metadata::DSP1_memory_mapper, QString> ROM_metadata::dsp_strings[] = {
