@@ -22,6 +22,7 @@ class disassembler_core : public QObject
 		selection region;
 		const ROM_buffer *buffer;
 		int delta;
+		QString error;
 		
 		QString add_label(int destination, QString prefix = "");
 		QString disassembly_text();
@@ -29,6 +30,7 @@ class disassembler_core : public QObject
 		void decode_name_args(QString &name);
 		unsigned int get_instruction();
 		unsigned int get_operand(int n);
+		bool in_range(int address);
 		
 		virtual QString decode_name_arg(const char arg, int &size) = 0;
 		virtual QString address_to_label(int address) = 0;
@@ -59,8 +61,9 @@ class disassembler_core : public QObject
 		int label_id;
 		
 		void add_data(int destination, QString data, block::data_format format);
-		void make_table(const bookmark_data &bookmark);
+		void disassemble_table(const bookmark_data &bookmark);
 		void disassemble_rats();
+		void disassemble_code();
 };
 
 #endif // DISASSEMBLER_CORE_H

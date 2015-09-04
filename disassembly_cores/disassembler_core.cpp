@@ -7,42 +7,28 @@
 QString disassembler_core::disassemble(selection selection_area, const ROM_buffer *b)
 {
 	reset();
-	QString error;
 	buffer = b;
 	region = selection_area;
 	data = buffer->range(region.get_start_aligned(), region.get_end_aligned());
-	delta = 0;
 	
 	const bookmark_map *bookmarks = buffer->get_bookmark_map();
 	const QVector<int> rats_tags = buffer->get_rats_tags();
 
 	while(delta < data.size() && error.isEmpty()){
-		int opcode_address = delta;
 		const QString address = buffer->get_formatted_address(get_base()+delta);
 		if(bookmarks->contains(address)){
 			bookmark_data bookmark = bookmarks->value(address);
 			if(bookmark.data_type & bookmark_data::CODE && !(bookmark.data_type & bookmark_data::UNKNOWN)){
 				set_flags(bookmark.data_type);
 			}else if(!(bookmark.data_type & bookmark_data::CODE)){
-				make_table(bookmark);
+				disassemble_table(bookmark);
 				continue;
 			}
 		}else if(rats_tags.contains(region.get_start_byte() + delta) && delta + 8 < data.size()){
 			disassemble_rats();
 			continue;
 		}
-		unsigned char hex = data.at(delta);
-		disassembler_core::opcode op = get_opcode(hex);	
-		if(abort_unlikely(hex)){
-			error = "Unlikely opcode detected, aborting!";
-		}
-		delta++;
-		decode_name_args(op.name);
-		add_data(opcode_address, op.name, block::CODE);
-		
-		if(delta > data.size()){
-			error = "Disassembly range too small, last opcode may be invalid.";
-		}
+		disassemble_code();
 	}
 	
 	update_state();
@@ -103,7 +89,9 @@ QString disassembler_core::disassembly_text()
 void disassembler_core::reset()
 {
 	disassembly_list.clear();
+	error.clear();
 	label_id = 0;
+	delta = 0;
 }
 
 void disassembler_core::decode_name_args(QString &name)
@@ -133,13 +121,18 @@ unsigned int disassembler_core::get_operand(int n)
 	return delta+n < data.size() ? ((unsigned char)data.at(delta+n) << n*8) : 0;
 }
 
+bool disassembler_core::in_range(int address)
+{
+	return region.get_start_byte() < address && region.get_end_byte() > address;
+}
+
 void disassembler_core::add_data(int destination, QString data, block::data_format format)
 {
 	disassembly_list[get_base()+destination].data = data;
 	disassembly_list[get_base()+destination].format = format;
 }
 
-void disassembler_core::make_table(const bookmark_data &bookmark)
+void disassembler_core::disassemble_table(const bookmark_data &bookmark)
 {
 	bool packed = bookmark.data_type & bookmark_data::PACKED;
 	int width = (bookmark.data_type & bookmark_data::BYTE) ? 0 :
@@ -147,7 +140,7 @@ void disassembler_core::make_table(const bookmark_data &bookmark)
 	            (bookmark.data_type & bookmark_data::LONG) ? 2 :
 	                                                         3 ; //double
 	add_label(get_base() + delta);
-	add_label(get_base() + delta + bookmark.size);
+	add_label(get_base() + delta + bookmark.size, "\nlabel_");
 	for(int i = 0; i < bookmark.size && i + delta < data.size(); i += width + 1){
 		unsigned int table_value = 0;
 		for(int j = width; j >= 0 && (i + j + delta) < data.size(); j--){
@@ -169,4 +162,21 @@ void disassembler_core::disassemble_rats()
 	delta += 8;
 	add_label(get_base() + delta, "RATS_start_");
 	add_label(get_base() + delta + read_word(data, delta - 4) + 1, "RATS_end_");
+}
+
+void disassembler_core::disassemble_code()
+{
+	int opcode_address = delta;
+	unsigned char hex = data.at(delta);
+	disassembler_core::opcode op = get_opcode(hex);	
+	if(abort_unlikely(hex)){
+		error = "Unlikely opcode detected, aborting!";
+	}
+	delta++;
+	decode_name_args(op.name);
+	add_data(opcode_address, op.name, block::CODE);
+	
+	if(delta > data.size()){
+		error = "Disassembly range too small, last opcode may be invalid.";
+	}
 }

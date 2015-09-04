@@ -23,7 +23,7 @@ QString isa_gsu::label_op(int offset, int size, V validator)
 {
 	QByteArray little_endian = QByteArray::fromHex(QByteArray(to_hex(offset, size).toLatin1()));
 	int address = buffer->snes_to_pc((buffer->*validator)(delta*2+region.get_start_aligned(), little_endian));
-	if(address < (region.get_start_byte()) || address > (region.get_end_byte())){
+	if(!in_range(address)){
 		return '$' + to_hex(offset, size);
 	}
 	return add_label(address);
