@@ -29,7 +29,7 @@ int selection::get_start()
 
 int selection::get_end()
 {
-	return start < end ? end : start;
+	return start < end ? end : (start + 2);
 }
 
 int selection::get_start_byte()
@@ -44,13 +44,13 @@ int selection::get_end_byte()
 
 int selection::get_start_aligned()
 {
-	return (start > end ? end : start) & ~1;
+	return get_start() & ~1;
 }
 
 
 int selection::get_end_aligned()
 {
-	return (start < end ? end : start) & ~1;
+	return get_end() & ~1;
 }
 
 void selection::move_end(int amount)

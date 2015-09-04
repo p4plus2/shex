@@ -39,6 +39,7 @@ void ROM_mapper::convert_to(memory_mapper mapper)
 #define pc_to_snes []
 #define can_convert []
 #define convert_to []
+#define max_size(MB) MB * 1024 * 1024
 
 const mapper_dispatch lorom_dispatch {
 		snes_to_pc(int address){
@@ -63,7 +64,9 @@ const mapper_dispatch lorom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(4)
 	};
 	
 const mapper_dispatch hirom_dispatch {
@@ -88,7 +91,9 @@ const mapper_dispatch hirom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(4)
 	};
 
 const mapper_dispatch exlorom_dispatch {
@@ -109,7 +114,9 @@ const mapper_dispatch exlorom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(8)
 	};
 	
 const mapper_dispatch exhirom_dispatch {
@@ -130,7 +137,9 @@ const mapper_dispatch exhirom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(8)
 	};
 
 const mapper_dispatch superfxrom_dispatch {
@@ -159,7 +168,9 @@ const mapper_dispatch superfxrom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(2)
 	};
 
 const mapper_dispatch sa1rom_dispatch {
@@ -200,7 +211,9 @@ const mapper_dispatch sa1rom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(8)
 	};
 
 const mapper_dispatch spc7110rom_dispatch {
@@ -221,7 +234,9 @@ const mapper_dispatch spc7110rom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(8)
 	};
 
 const mapper_dispatch sdd1rom_dispatch {
@@ -242,7 +257,9 @@ const mapper_dispatch sdd1rom_dispatch {
 	
 		convert_to(memory_mapper mapper){
 			Q_UNUSED(mapper);
-		}
+		},
+		
+		max_size(8)
 	};
 
 #undef snes_to_pc

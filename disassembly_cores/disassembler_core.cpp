@@ -21,33 +21,14 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 		const QString address = buffer->get_formatted_address(get_base()+delta);
 		if(bookmarks->contains(address)){
 			bookmark_data bookmark = bookmarks->value(address);
-			if(bookmark.data_type & bookmark_data::CODE &&
-			   !(bookmark.data_type & bookmark_data::UNKNOWN)){
+			if(bookmark.data_type & bookmark_data::CODE && !(bookmark.data_type & bookmark_data::UNKNOWN)){
 				set_flags(bookmark.data_type);
 			}else if(!(bookmark.data_type & bookmark_data::CODE)){
-				bool packed = bookmark.data_type & bookmark_data::PACKED;
-				int width = 0; //byte
-				if(bookmark.data_type & bookmark_data::WORD){
-					width = 1;
-				}else if(bookmark.data_type & bookmark_data::LONG){
-					width = 2;
-				}else if(bookmark.data_type & bookmark_data::DOUBLE){
-					width = 3;
-				}
-				make_table(data, delta, bookmark.size, width, packed, bookmark.data_is_pointer);
+				make_table(bookmark);
 				continue;
 			}
 		}else if(rats_tags.contains(region.get_start_byte() + delta) && delta + 8 < data.size()){
-			add_data(delta, "STAR", block::DATA_STRING);
-			add_data(delta + 4, to_hex(read_word(data, delta + 4), 4), 
-						   (block::data_format)(block::DATA_UNPACKED + 1));
-			add_data(delta + 6, to_hex(read_word(data, delta + 6), 4), 
-						   (block::data_format)(block::DATA_UNPACKED + 1));
-			
-			add_label(get_base() + delta, "RATS_tag_");
-			delta += 8;
-			add_label(get_base() + delta, "RATS_start_");
-			add_label(get_base() + delta + read_word(data, delta - 4) + 1, "RATS_end_");
+			disassemble_rats();
 			continue;
 		}
 		unsigned char hex = data.at(delta);
@@ -158,17 +139,34 @@ void disassembler_core::add_data(int destination, QString data, block::data_form
 	disassembly_list[get_base()+destination].format = format;
 }
 
-void disassembler_core::make_table(QByteArray &data, int start, int size, int width, bool packed, bool is_pointer)
+void disassembler_core::make_table(const bookmark_data &bookmark)
 {
-	add_label(get_base() + start);
-	add_label(get_base() + start + size);
-	for(int i = 0; i < size && i + start < data.size(); i += width+1){
+	bool packed = bookmark.data_type & bookmark_data::PACKED;
+	int width = (bookmark.data_type & bookmark_data::BYTE) ? 0 :
+		    (bookmark.data_type & bookmark_data::WORD) ? 1 :
+	            (bookmark.data_type & bookmark_data::LONG) ? 2 :
+	                                                         3 ; //double
+	add_label(get_base() + delta);
+	add_label(get_base() + delta + bookmark.size);
+	for(int i = 0; i < bookmark.size && i + delta < data.size(); i += width + 1){
 		unsigned int table_value = 0;
-		for(int j = width; j >= 0 && (i + j + start) < data.size(); j--){
-			table_value |= (unsigned char)data.at(start+i+j) << (j * 8);
+		for(int j = width; j >= 0 && (i + j + delta) < data.size(); j--){
+			table_value |= (unsigned char)data.at(delta+i+j) << (j * 8);
 		}
-		add_data(start+i, format_data_value(width, table_value, is_pointer),
+		add_data(delta + i, format_data_value(width, table_value, bookmark.data_is_pointer),
 			  (block::data_format)((packed ? block::DATA_PACKED : block::DATA_UNPACKED) + width));
 	}
-	delta += size;
+	delta += bookmark.size;
+}
+
+void disassembler_core::disassemble_rats()
+{
+	add_data(delta, "STAR", block::DATA_STRING);
+	add_data(delta + 4, to_hex(read_word(data, delta + 4), 4), block::DATA_UNPACKED_WORD);
+	add_data(delta + 6, to_hex(read_word(data, delta + 6), 4), block::DATA_UNPACKED_WORD);
+	
+	add_label(get_base() + delta, "RATS_tag_");
+	delta += 8;
+	add_label(get_base() + delta, "RATS_start_");
+	add_label(get_base() + delta + read_word(data, delta - 4) + 1, "RATS_end_");
 }

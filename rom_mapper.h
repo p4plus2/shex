@@ -18,7 +18,7 @@ struct mapper_dispatch{
 	int (*pc_to_snes)(int);
 	bool (*can_convert)(memory_mapper mapper);
 	void (*convert_to)(memory_mapper mapper);
-	
+	int max_size;
 };
 
 extern const mapper_dispatch mappers[];

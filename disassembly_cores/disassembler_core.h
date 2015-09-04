@@ -46,6 +46,7 @@ class disassembler_core : public QObject
 				DATA_PACKED = 1,
 				DATA_PACKED_END = 4,
 				DATA_UNPACKED = 5,
+				DATA_UNPACKED_WORD = DATA_UNPACKED + 1,
 				DATA_UNPACKED_END = 9,
 				DATA_STRING = 10
 			};
@@ -58,7 +59,8 @@ class disassembler_core : public QObject
 		int label_id;
 		
 		void add_data(int destination, QString data, block::data_format format);
-		void make_table(QByteArray &data, int start, int size, int width, bool packed, bool is_pointer);
+		void make_table(const bookmark_data &bookmark);
+		void disassemble_rats();
 };
 
 #endif // DISASSEMBLER_CORE_H
