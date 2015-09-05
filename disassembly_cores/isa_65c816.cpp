@@ -26,7 +26,7 @@ template <typename V>
 QString isa_65c816::label_op(int offset, int size, V validator)
 {
 	QByteArray little_endian = QByteArray::fromHex(QByteArray(to_hex(offset, size).toLatin1()));
-	int address = buffer->snes_to_pc((buffer->*validator)(delta*2+region.get_start_aligned(), little_endian));
+	int address = buffer->snes_to_pc((buffer->*validator)(delta * 2 + get_base(), little_endian));
 	if(!in_range(address)){
 		return '$' + to_hex(offset, size);
 	}
