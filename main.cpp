@@ -1,8 +1,9 @@
 #include "main_window.h"
 #include "debug.h"
 
-void message_handler(QtMsgType type, const char *message)
+void message_handler(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
+	Q_UNUSED(context);
 	QString text;
 	switch (type){
 		case QtDebugMsg:
@@ -22,7 +23,7 @@ void message_handler(QtMsgType type, const char *message)
 		break;
 	}
 	QFile log("debug.log");
-	log.open(QIODevice::WriteOnly | QIODevice::Append);
+	log.open(QIODevice::WriteOnly);
 	QTextStream log_stream(&log);
 	log_stream << text << endl;
 }
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 #ifdef LOG_TO_FILE
-	qInstallMsgHandler(message_handler);
+	qInstallMessageHandler(message_handler);
 #endif
 	
 	QCoreApplication::setOrganizationName("p4programing");

@@ -131,6 +131,11 @@ int ROM_metadata::pc_to_snes(int address) const
 	return mapper.pc_to_snes(address);
 }
 
+memory_type ROM_metadata::address_to_type(int address) const
+{
+	return mapper.address_to_type(address);
+}
+
 bool ROM_metadata::validate_address(int address, bool error_method)
 {
 	address_error = "";

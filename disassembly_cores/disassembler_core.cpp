@@ -2,6 +2,11 @@
 
 #include "utility.h"
 #include "disassembler_core.h"
+
+#include "isa_65c816.h"
+#include "isa_spc700.h"
+#include "isa_gsu.h"
+
 #include "debug.h"
 
 QString disassembler_core::disassemble(selection selection_area, const ROM_buffer *b)
@@ -27,11 +32,26 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 		}else if(rats_tags.contains(region.get_start_byte() + delta) && delta + 8 < data.size()){
 			disassemble_rats();
 			continue;
-		}
+		}/*else if(delta == 3){
+			qDebug() << 123;
+			selection s = selection::create_selection(selection_area.get_start_aligned() + delta, 1);
+			isa_spc700 test;
+			qDebug() << test.disassemble(s, b);
+			for(auto i = test.disassembly_list.begin(); i != test.disassembly_list.end(); i++){
+				disassembly_list.insert(i.key(), i.value());
+			}
+			delta += 1;
+			continue;
+		}*/
 		disassemble_code();
+		qDebug() << delta;
+		
 	}
 	
-	update_state();
+	if(parent){
+		update_state();
+	}
+	//qDebug() << disassembly_text() + error;
 	return disassembly_text() + error;
 }
 
@@ -169,14 +189,69 @@ void disassembler_core::disassemble_code()
 	int opcode_address = delta;
 	unsigned char hex = data.at(delta);
 	disassembler_core::opcode op = get_opcode(hex);	
-	if(abort_unlikely(hex)){
-		error = "Unlikely opcode detected, aborting!";
+	bool data_found = false;
+	if(is_unlikely_opcode(hex) || (previous_codeflow && is_semiunlikely_opcode(hex))){
+		data_found = disassemble_data();
 	}
-	delta++;
-	decode_name_args(op.name);
-	add_data(opcode_address, op.name, block::CODE);
+	
+	if(!data_found){
+		delta++;
+		decode_name_args(op.name);
+		add_data(opcode_address, op.name, block::CODE);
+		previous_codeflow = is_codeflow_opcode(hex);
+	}
 	
 	if(delta > data.size()){
 		error = "Disassembly range too small, last opcode may be invalid.";
 	}
+}
+
+bool disassembler_core::disassemble_data()
+{
+	int start_address = delta;
+	unsigned char hex = data.at(delta);
+	disassembler_core::opcode op = get_opcode(hex);	
+	
+	bookmark_data bookmark;
+	bookmark.data_type = (bookmark_data::types)(bookmark_data::PACKED | bookmark_data::BYTE);
+	bookmark.data_is_pointer = false;
+	
+	const int valid_byte_count = 10;
+	int is_valid = valid_byte_count;
+	int potential_delta = delta;
+	while(delta < data.size()){
+		hex = data.at(delta);
+		if(is_valid == valid_byte_count){
+			potential_delta = delta;
+		}
+		delta++;
+		if(!is_unlikely_opcode(hex)){
+			if(is_valid < 0 && !is_semiunlikely_opcode(hex)){
+				delta = potential_delta;
+				break;
+			}
+			if(!is_semiunlikely_opcode(hex)){
+				op = get_opcode(hex);
+				decode_name_args(op.name);
+			}
+			is_valid--;
+			continue;
+		}
+		if(is_valid < valid_byte_count){
+			is_valid = valid_byte_count;
+		}
+	}
+	
+	bookmark.size = delta - start_address;
+	delta = start_address;
+	if(bookmark.size){
+		disassemble_table(bookmark);
+		return true;
+	}
+	return false;
+}
+
+QString disassembler_core_ui::disassemble(selection selection_area, const ROM_buffer *b)
+{
+	return core->disassemble(selection_area, b);
 }

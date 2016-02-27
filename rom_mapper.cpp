@@ -23,6 +23,11 @@ int ROM_mapper::pc_to_snes(int address) const
 	return dispatcher.pc_to_snes(address);
 }
 
+memory_type ROM_mapper::address_to_type(int address) const
+{
+//	return dispatcher.pc_to_snes(address);
+}
+
 bool ROM_mapper::can_convert(memory_mapper mapper)
 {
 	return dispatcher.can_convert(mapper);
@@ -37,6 +42,7 @@ void ROM_mapper::convert_to(memory_mapper mapper)
 
 #define snes_to_pc []
 #define pc_to_snes []
+#define address_to_type []
 #define can_convert []
 #define convert_to []
 #define max_size(MB) MB * 1024 * 1024
@@ -55,6 +61,10 @@ const mapper_dispatch lorom_dispatch {
 				return -1;
 			}
 			return ((address << 1) & 0x7F0000) | (address & 0x7FFF) | 0x8000;
+		},
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
 		},
 	
 		can_convert(memory_mapper mapper){
@@ -83,7 +93,11 @@ const mapper_dispatch hirom_dispatch {
 			}
 			return address | 0xC00000;
 		},
-	
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
+		},
+		
 		can_convert(memory_mapper mapper){
 			Q_UNUSED(mapper);
 			return false;
@@ -105,6 +119,10 @@ const mapper_dispatch exlorom_dispatch {
 		pc_to_snes(int address){
 			Q_UNUSED(address);
 			return -1;
+		},
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
 		},
 	
 		can_convert(memory_mapper mapper){
@@ -128,6 +146,10 @@ const mapper_dispatch exhirom_dispatch {
 		pc_to_snes(int address){
 			Q_UNUSED(address);
 			return -1;
+		},
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
 		},
 	
 		can_convert(memory_mapper mapper){
@@ -159,6 +181,10 @@ const mapper_dispatch superfxrom_dispatch {
 				return ((address << 1) & 0x7F0000) | ((address | 0x8000) & 0xFFFF) | 0x800000;
 			}
 			return ((address << 1) & 0x7F0000) | ((address | 0x8000) & 0xFFFF);
+		},
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
 		},
 	
 		can_convert(memory_mapper mapper){
@@ -203,6 +229,10 @@ const mapper_dispatch sa1rom_dispatch {
 				return (address - 0x400000) | 0xC00000;
 			}
 		},
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
+		},
 	
 		can_convert(memory_mapper mapper){
 			Q_UNUSED(mapper);
@@ -225,6 +255,10 @@ const mapper_dispatch spc7110rom_dispatch {
 		pc_to_snes(int address){
 			Q_UNUSED(address);
 			return -1;
+		},
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
 		},
 	
 		can_convert(memory_mapper mapper){
@@ -249,6 +283,10 @@ const mapper_dispatch sdd1rom_dispatch {
 			Q_UNUSED(address);
 			return -1;
 		},
+		
+		address_to_type(int address){
+			return ROM; //todo: implement
+		},
 	
 		can_convert(memory_mapper mapper){
 			Q_UNUSED(mapper);
@@ -264,6 +302,7 @@ const mapper_dispatch sdd1rom_dispatch {
 
 #undef snes_to_pc
 #undef pc_to_snes
+#undef address_to_type
 #undef can_convert
 #undef convert_to
 

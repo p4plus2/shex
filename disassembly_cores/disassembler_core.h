@@ -6,18 +6,36 @@
 #include "rom_buffer.h"
 #include "selection.h"
 
-class disassembler_core : public QObject
+class disassembler_core
 {
-	Q_OBJECT
 	public:
+		explicit disassembler_core(QObject *p = 0){ parent = p; }
 		struct opcode{
+			enum operand_hints{
+				NONE,
+				WORD_ADDRESS_RAM,
+				LONG_ADDRESS_RAM,
+				WORD_ADDRESS_ROM,
+				LONG_ADDRESS_ROM,
+				WORD_ADDRESS_ANY,
+				LONG_ADDRESS_ANY,
+				WORD_JUMP,
+				LONG_JUMP,
+				INDIRECT_JUMP,
+				BRANCH,
+				FLAGS,
+				CONST,
+				INDEX,
+				MOVE
+			};
 			QString name;
+			operand_hints hint;
 		};
-		using QObject::QObject;
-		virtual QGridLayout *core_layout() = 0;
 		virtual QString disassemble(selection selection_area, const ROM_buffer *b);
+		virtual ~disassembler_core(){}
 		
 	protected:
+		QObject *parent;
 		QByteArray data;
 		selection region;
 		const ROM_buffer *buffer;
@@ -37,15 +55,19 @@ class disassembler_core : public QObject
 		virtual QString format_data_value(int size, int value, bool is_pointer) = 0;
 		virtual opcode get_opcode(int op) = 0;
 		virtual int get_base() = 0;
-		virtual bool abort_unlikely(int op) = 0;
+		virtual bool is_unlikely_opcode(int op) = 0;
+		virtual bool is_semiunlikely_opcode(int op){ Q_UNUSED(op); return false; }
+		virtual bool is_codeflow_opcode(int op){ Q_UNUSED(op); return false; }
+		virtual bool is_unlikely_operand(opcode::operand_hints hint){ Q_UNUSED(hint) return false; }
 		virtual void update_state() = 0;
 		virtual void set_flags(bookmark_data::types flags) = 0;
 		
-	private:
+	private:		
 		struct block{
 			enum data_format{
 				CODE = 0,
 				DATA_PACKED = 1,
+				DATA_PACKED_BYTE = DATA_PACKED,
 				DATA_PACKED_END = 4,
 				DATA_UNPACKED = 5,
 				DATA_UNPACKED_WORD = DATA_UNPACKED + 1,
@@ -59,11 +81,30 @@ class disassembler_core : public QObject
 
 		QMap<int, block> disassembly_list;
 		int label_id;
+		bool previous_codeflow = false;
 		
 		void add_data(int destination, QString data, block::data_format format);
 		void disassemble_table(const bookmark_data &bookmark);
 		void disassemble_rats();
 		void disassemble_code();
+		bool disassemble_data();
+};
+
+class disassembler_core_ui : public QObject
+{
+	public:
+		using QObject::QObject;
+		~disassembler_core_ui(){ delete core; }
+		
+		virtual QGridLayout *core_layout() = 0;
+		QString disassemble(selection selection_area, const ROM_buffer *b);
+	
+	protected:
+		disassembler_core *disassembler(){ return core; }
+		void set_disassembler(disassembler_core *c){ core = c; }
+		
+	private:
+		disassembler_core *core;
 };
 
 #endif // DISASSEMBLER_CORE_H

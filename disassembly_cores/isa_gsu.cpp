@@ -1,23 +1,6 @@
 #include "isa_gsu.h"
 #include "utility.h"
 
-isa_gsu::isa_gsu(QObject *parent) :
-        disassembler_core(parent)
-{
-	set_alt->setValidator(new QIntValidator(0, 3, this));
-			
-	connect(set_alt, &QLineEdit::textEdited, this, &isa_gsu::change_alt);
-	connect(stop, &QCheckBox::toggled, this, &isa_gsu::toggle_error_stop);
-}
-
-QGridLayout *isa_gsu::core_layout()
-{
-	QGridLayout *grid = new QGridLayout();
-	grid->addWidget(set_alt, 1, 0, 1, 1);
-	grid->addWidget(stop, 1, 1, 2, 1);
-	return grid;
-}
-
 template <typename V> 
 QString isa_gsu::label_op(int offset, int size, V validator)
 {
@@ -88,23 +71,39 @@ int isa_gsu::get_base()
 	return region.get_start_byte();
 }
 
-bool isa_gsu::abort_unlikely(int op)
+bool isa_gsu::is_unlikely_opcode(int op)
 {
 	return error_stop && unlikely.contains(op);
 }
 
 void isa_gsu::update_state()
 {
-	set_alt->setText(QString::number(alt_state));
+	((isa_gsu_ui *)parent)->set_alt->setText(QString::number(alt_state));
 }
 
-isa_gsu::~isa_gsu()
+
+QGridLayout *isa_gsu_ui::core_layout()
+{
+	QGridLayout *grid = new QGridLayout();
+	grid->addWidget(set_alt, 1, 0, 1, 1);
+	grid->addWidget(stop, 1, 1, 2, 1);
+	return grid;
+}
+
+isa_gsu_ui::isa_gsu_ui(QObject *parent) :
+        disassembler_core_ui(parent)
+{
+	set_disassembler(new isa_gsu(this));
+	set_alt->setValidator(new QIntValidator(0, 3, this));
+}
+
+isa_gsu_ui::~isa_gsu_ui()
 {
 	delete stop;
 	delete set_alt;
 }
 
-#define OP1(O) {O}
+#define OP1(O) {O, disassembler_core::opcode::NONE}
 #define OP2(O) OP1(O), OP1(O)
 #define OP4(O) OP2(O), OP2(O)
 #define OP6(O) OP4(O), OP2(O)
@@ -173,12 +172,12 @@ const QList<disassembler_core::opcode> isa_gsu::opcode_list = {
 #undef OP15
 #undef OP16
 
-#define OP1(I, O) {I, {O}}
+#define OP1(I, O) {I, {O, disassembler_core::opcode::NONE}}
 #define OP2(I, O) OP1(I, O), OP1(I + 1, O)
 #define OP4(I, O) OP2(I, O), OP2(I + 2, O)
 #define OP6(I, O) OP4(I, O), OP2(I + 4, O)
 #define OP12(I, O) OP6(I, O), OP6(I + 6, O)
-#define OP15(I, O) OP12(I, O), OP2(I + 12, O), {I+14, {O}}
+#define OP15(I, O) OP12(I, O), OP2(I + 12, O), {I+14, {O, disassembler_core::opcode::NONE}}
 #define OP16(I, O) OP12(I, O), OP4(I + 12, O)
 
 const QMap<unsigned char, disassembler_core::opcode> isa_gsu::alt1 = {

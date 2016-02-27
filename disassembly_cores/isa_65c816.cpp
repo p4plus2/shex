@@ -2,25 +2,6 @@
 #include "utility.h"
 #include "debug.h"
 
-isa_65c816::isa_65c816(QObject *parent) :
-        disassembler_core(parent)
-{
-	connect(this, &isa_65c816::A_changed, set_A, &QCheckBox::setChecked);
-	connect(this, &isa_65c816::I_changed, set_I, &QCheckBox::setChecked);
-			
-	connect(set_A, &QCheckBox::toggled, this, &isa_65c816::toggle_A);
-	connect(set_I, &QCheckBox::toggled, this, &isa_65c816::toggle_I);
-	connect(stop, &QCheckBox::toggled, this, &isa_65c816::toggle_error_stop);
-}
-
-QGridLayout *isa_65c816::core_layout()
-{
-	QGridLayout *grid = new QGridLayout();
-	grid->addWidget(set_A, 1, 0, 1, 1);
-	grid->addWidget(set_I, 2, 0, 1, 1);
-	grid->addWidget(stop, 1, 1, 2, 1);
-	return grid;
-}
 
 template <typename V> 
 QString isa_65c816::label_op(int offset, int size, V validator)
@@ -110,15 +91,105 @@ int isa_65c816::get_base()
 	return region.get_start_byte();
 }
 
-bool isa_65c816::abort_unlikely(int op)
+bool isa_65c816::is_unlikely_opcode(int op)
 {
 	return error_stop && unlikely.contains(op);
 }
 
+bool isa_65c816::is_semiunlikely_opcode(int op)
+{
+	return error_stop && semiunlikely.contains(op);
+}
+
+bool isa_65c816::is_codeflow_opcode(int op)
+{
+	return codeflow.contains(op);
+}
+
+bool isa_65c816::is_unlikely_operand(opcode::operand_hints hint)
+{
+	unsigned int bank = buffer->pc_to_snes(get_base() + delta) & 0xFF0000;
+	unsigned int operand_long = get_operand(0) | get_operand(1) | get_operand(2);
+	unsigned int operand_word = get_operand(0) | get_operand(1);
+	unsigned int operand_byte = get_operand(0);
+	unsigned int op = data.at(delta - 1);
+	switch(hint){
+		case opcode::INDIRECT_JUMP:
+		case opcode::WORD_ADDRESS_RAM:
+			if(buffer->address_to_type(operand_word | bank) != RAM){
+				return true;
+			}
+		break;
+		case opcode::LONG_ADDRESS_RAM:
+			if(buffer->address_to_type(operand_long) != RAM){
+				return true;
+			}
+		break;
+			
+		case opcode::WORD_JUMP:
+		case opcode::WORD_ADDRESS_ROM:
+			if(buffer->address_to_type(operand_word | bank) != ROM){
+				return true;
+			}
+			
+		case opcode::LONG_JUMP:
+		case opcode::LONG_ADDRESS_ROM:
+			if(buffer->address_to_type(operand_long) != ROM){
+				return true;
+			}
+		break;
+			
+		case opcode::WORD_ADDRESS_ANY:
+			if(buffer->address_to_type(operand_word | bank) == UNMAPPED){
+				return true;
+			}
+		break;
+			
+		case opcode::LONG_ADDRESS_ANY:
+			if(buffer->address_to_type(operand_long) == UNMAPPED){
+				return true;
+			}
+		break;
+			
+		case opcode::FLAGS:
+			if((operand_byte & 0x31) != operand_byte){
+				return true;
+			}
+		break;
+			
+		case opcode::CONST:
+			if(A_state){
+				int next_op = data.at(delta+2);
+				int middle_op = data.at(delta+1);
+				if(is_unlikely_opcode(next_op) || is_semiunlikely_opcode(next_op)){
+					if(is_unlikely_opcode(middle_op) || is_semiunlikely_opcode(middle_op)){
+						return true;
+					}
+					A_state = false;
+				}
+			}
+		break;
+		case opcode::INDEX:
+			
+		break;
+			
+		case opcode::MOVE:
+			if((operand_word & 0x7E00) != 0x7E00 && (operand_word & 0x7E) != 0x7E){
+				return true;
+			}
+		break;
+			
+		case opcode::BRANCH:
+		case opcode::NONE:
+		break;
+	}
+	return false;
+}
+
 void isa_65c816::update_state()
 {
-  	emit A_changed(A_state);
-	emit I_changed(I_state);
+  	((isa_65c816_ui *)parent)->set_A->setChecked(A_state);
+	((isa_65c816_ui *)parent)->set_I->setChecked(I_state);
 }
 
 void isa_65c816::set_flags(bookmark_data::types type)
@@ -127,273 +198,305 @@ void isa_65c816::set_flags(bookmark_data::types type)
 	I_state = type & bookmark_data::I;
 }
 
-isa_65c816::~isa_65c816()
+isa_65c816_ui::isa_65c816_ui(QObject *parent) : 
+        disassembler_core_ui(parent)
+{
+	set_disassembler(new isa_65c816(this));
+	connect(set_A, &QCheckBox::toggled, this, &isa_65c816_ui::toggle_A);
+	connect(set_I, &QCheckBox::toggled, this, &isa_65c816_ui::toggle_I);
+	connect(stop, &QCheckBox::toggled, this, &isa_65c816_ui::toggle_error_stop);
+}
+
+QGridLayout *isa_65c816_ui::core_layout()
+{
+	QGridLayout *grid = new QGridLayout();
+	grid->addWidget(set_A, 1, 0, 1, 1);
+	grid->addWidget(set_I, 2, 0, 1, 1);
+	grid->addWidget(stop, 1, 1, 2, 1);
+	return grid;
+}
+
+
+isa_65c816_ui::~isa_65c816_ui()
 {
 	delete stop;
 	delete set_A;
 	delete set_I;
 }
-
+using hint = disassembler_core::opcode;
 const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
-        {"BRK %c"},
-	{"ORA (%b,X)"},
-	{"COP %c"},
-	{"ORA %b,s"},
-	{"TSB %b"},
-	{"ORA %b"},
-	{"ASL %b"},
-	{"ORA [%b]"},
-	{"PHP"},
-	{"ORA %a"},
-	{"ASL A"},
-	{"PHD"},
-	{"TSB %w"},
-	{"ORA %w"},
-	{"ASL %w"},
-	{"ORA %l"},
-	{"BPL %r"},
-	{"ORA (%b),Y"},
-	{"ORA (%b)"},
-	{"ORA (%b,S),Y"},
-	{"TRB %b"},
-	{"ORA %b,X"},
-	{"ASL %b,X"},
-	{"ORA [%b],Y"},
-	{"CLC"},
-	{"ORA %w,Y"},
-	{"INC A"},
-	{"TCS"},
-	{"TRB %w"},
-	{"ORA %w,X"},
-	{"ASL %w,X"},
-	{"ORA %l,X"},
-	{"JSR %j"},
-	{"AND (%b,X)"},
-	{"JSL %J"},
-	{"AND %b"},
-	{"BIT %b"},
-	{"AND %b"},
-	{"ROL %b"},
-	{"AND [%b]"},
-	{"PLP"},
-	{"AND %a"},
-	{"ROL A"},
-	{"PLD"},
-	{"BIT %w"},
-	{"AND %w"},
-	{"ROL %w"},
-	{"AND %l"},
-	{"BMI %r"},
-	{"AND (%b),Y"},
-	{"AND (%b)"},
-	{"AND (%b,S),Y"},
-	{"BIT %b,X"},
-	{"AND %b,X"},
-	{"ROL %b,X"},
-	{"AND [%b],Y"},
-	{"SEC"},
-	{"AND %w,Y"},
-	{"DEC A"},
-	{"TSC"},
-	{"BIT %b,X"},
-	{"AND %b,X"},
-	{"ROL %b,X"},
-	{"AND %l,X"},
-	{"RTI"},
-	{"EOR (%b,X)"},
-	{"WDM %b"},
-	{"EOR %b,S"},
-	{"MVN %w"},
-	{"EOR %b"},
-	{"LSR %b"},
-	{"EOR [%b]"},
-	{"PHA"},
-	{"EOR %a"},
-	{"LSR A"},
-	{"PHK"},
-	{"JMP %j"},
-	{"EOR %w"},
-	{"LSR %w"},
-	{"EOR %l"},
-	{"BVC %r"},
-	{"EOR (%b),Y"},
-	{"EOR (%b)"},
-	{"EOR (%b,S),Y"},
-	{"MVN %w"},
-	{"EOR %b,X"},
-	{"LSR %b,X"},
-	{"EOR [%b],Y"},
-	{"CLI"},
-	{"EOR %w,Y"},
-	{"PHY"},
-	{"TCD"},
-	{"JML %J"},
-	{"EOR %w,X"},
-	{"LSR %w,X"},
-	{"EOR %l,X"},
-	{"RTS"},
-	{"ADC (%b,X)"},
-	{"PER %w"},
-	{"ADC %b,S"},
-	{"STZ %b"},
-	{"ADC %b"},
-	{"ROR %b"},
-	{"ADC [%b]"},
-	{"PLA"},
-	{"ADC %a"},
-	{"ROR A"},
-	{"RTL"},
-	{"JMP (%j)"},
-	{"ADC %w"},
-	{"ROR %w"},
-	{"ADC %l"},
-	{"BVS %r"},
-	{"ADC (%b),Y"},
-	{"ADC (%b)"},
-	{"ADC (%b,S),Y"},
-	{"STZ %b,X"},
-	{"ADC %b,X"},
-	{"ROR %b,X"},
-	{"ADC [%b],Y"},
-	{"SEI"},
-	{"ADC %w,Y"},
-	{"PLY"},
-	{"TDC"},
-	{"JMP (%j,X)"},
-	{"ADC %w,X"},
-	{"ROR %w,X"},
-	{"ADC %l,X"},
-	{"BRA %r"},
-	{"STA (%b,X)"},
-	{"BRL %R"},
-	{"STA %b,S"},
-	{"STY %b"},
-	{"STA %b"},
-	{"STX %b"},
-	{"STA [%b]"},
-	{"DEY"},
-	{"BIT %a"},
-	{"TXA"},
-	{"PHB"},
-	{"STY %w"},
-	{"STA %w"},
-	{"STX %w"},
-	{"STA %l"},
-	{"BCC %r"},
-	{"STA (%b),Y"},
-	{"STA (%b)"},
-	{"STA (%b,S),Y"},
-	{"STY %b,X"},
-	{"STA %b,X"},
-	{"STX %b,Y"},
-	{"STA [%b],Y"},
-	{"TYA"},
-	{"STA %w,Y"},
-	{"TXS"},
-	{"TXY"},
-	{"STZ %w"},
-	{"STA %w,X"},
-	{"STZ %w,X"},
-	{"STA %l,X"},
-	{"LDY %i"},
-	{"LDA (%b,X)"},
-	{"LDX %i"},
-	{"LDA %b,S"},
-	{"LDY %b"},
-	{"LDA %b"},
-	{"LDX %b"},
-	{"LDA [%b]"},
-	{"TAY"},
-	{"LDA %a"},
-	{"TAX"},
-	{"PLB"},
-	{"LDY %w"},
-	{"LDA %w"},
-	{"LDX %w"},
-	{"LDA %l"},
-	{"BCS %r"},
-	{"LDA (%b),Y"},
-	{"LDA (%b)"},
-	{"LDA (%b,S),Y"},
-	{"LDY %b,X"},
-	{"LDA %b,X"},
-	{"LDX %b,Y"},
-	{"LDA [%b],Y"},
-	{"CLV"},
-	{"LDA %w,Y"},
-	{"TSX"},
-	{"TYX"},
-	{"LDY %w,X"},
-	{"LDA %w,X"},
-	{"LDX %w,Y"},
-	{"LDA %l,X"},
-	{"CPY %i"},
-	{"CMP (%b,X)"},
-	{"REP %f"},
-	{"CMP %b"},
-	{"CPY %b"},
-	{"CMP %b"},
-	{"DEC %b"},
-	{"CMP [%b]"},
-	{"INY"},
-	{"CMP %a"},
-	{"DEX"},
-	{"WAI"},
-	{"CPY %w"},
-	{"CMP %w"},
-	{"DEC %w"},
-	{"CMP %l"},
-	{"BNE %r"},
-	{"CMP (%b),Y"},
-	{"CMP (%b)"},
-	{"CMP (%b,S),Y"},
-	{"PEI (%b)"},
-	{"CMP %b,X"},
-	{"DEC %b,X"},
-	{"CMP [%b],Y"},
-	{"CLD"},
-	{"CMP %w,Y"},
-	{"PHX"},
-	{"STP"},
-	{"JMP [%j]"},
-	{"CMP %w,X"},
-	{"DEC %w,X"},
-	{"CMP %l,X"},
-	{"CPX %i"},
-	{"SBC (%b,X)"},
-	{"SEP %f"},
-	{"SBC %b,S"},
-	{"CPX %b"},
-	{"SBC %b"},
-	{"INC %b"},
-	{"SBC [%b]"},
-	{"INX"},
-	{"SBC %a"},
-	{"NOP"},
-	{"XBA"},
-	{"CPX %w"},
-	{"SBC %w"},
-	{"INC %w"},
-	{"SBC %l"},
-	{"BEQ %r"},
-	{"SBC (%b),Y"},
-	{"SBC (%b)"},
-	{"SBC (%b,S),Y"},
-	{"PEA %w"},
-	{"SBC %b,X"},
-	{"INC %b,X"},
-	{"SBC [%b],Y"},
-	{"SED"},
-	{"SBC %w,Y"},
-	{"PLX"},
-	{"XCE"},
-	{"JSR (%j,X)"},
-	{"SBC %w,X"},
-	{"INC %w,X"},
-	{"SBC %l,X"}
+        {"BRK %c",	hint::NONE},
+	{"ORA (%b,X)",	hint::NONE},
+	{"COP %c",	hint::NONE},
+	{"ORA %b,s",	hint::NONE},
+	{"TSB %b",	hint::NONE},
+	{"ORA %b",	hint::NONE},
+	{"ASL %b",	hint::NONE},
+	{"ORA [%b]",	hint::NONE},
+	{"PHP",		hint::NONE},
+	{"ORA %a",	hint::CONST},
+	{"ASL A",	hint::NONE},
+	{"PHD",		hint::NONE},
+	{"TSB %w",	hint::WORD_ADDRESS_RAM},
+	{"ORA %w",	hint::WORD_ADDRESS_RAM},
+	{"ASL %w",	hint::WORD_ADDRESS_RAM},
+	{"ORA %l",	hint::LONG_ADDRESS_RAM},
+	{"BPL %r",	hint::BRANCH},
+	{"ORA (%b),Y",	hint::NONE},
+	{"ORA (%b)",	hint::NONE},
+	{"ORA (%b,S),Y",hint::NONE},
+	{"TRB %b",	hint::NONE},
+	{"ORA %b,X",	hint::NONE},
+	{"ASL %b,X",	hint::NONE},
+	{"ORA [%b],Y",	hint::NONE},
+	{"CLC",		hint::NONE},
+	{"ORA %w,Y",	hint::WORD_ADDRESS_ANY},
+	{"INC A",	hint::NONE},
+	{"TCS",		hint::NONE},
+	{"TRB %w",	hint::WORD_ADDRESS_RAM},
+	{"ORA %w,X",	hint::WORD_ADDRESS_ANY},
+	{"ASL %w,X",	hint::WORD_ADDRESS_RAM},
+	{"ORA %l,X",	hint::LONG_ADDRESS_ANY},
+	{"JSR %j",	hint::WORD_JUMP},
+	{"AND (%b,X)",	hint::NONE},
+	{"JSL %J",	hint::LONG_JUMP},
+	{"AND %b",	hint::NONE},
+	{"BIT %b",	hint::NONE},
+	{"AND %b",	hint::NONE},
+	{"ROL %b",	hint::NONE},
+	{"AND [%b]",	hint::NONE},
+	{"PLP",		hint::NONE},
+	{"AND %a",	hint::CONST},
+	{"ROL A",	hint::NONE},
+	{"PLD",		hint::NONE},
+	{"BIT %w",	hint::WORD_ADDRESS_RAM},
+	{"AND %w",	hint::WORD_ADDRESS_RAM},
+	{"ROL %w",	hint::WORD_ADDRESS_RAM},
+	{"AND %l",	hint::LONG_ADDRESS_RAM},
+	{"BMI %r",	hint::BRANCH},
+	{"AND (%b),Y",	hint::NONE},
+	{"AND (%b)",	hint::NONE},
+	{"AND (%b,S),Y",hint::NONE},
+	{"BIT %b,X",	hint::NONE},
+	{"AND %b,X",	hint::NONE},
+	{"ROL %b,X",	hint::NONE},
+	{"AND [%b],Y",	hint::NONE},
+	{"SEC",		hint::NONE},
+	{"AND %w,Y",	hint::WORD_ADDRESS_ANY},
+	{"DEC A",	hint::NONE},
+	{"TSC",		hint::NONE},
+	{"BIT %b,X",	hint::NONE},
+	{"AND %b,X",	hint::NONE},
+	{"ROL %b,X",	hint::NONE},
+	{"AND %l,X",	hint::LONG_ADDRESS_RAM},
+	{"RTI",		hint::NONE},
+	{"EOR (%b,X)",	hint::NONE},
+	{"WDM %b",	hint::NONE},
+	{"EOR %b,s",	hint::NONE},
+	{"MVP %w",	hint::MOVE},
+	{"EOR %b",	hint::NONE},
+	{"LSR %b",	hint::NONE},
+	{"EOR [%b]",	hint::NONE},
+	{"PHA",		hint::NONE},
+	{"EOR %a",	hint::CONST},
+	{"LSR A",	hint::NONE},
+	{"PHK",		hint::NONE},
+	{"JMP %j",	hint::WORD_JUMP},
+	{"EOR %w",	hint::WORD_ADDRESS_RAM},
+	{"LSR %w",	hint::WORD_ADDRESS_RAM},
+	{"EOR %l",	hint::LONG_ADDRESS_RAM},
+	{"BVC %r",	hint::BRANCH},
+	{"EOR (%b),Y",	hint::NONE},
+	{"EOR (%b)",	hint::NONE},
+	{"EOR (%b,S),Y",hint::NONE},
+	{"MVN %w",	hint::MOVE},
+	{"EOR %b,X",	hint::NONE},
+	{"LSR %b,X",	hint::NONE},
+	{"EOR [%b],Y",	hint::NONE},
+	{"CLI",		hint::NONE},
+	{"EOR %w,Y",	hint::WORD_ADDRESS_ANY},
+	{"PHY",		hint::NONE},
+	{"TCD",		hint::NONE},
+	{"JML %J",	hint::LONG_JUMP},
+	{"EOR %w,X",	hint::WORD_ADDRESS_ANY},
+	{"LSR %w,X",	hint::WORD_ADDRESS_RAM},
+	{"EOR %l,X",	hint::LONG_ADDRESS_ANY},
+	{"RTS",		hint::NONE},
+	{"ADC (%b,X)",	hint::NONE},
+	{"PER %w",	hint::NONE},
+	{"ADC %b,s",	hint::NONE},
+	{"STZ %b",	hint::NONE},
+	{"ADC %b",	hint::NONE},
+	{"ROR %b",	hint::NONE},
+	{"ADC [%b]",	hint::NONE},
+	{"PLA",		hint::NONE},
+	{"ADC %a",	hint::CONST},
+	{"ROR A",	hint::NONE},
+	{"RTL",		hint::NONE},
+	{"JMP (%j)",	hint::NONE},
+	{"ADC %w",	hint::WORD_ADDRESS_RAM},
+	{"ROR %w",	hint::WORD_ADDRESS_RAM},
+	{"ADC %l",	hint::LONG_ADDRESS_RAM},
+	{"BVS %r",	hint::BRANCH},
+	{"ADC (%b),Y",	hint::NONE},
+	{"ADC (%b)",	hint::NONE},
+	{"ADC (%b,S),Y",hint::NONE},
+	{"STZ %b,X",	hint::NONE},
+	{"ADC %b,X",	hint::NONE},
+	{"ROR %b,X",	hint::NONE},
+	{"ADC [%b],Y",	hint::NONE},
+	{"SEI",		hint::NONE},
+	{"ADC %w,Y",	hint::WORD_ADDRESS_ANY},
+	{"PLY",		hint::NONE},
+	{"TDC",		hint::NONE},
+	{"JMP (%j,X)",	hint::NONE},
+	{"ADC %w,X",	hint::WORD_ADDRESS_ANY},
+	{"ROR %w,X",	hint::WORD_ADDRESS_RAM},
+	{"ADC %l,X",	hint::LONG_ADDRESS_ANY},
+	{"BRA %r",	hint::BRANCH},
+	{"STA (%b,X)",	hint::NONE},
+	{"BRL %r",	hint::BRANCH},
+	{"STA %b,s",	hint::NONE},
+	{"STY %b",	hint::NONE},
+	{"STA %b",	hint::NONE},
+	{"STX %b",	hint::NONE},
+	{"STA [%b]",	hint::NONE},
+	{"DEY",		hint::NONE},
+	{"BIT %a",	hint::CONST},
+	{"TXA",		hint::NONE},
+	{"PHB",		hint::NONE},
+	{"STY %w",	hint::WORD_ADDRESS_RAM},
+	{"STA %w",	hint::WORD_ADDRESS_RAM},
+	{"STX %w",	hint::WORD_ADDRESS_RAM},
+	{"STA %l",	hint::LONG_ADDRESS_RAM},
+	{"BCC %r",	hint::BRANCH},
+	{"STA (%b),Y",	hint::NONE},
+	{"STA (%b)",	hint::NONE},
+	{"STA (%b,S),Y",hint::NONE},
+	{"STY %b,X",	hint::NONE},
+	{"STA %b,X",	hint::NONE},
+	{"STX %b,Y",	hint::NONE},
+	{"STA [%b],Y",	hint::NONE},
+	{"TYA",		hint::NONE},
+	{"STA %w,Y",	hint::WORD_ADDRESS_RAM},
+	{"TXS",		hint::NONE},
+	{"TXY",		hint::NONE},
+	{"STZ %w",	hint::WORD_ADDRESS_RAM},
+	{"STA %w,X",	hint::WORD_ADDRESS_RAM},
+	{"STZ %w,X",	hint::WORD_ADDRESS_RAM},
+	{"STA %l,X",	hint::LONG_ADDRESS_ANY},
+	{"LDY %i",	hint::INDEX},
+	{"LDA (%b,X)",	hint::NONE},
+	{"LDX %i",	hint::INDEX},
+	{"LDA %b,s",	hint::NONE},
+	{"LDY %b",	hint::NONE},
+	{"LDA %b",	hint::NONE},
+	{"LDX %b",	hint::NONE},
+	{"LDA [%b]",	hint::NONE},
+	{"TAY",		hint::NONE},
+	{"LDA %a",	hint::CONST},
+	{"TAX",		hint::NONE},
+	{"PLB",		hint::NONE},
+	{"LDY %w",	hint::WORD_ADDRESS_ANY},
+	{"LDA %w",	hint::WORD_ADDRESS_ANY},
+	{"LDX %w",	hint::WORD_ADDRESS_ANY},
+	{"LDA %l",	hint::LONG_ADDRESS_ANY},
+	{"BCS %r",	hint::BRANCH},
+	{"LDA (%b),Y",	hint::NONE},
+	{"LDA (%b)",	hint::NONE},
+	{"LDA (%b,S),Y",hint::NONE},
+	{"LDY %b,X",	hint::NONE},
+	{"LDA %b,X",	hint::NONE},
+	{"LDX %b,Y",	hint::NONE},
+	{"LDA [%b],Y",	hint::NONE},
+	{"CLV",		hint::NONE},
+	{"LDA %w,Y",	hint::WORD_ADDRESS_ANY},
+	{"TSX",		hint::NONE},
+	{"TYX",		hint::NONE},
+	{"LDY %w,X",	hint::WORD_ADDRESS_ANY},
+	{"LDA %w,X",	hint::WORD_ADDRESS_ANY},
+	{"LDX %w,Y",	hint::WORD_ADDRESS_ANY},
+	{"LDA %l,X",	hint::LONG_ADDRESS_ANY},
+	{"CPY %i",	hint::INDEX},
+	{"CMP (%b,X)",	hint::NONE},
+	{"REP %f",	hint::FLAGS},
+	{"CMP %b",	hint::NONE},
+	{"CPY %b",	hint::NONE},
+	{"CMP %b",	hint::NONE},
+	{"DEC %b",	hint::NONE},
+	{"CMP [%b]",	hint::NONE},
+	{"INY",		hint::NONE},
+	{"CMP %a",	hint::CONST},
+	{"DEX",		hint::NONE},
+	{"WAI",		hint::NONE},
+	{"CPY %w",	hint::WORD_ADDRESS_RAM},
+	{"CMP %w",	hint::WORD_ADDRESS_RAM},
+	{"DEC %w",	hint::WORD_ADDRESS_RAM},
+	{"CMP %l",	hint::LONG_ADDRESS_RAM},
+	{"BNE %r",	hint::BRANCH},
+	{"CMP (%b),Y",	hint::NONE},
+	{"CMP (%b)",	hint::NONE},
+	{"CMP (%b,S),Y",hint::NONE},
+	{"PEI (%b)",	hint::NONE},
+	{"CMP %b,X",	hint::NONE},
+	{"DEC %b,X",	hint::NONE},
+	{"CMP [%b],Y",	hint::NONE},
+	{"CLD",		hint::NONE},
+	{"CMP %w,Y",	hint::WORD_ADDRESS_RAM},
+	{"PHX",		hint::NONE},
+	{"STP",		hint::NONE},
+	{"JMP [%j]",	hint::INDIRECT_JUMP},
+	{"CMP %w,X",	hint::WORD_ADDRESS_RAM},
+	{"DEC %w,X",	hint::WORD_ADDRESS_RAM},
+	{"CMP %l,X",	hint::LONG_ADDRESS_RAM},
+	{"CPX %i",	hint::INDEX},
+	{"SBC (%b,X)",	hint::NONE},
+	{"SEP %f",	hint::FLAGS},
+	{"SBC %b,s",	hint::NONE},
+	{"CPX %b",	hint::NONE},
+	{"SBC %b",	hint::NONE},
+	{"INC %b",	hint::NONE},
+	{"SBC [%b]",	hint::NONE},
+	{"INX",		hint::NONE},
+	{"SBC %a",	hint::CONST},
+	{"NOP",		hint::NONE},
+	{"XBA",		hint::NONE},
+	{"CPX %w",	hint::WORD_ADDRESS_RAM},
+	{"SBC %w",	hint::WORD_ADDRESS_RAM},
+	{"INC %w",	hint::WORD_ADDRESS_RAM},
+	{"SBC %l",	hint::LONG_ADDRESS_RAM},
+	{"BEQ %r",	hint::BRANCH},
+	{"SBC (%b),Y",	hint::NONE},
+	{"SBC (%b)",	hint::NONE},
+	{"SBC (%b,S),Y",hint::NONE},
+	{"PEA %w",	hint::NONE},
+	{"SBC %b,X",	hint::NONE},
+	{"INC %b,X",	hint::NONE},
+	{"SBC [%b],Y",	hint::NONE},
+	{"SED",		hint::NONE},
+	{"SBC %w,Y",	hint::WORD_ADDRESS_ANY},
+	{"PLX",		hint::NONE},
+	{"XCE",		hint::NONE},
+	{"JSR (%j,X)",	hint::NONE},
+	{"SBC %w,X",	hint::WORD_ADDRESS_ANY},
+	{"INC %w,X",	hint::WORD_ADDRESS_RAM},
+	{"SBC %l,X",	hint::LONG_ADDRESS_ANY}
 };
 
 const QSet<unsigned char> isa_65c816::unlikely = {
         0x00, 0x02, 0x03, 0x13, 0x23, 0x33, 0x42, 0x43, 0x53, 0x63, 
         0x73, 0x83, 0x93, 0xA3, 0xB3, 0xC3, 0xD3, 0xDB, 0xE3, 0xF3, 0xFF
+};
+
+const QSet<unsigned char> isa_65c816::semiunlikely = {
+	0x01, 0x04, 0x07, 0x0B, 0x0F, 0x11, 0x12, 0x14, 0x17, 0x1B, 0x1C, 0x1F, 0x21, 0x27, 0x2B, 0x2F,
+	0x30, 0x31, 0x32, 0x37, 0x3B, 0x3F, 0x40, 0x41, 0x44, 0x47, 0x4F, 0x50, 0x51, 0x52, 0x54, 0x57,
+	0x58, 0x5B, 0x5F, 0x61, 0x62, 0x67, 0x68, 0x6F, 0x70, 0x71, 0x72, 0x76, 0x77, 0x78, 0x7A, 0x7B,
+	0x7F, 0x81, 0x82, 0x87, 0x8F, 0x91, 0x92, 0x97, 0x9A, 0xA1, 0xA7, 0xAB, 0xAF, 0xB1, 0xB2, 0xB7,
+	0xB8, 0xBA, 0xC1, 0xC7, 0xCB, 0xCF, 0xD1, 0xD2, 0xD4, 0xD7, 0xD8, 0xE1, 0xE7, 0xEA, 0xEB, 0xEF,
+	0xF1, 0xF2, 0xF4, 0xF7, 0xF8, 0xFA, 0xFB, 0xFE
+};
+
+const QSet<unsigned char> isa_65c816::codeflow = {
+	0x4C, 0x5C, 0x60, 0x6B, 0x6C, 0x7C, 0x80, 0xDC
 };

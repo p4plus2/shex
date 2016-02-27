@@ -9,9 +9,9 @@
 disassembler_panel::disassembler_panel(panel_manager *parent, hex_editor *editor) :
         QPlainTextEdit(parent), abstract_panel(parent, editor)
 {
-	cores.insert(isa_65c816::id(), new isa_65c816(this));
-	cores.insert(isa_spc700::id(), new isa_spc700(this));
-	cores.insert(isa_gsu::id(), new isa_gsu(this));
+	cores.insert(isa_65c816_ui::id(), new isa_65c816_ui(this));
+	cores.insert(isa_spc700_ui::id(), new isa_spc700_ui(this));
+	cores.insert(isa_gsu_ui::id(), new isa_gsu_ui(this));
         for(auto i = cores.begin(); i != cores.end(); i++){
 		disassembler_cores->addItem(i.key());
         }

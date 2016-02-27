@@ -101,6 +101,7 @@ class ROM_metadata {
 		QByteArray to_little_endian(QByteArray bytes) const;
 		int snes_to_pc(int address) const;
 		int pc_to_snes(int address) const;
+		memory_type address_to_type(int address) const;
 		bool validate_address(int address, bool error_method = true);
 		int branch_address(int address, QByteArray branch) const;
 		int jump_address(int address, QByteArray jump) const;
