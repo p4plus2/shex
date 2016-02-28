@@ -221,6 +221,10 @@ bool disassembler_core::disassemble_data()
 	const int valid_byte_count = 10;
 	int is_valid = valid_byte_count;
 	int potential_delta = delta;
+	
+	int opcode_repeat = 0;
+	int opcode_repeat_count = 0;
+	
 	while(delta < data.size()){
 		hex = data.at(delta);
 		if(is_valid == valid_byte_count){
@@ -228,19 +232,32 @@ bool disassembler_core::disassemble_data()
 		}
 		delta++;
 		if(!is_unlikely_opcode(hex)){
-			if(is_valid < 0 && !is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
+			if(is_valid < 0 && !opcode_repeat_count &&
+			   !is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
 				delta = potential_delta;
 				break;
 			}
 			if(!is_semiunlikely_opcode(hex) || !is_unlikely_operand()){
 				op = get_opcode(hex);
 				decode_name_args(op.name);
+				
+				if(opcode_repeat == hex){
+					opcode_repeat_count++;
+					if(opcode_repeat_count > 5){
+						potential_delta = delta;
+						is_valid = valid_byte_count;
+					}
+				}else{
+					opcode_repeat_count = 0;
+				}
+				opcode_repeat = hex;
 			}
 			is_valid--;
 			continue;
 		}
 		if(is_valid < valid_byte_count){
 			is_valid = valid_byte_count;
+			opcode_repeat_count = 0;
 		}
 	}
 	
