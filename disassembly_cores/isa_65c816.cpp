@@ -106,22 +106,28 @@ bool isa_65c816::is_codeflow_opcode(int op)
 	return codeflow.contains(op);
 }
 
-bool isa_65c816::is_unlikely_operand(opcode::operand_hints hint)
+bool isa_65c816::is_unlikely_operand()
 {
 	unsigned int bank = buffer->pc_to_snes(get_base() + delta) & 0xFF0000;
+	delta++;
 	unsigned int operand_long = get_operand(0) | get_operand(1) | get_operand(2);
 	unsigned int operand_word = get_operand(0) | get_operand(1);
 	unsigned int operand_byte = get_operand(0);
-	unsigned int op = data.at(delta - 1);
+	unsigned int op = (unsigned char)data.at(delta - 1);
+	delta--;
+	opcode::operand_hints hint = opcode_list.at(op).hint;
+	memory_type type;
 	switch(hint){
 		case opcode::INDIRECT_JUMP:
 		case opcode::WORD_ADDRESS_RAM:
-			if(buffer->address_to_type(operand_word | bank) != RAM){
+			type = buffer->address_to_type(operand_word | bank);
+			if(type != RAM && type != MMIO){
 				return true;
 			}
 		break;
 		case opcode::LONG_ADDRESS_RAM:
-			if(buffer->address_to_type(operand_long) != RAM){
+			type = buffer->address_to_type(operand_long);
+			if(type != RAM && type != MMIO){
 				return true;
 			}
 		break;
@@ -131,10 +137,23 @@ bool isa_65c816::is_unlikely_operand(opcode::operand_hints hint)
 			if(buffer->address_to_type(operand_word | bank) != ROM){
 				return true;
 			}
+		break;
 			
 		case opcode::LONG_JUMP:
+			type = buffer->address_to_type(operand_long);
+			if(type == UNMAPPED || type == MMIO){
+				return true;
+			}
+			if(type == ROM && buffer->snes_to_pc(operand_long) > buffer->size()){
+				return true;
+			}
+		break;
+			
 		case opcode::LONG_ADDRESS_ROM:
 			if(buffer->address_to_type(operand_long) != ROM){
+				return true;
+			}
+			if(buffer->snes_to_pc(operand_long) > buffer->size()){
 				return true;
 			}
 		break;
@@ -146,31 +165,35 @@ bool isa_65c816::is_unlikely_operand(opcode::operand_hints hint)
 		break;
 			
 		case opcode::LONG_ADDRESS_ANY:
-			if(buffer->address_to_type(operand_long) == UNMAPPED){
+			type = buffer->address_to_type(operand_long);
+			if(type == UNMAPPED){
+				return true;
+			}
+			if(type == ROM && buffer->snes_to_pc(operand_long) > buffer->size()){
 				return true;
 			}
 		break;
 			
 		case opcode::FLAGS:
-			if((operand_byte & 0x31) != operand_byte){
+			if((operand_byte & 0x39) != operand_byte){
 				return true;
 			}
 		break;
 			
 		case opcode::CONST:
-			if(A_state){
-				int next_op = data.at(delta+2);
-				int middle_op = data.at(delta+1);
-				if(is_unlikely_opcode(next_op) || is_semiunlikely_opcode(next_op)){
-					if(is_unlikely_opcode(middle_op) || is_semiunlikely_opcode(middle_op)){
-						return true;
-					}
-					A_state = false;
-				}
-			}
+//			if(!A_state){
+//				int next_op = data.at(delta+2);
+//				int middle_op = data.at(delta+1);
+//				if(is_unlikely_opcode(next_op) || is_semiunlikely_opcode(next_op)){
+//					if(is_unlikely_opcode(middle_op) || is_semiunlikely_opcode(middle_op)){
+//						return true;
+//					}
+//					A_state = true;
+//				}
+//			}
 		break;
 		case opcode::INDEX:
-			
+			return false; //not handled yet
 		break;
 			
 		case opcode::MOVE:

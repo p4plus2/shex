@@ -3,6 +3,7 @@
 
 enum memory_type{
 	RAM,
+	SRAM = RAM,  //for now I don't need to distinguish these
 	ROM,
 	MMIO,
 	CHIP,

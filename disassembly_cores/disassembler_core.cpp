@@ -44,7 +44,7 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 			continue;
 		}*/
 		disassemble_code();
-		qDebug() << delta;
+		//qDebug() << delta;
 		
 	}
 	
@@ -190,7 +190,9 @@ void disassembler_core::disassemble_code()
 	unsigned char hex = data.at(delta);
 	disassembler_core::opcode op = get_opcode(hex);	
 	bool data_found = false;
-	if(is_unlikely_opcode(hex) || (previous_codeflow && is_semiunlikely_opcode(hex))){
+	if(is_unlikely_opcode(hex) || 
+		(previous_codeflow && is_semiunlikely_opcode(hex)) ||
+		is_unlikely_operand()){
 		data_found = disassemble_data();
 	}
 	
@@ -226,11 +228,11 @@ bool disassembler_core::disassemble_data()
 		}
 		delta++;
 		if(!is_unlikely_opcode(hex)){
-			if(is_valid < 0 && !is_semiunlikely_opcode(hex)){
+			if(is_valid < 0 && !is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
 				delta = potential_delta;
 				break;
 			}
-			if(!is_semiunlikely_opcode(hex)){
+			if(!is_semiunlikely_opcode(hex) || !is_unlikely_operand()){
 				op = get_opcode(hex);
 				decode_name_args(op.name);
 			}

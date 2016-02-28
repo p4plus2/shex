@@ -23,7 +23,7 @@ class isa_65c816 : public disassembler_core
 		bool is_unlikely_opcode(int op);
 		bool is_semiunlikely_opcode(int op);
 		bool is_codeflow_opcode(int op);
-		bool is_unlikely_operand(opcode::operand_hints hint);
+		bool is_unlikely_operand();
 		void update_state();
 		void set_flags(bookmark_data::types type);
 	private:		

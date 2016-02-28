@@ -1,6 +1,7 @@
 #include <QtGlobal>
 
 #include "rom_mapper.h"
+#include "debug.h"
 
 void ROM_mapper::set_type(memory_mapper mapper)
 {
@@ -23,9 +24,11 @@ int ROM_mapper::pc_to_snes(int address) const
 	return dispatcher.pc_to_snes(address);
 }
 
+//NOTE:  Address to type is an estimation not assertion
+//This type can be wrong.
 memory_type ROM_mapper::address_to_type(int address) const
 {
-//	return dispatcher.pc_to_snes(address);
+	return dispatcher.address_to_type(address);
 }
 
 bool ROM_mapper::can_convert(memory_mapper mapper)
@@ -64,7 +67,27 @@ const mapper_dispatch lorom_dispatch {
 		},
 		
 		address_to_type(int address){
-			return ROM; //todo: implement
+			int bank = address >> 16;
+			int word = address & 0xFFFF;
+			if((bank & 0x7E) != 0x7E){
+				if((bank & 0x70) == 0x70){
+					return SRAM;
+				}
+				//bank 40-60 have no mmio/data mirrors
+				//and if the word
+				if((bank & 0x40) || word >= 0x8000){
+					return ROM;
+				}
+				
+				if(word >= 0x4390){
+					return UNMAPPED;
+				}
+				
+				if(word >= 0x2000){
+					return MMIO;
+				}
+			}
+			return RAM;
 		},
 	
 		can_convert(memory_mapper mapper){
