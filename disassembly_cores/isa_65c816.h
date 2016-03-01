@@ -4,6 +4,7 @@
 #include <QCheckBox>
 #include <QSet>
 #include <QGridLayout>
+#include <QStack>
 
 #include "disassembler_core.h"
 
@@ -23,13 +24,25 @@ class isa_65c816 : public disassembler_core
 		bool is_unlikely_opcode(int op);
 		bool is_semiunlikely_opcode(int op);
 		bool is_codeflow_opcode(int op);
+		bool is_stateful_opcode(int op);
 		bool is_unlikely_operand();
 		void update_state();
 		void set_flags(bookmark_data::types type);
+		void push_state();
+		void pop_state();
+		void reset_stack();
+		
 	private:		
 		bool A_state = false;
 		bool I_state = false;
 		bool error_stop = false;
+		
+		struct state{
+			bool A_state;
+			bool I_state;
+		};
+		
+		QStack<state> state_stack;
 
 		static const QList<disassembler_core::opcode> opcode_list;
 		static const QSet<unsigned char> unlikely;

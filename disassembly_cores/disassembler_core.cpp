@@ -197,6 +197,7 @@ void disassembler_core::disassemble_code()
 	}
 	
 	if(!data_found){
+		is_stateful_opcode(hex);
 		delta++;
 		decode_name_args(op.name);
 		add_data(opcode_address, op.name, block::CODE);
@@ -222,43 +223,87 @@ bool disassembler_core::disassemble_data()
 	int is_valid = valid_byte_count;
 	int potential_delta = delta;
 	
+	const int opcode_repeat_threshold = 5;
 	int opcode_repeat = 0;
 	int opcode_repeat_count = 0;
 	
+	auto check_pointers = [&](){
+		const int max_distance[] = {0, 3, 2, 1};
+		int max_depth = delta;
+		for(int width = 3; width > 1; width--){
+			int pointer_delta = delta;
+			int base_byte = data.at(delta);
+			int byte_count = 0;
+			while(pointer_delta < data.size()){
+				int current_byte = data.at(pointer_delta);
+				if(base_byte - max_distance[width] < current_byte && 
+				   current_byte < base_byte + max_distance[width]){
+					byte_count++;
+				}else{
+					break;
+				}
+				pointer_delta += width;
+			}
+			
+			if(pointer_delta > max_depth){
+				max_depth = pointer_delta;
+			}
+		}
+		max_depth -= delta;
+		if(max_depth > 5){
+			delta += max_depth;
+			is_valid = valid_byte_count;
+			return true;
+		}
+		return false;
+	};
+	
 	while(delta < data.size()){
 		hex = data.at(delta);
+		
 		if(is_valid == valid_byte_count){
 			potential_delta = delta;
 		}
-		delta++;
+		if(check_pointers()){
+			continue;
+		}
+		
+		
+		//if(opcode_repeat == hex){
+		//	opcode_repeat_count++;
+		//	if(opcode_repeat_count > opcode_repeat_threshold){
+		//		potential_delta = delta;
+		//		is_valid = valid_byte_count;
+		//	}
+		//}else{
+		//	opcode_repeat_count = 0;
+		//}
+		//opcode_repeat = hex;
+
 		if(!is_unlikely_opcode(hex)){
 			if(is_valid < 0 && !opcode_repeat_count &&
 			   !is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
 				delta = potential_delta;
 				break;
 			}
-			if(!is_semiunlikely_opcode(hex) || !is_unlikely_operand()){
+			
+			if(!is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
+				//decode opcode is likely
+				push_state();
+				delta++;
 				op = get_opcode(hex);
 				decode_name_args(op.name);
-				
-				if(opcode_repeat == hex){
-					opcode_repeat_count++;
-					if(opcode_repeat_count > 5){
-						potential_delta = delta;
-						is_valid = valid_byte_count;
-					}
-				}else{
-					opcode_repeat_count = 0;
-				}
-				opcode_repeat = hex;
+				delta--;
+				pop_state();
 			}
 			is_valid--;
-			continue;
+		}else{
+			if(is_valid < valid_byte_count){
+				is_valid = valid_byte_count;
+				opcode_repeat_count = 0;
+			}
 		}
-		if(is_valid < valid_byte_count){
-			is_valid = valid_byte_count;
-			opcode_repeat_count = 0;
-		}
+		delta++;
 	}
 	
 	bookmark.size = delta - start_address;

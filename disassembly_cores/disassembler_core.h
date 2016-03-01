@@ -59,8 +59,12 @@ class disassembler_core
 		virtual bool is_semiunlikely_opcode(int op){ Q_UNUSED(op); return false; }
 		virtual bool is_codeflow_opcode(int op){ Q_UNUSED(op); return false; }
 		virtual bool is_unlikely_operand(){ return false; }
+		virtual bool is_stateful_opcode(int op){ Q_UNUSED(op); return false; }
 		virtual void update_state() = 0;
 		virtual void set_flags(bookmark_data::types flags) = 0;
+		virtual void push_state(){}
+		virtual void pop_state(){}
+		virtual void reset_stack(){}
 		
 	private:		
 		struct block{
