@@ -86,6 +86,7 @@ class disassembler_core
 		QMap<int, block> disassembly_list;
 		int label_id;
 		bool previous_codeflow = false;
+		bool inspecting_data = false;
 		
 		void add_data(int destination, QString data, block::data_format format);
 		void disassemble_table(const bookmark_data &bookmark);

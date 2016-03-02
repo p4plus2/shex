@@ -57,6 +57,9 @@ QString disassembler_core::disassemble(selection selection_area, const ROM_buffe
 
 QString disassembler_core::add_label(int destination, QString prefix)
 {
+	if(inspecting_data){
+		return "";
+	}
 	block &b = disassembly_list[destination];
 	if(b.label.isEmpty()){
 		label_id++;
@@ -215,6 +218,8 @@ bool disassembler_core::disassemble_data()
 	unsigned char hex = data.at(delta);
 	disassembler_core::opcode op = get_opcode(hex);	
 	
+	inspecting_data = true;
+	
 	bookmark_data bookmark;
 	bookmark.data_type = (bookmark_data::types)(bookmark_data::PACKED | bookmark_data::BYTE);
 	bookmark.data_is_pointer = false;
@@ -222,10 +227,6 @@ bool disassembler_core::disassemble_data()
 	const int valid_byte_count = 10;
 	int is_valid = valid_byte_count;
 	int potential_delta = delta;
-	
-	const int opcode_repeat_threshold = 5;
-	int opcode_repeat = 0;
-	int opcode_repeat_count = 0;
 	
 	auto check_pointers = [&](){
 		const int max_distance[] = {0, 3, 2, 1};
@@ -267,22 +268,9 @@ bool disassembler_core::disassemble_data()
 		if(check_pointers()){
 			continue;
 		}
-		
-		
-		//if(opcode_repeat == hex){
-		//	opcode_repeat_count++;
-		//	if(opcode_repeat_count > opcode_repeat_threshold){
-		//		potential_delta = delta;
-		//		is_valid = valid_byte_count;
-		//	}
-		//}else{
-		//	opcode_repeat_count = 0;
-		//}
-		//opcode_repeat = hex;
 
 		if(!is_unlikely_opcode(hex)){
-			if(is_valid < 0 && !opcode_repeat_count &&
-			   !is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
+			if(is_valid < 0 && !is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
 				delta = potential_delta;
 				break;
 			}
@@ -300,11 +288,12 @@ bool disassembler_core::disassemble_data()
 		}else{
 			if(is_valid < valid_byte_count){
 				is_valid = valid_byte_count;
-				opcode_repeat_count = 0;
 			}
 		}
 		delta++;
 	}
+	
+	inspecting_data = false;
 	
 	bookmark.size = delta - start_address;
 	delta = start_address;

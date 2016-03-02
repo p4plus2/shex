@@ -129,6 +129,10 @@ bool isa_65c816::is_unlikely_operand()
 	delta--;
 	opcode::operand_hints hint = opcode_list.at(op).hint;
 	memory_type type;
+	
+	const QSet<unsigned char> stores = {
+		0x85, 0x8D, 0x8F, 0x95, 0x99, 0x9D, 0x9F, 0x86, 0x96, 0x84, 0x8C, 0x94
+	};
 	switch(hint){
 		case opcode::INDIRECT_JUMP:
 		case opcode::WORD_ADDRESS_RAM:
@@ -193,8 +197,26 @@ bool isa_65c816::is_unlikely_operand()
 		break;
 			
 		case opcode::CONST:
+			delta++;
+			if(A_state && stores.contains(get_operand(1) >> 8)){
+				A_state = false;
+			}else if(!A_state && is_unlikely_opcode(get_operand(1) >> 8) 
+				          && stores.contains(get_operand(2) >> 16)){
+				A_state = true;
+			}
+			qDebug() << "A: " << (operand_word >> 8) << (get_operand(1) >> 8);
+			delta--;
 		break;
 		case opcode::INDEX:
+			delta++;
+			if(I_state && stores.contains(get_operand(1) >> 8)){
+				I_state = false;
+			}else if(!I_state && is_unlikely_opcode(get_operand(1) >> 8) 
+					  && stores.contains(get_operand(2) >> 16)){
+				I_state = true;
+			}
+			qDebug() << "I: " << (operand_word >> 8) << (get_operand(1) >> 8);
+			delta--;
 		break;
 			
 		case opcode::MOVE:
