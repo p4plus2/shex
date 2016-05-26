@@ -207,7 +207,28 @@ const mapper_dispatch superfxrom_dispatch {
 		},
 		
 		address_to_type(int address){
-			return ROM; //todo: implement
+			//todo: add gsu registers to mmio
+			int bank = address >> 16;
+			int word = address & 0xFFFF;
+			if((bank & 0x7E) != 0x7E){
+				if((bank & 0x70) == 0x70){
+					return SRAM;
+				}
+				//bank 40-60 have no mmio/data mirrors
+				//and if the word
+				if((bank & 0x40) || word >= 0x8000){
+					return ROM;
+				}
+				
+				if(word >= 0x4390){
+					return UNMAPPED;
+				}
+				
+				if(word >= 0x2000){
+					return MMIO;
+				}
+			}
+			return RAM;
 		},
 	
 		can_convert(memory_mapper mapper){

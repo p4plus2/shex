@@ -33,7 +33,7 @@ void hex_display::get_line(int start, int end, QTextStream &stream)
 //TODO possibly clean this up more
 int hex_display::screen_to_nibble(QPoint position, bool byte_align)
 {
-	int x_remainder = position.x() % editor_font::get_width();
+	int x_remainder = fmod(position.x(), editor_font::get_width());
 	int x = position.x() / editor_font::get_width();
 	int y = position.y() / editor_font::get_height();
 	if(x % 3 == 2){
@@ -58,5 +58,6 @@ QPoint hex_display::nibble_to_screen(int nibble)
 	int y = nibble / (get_columns() * 2);
 	int x = nibble % (get_columns() * 2);
 	x = ((x / 2 * 3) + (x & 1));
+
 	return QPoint(x * editor_font::get_width(), y * editor_font::get_height());
 }

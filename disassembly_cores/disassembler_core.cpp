@@ -224,7 +224,7 @@ bool disassembler_core::disassemble_data()
 	bookmark.data_type = (bookmark_data::types)(bookmark_data::PACKED | bookmark_data::BYTE);
 	bookmark.data_is_pointer = false;
 	
-	const int valid_byte_count = 10;
+	const int valid_byte_count = 9;
 	int is_valid = valid_byte_count;
 	int potential_delta = delta;
 	
@@ -275,16 +275,21 @@ bool disassembler_core::disassemble_data()
 				break;
 			}
 			
-			if(!is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
-				//decode opcode is likely
-				push_state();
-				delta++;
-				op = get_opcode(hex);
-				decode_name_args(op.name);
-				delta--;
-				pop_state();
+			if(is_unlikely_operand()){
+				is_valid++;
 			}
-			is_valid--;
+			
+			if(!is_semiunlikely_opcode(hex) && !is_unlikely_operand()){
+				is_valid -= 2;
+			}
+			
+			//decode opcode is likely
+			push_state();
+			delta++;
+			op = get_opcode(hex);
+			decode_name_args(op.name);
+			delta--;
+			pop_state();
 		}else{
 			if(is_valid < valid_byte_count){
 				is_valid = valid_byte_count;

@@ -31,13 +31,14 @@ void editor_font::font_setup()
 	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 	font.setPointSize(default_font_size);
 	
-	QFontMetrics font_info(font);
+	QFontMetricsF font_info(font);
 	font_width = font_info.averageCharWidth();
+	
 	font_height = font_info.height();
 }
 
-int editor_font::font_height = 0;
-int editor_font::font_width = 0;
+float editor_font::font_height = 0;
+float editor_font::font_width = 0;
 int editor_font::default_font_size = 9;
 QFont editor_font::font;
 editor_font *editor_font::self = nullptr;

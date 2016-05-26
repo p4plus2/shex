@@ -148,6 +148,7 @@ void text_display::paint_selection(QPainter &painter, selection &selection_area,
 	}
 	QPoint position1 = clip_screen(nibble_to_screen(selection_area.get_start_aligned()));
 	QPoint position2 = clip_screen(nibble_to_screen(selection_area.get_end_aligned()));
+	//qDebug() << position1.x() << position2.x();
 	QRegion area = QRect(0, position1.y(), get_line_characters() * editor_font::get_width(), 
 	                 position2.y() - position1.y() + editor_font::get_height());
 	if(position1.x()){

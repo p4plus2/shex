@@ -10,8 +10,8 @@ class editor_font : public QObject
 	public:
 		explicit editor_font(QObject *parent = 0);
 		
-		static int get_width(){ return font_width; }
-		static int get_height(){ return font_height; }
+		static float get_width(){ return font_width; }
+		static float get_height(){ return font_height; }
 		static QFont get_font(){ return font; }
 		static editor_font *instance(){ return self; }
 		
@@ -23,8 +23,8 @@ class editor_font : public QObject
 		
 	private:
 		static QFont font;
-		static int font_width;
-		static int font_height;
+		static float font_width;
+		static float font_height;
 		static int default_font_size;
 		
 		static editor_font *self;

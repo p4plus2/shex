@@ -204,19 +204,17 @@ bool isa_65c816::is_unlikely_operand()
 				          && stores.contains(get_operand(2) >> 16)){
 				A_state = true;
 			}
-			qDebug() << "A: " << (operand_word >> 8) << (get_operand(1) >> 8);
 			delta--;
 		break;
 		case opcode::INDEX:
-			delta++;
-			if(I_state && stores.contains(get_operand(1) >> 8)){
-				I_state = false;
-			}else if(!I_state && is_unlikely_opcode(get_operand(1) >> 8) 
-					  && stores.contains(get_operand(2) >> 16)){
-				I_state = true;
-			}
-			qDebug() << "I: " << (operand_word >> 8) << (get_operand(1) >> 8);
-			delta--;
+		//	delta++;
+		//	if(I_state && stores.contains(get_operand(1) >> 8)){
+		//		I_state = false;
+		//	}else if(!I_state && is_unlikely_opcode(get_operand(1) >> 8) 
+		//			  && stores.contains(get_operand(2) >> 16)){
+		//		I_state = true;
+		//	}
+		//	delta--;
 		break;
 			
 		case opcode::MOVE:
@@ -550,7 +548,7 @@ const QList<disassembler_core::opcode> isa_65c816::opcode_list = {
 };
 
 const QSet<unsigned char> isa_65c816::unlikely = {
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x13, 0x23, 0x33, 0x42, 0x43, 0x53, 0x63, 
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x0B, 0x0C, 0x11, 0x12, 0x13, 0x23, 0x24, 0x33, 0x42, 0x43, 0x53, 0x63, 
         0x73, 0x83, 0x93, 0xA3, 0xB3, 0xC3, 0xD3, 0xDB, 0xE3, 0xF3, 0xFF
 };
 
