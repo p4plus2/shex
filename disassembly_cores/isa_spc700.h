@@ -41,7 +41,6 @@ class isa_spc700_ui : public disassembler_core_ui
 		explicit isa_spc700_ui(QObject *parent = 0);
 		~isa_spc700_ui();
 		QGridLayout *core_layout();
-		static QString id(){ return "SPC700"; }
 
 	public slots:
 		void toggle_error_stop(bool state){ ((isa_spc700 *)disassembler())->error_stop = state; }
@@ -53,5 +52,20 @@ class isa_spc700_ui : public disassembler_core_ui
 		QLabel *base_text = new QLabel("Base address");
 		
 };
+
+class isa_spc700_options : public disassembler_core_options
+{
+	using disassembler_core_options::disassembler_core_options;
+};
+
+struct isa_spc700_factory : public disassembler_core_factory
+{
+	using disassembler_core_factory::disassembler_core_factory;
+	virtual disassembler_core *get_core(QObject *parent) { return new isa_spc700(parent); }
+	virtual disassembler_core_ui *get_ui(QObject *parent) { return new isa_spc700_ui(parent); }
+	virtual disassembler_core_options *get_options(QObject *parent) { return new isa_spc700_options(parent); }
+};
+
+static isa_spc700_factory factory("isa_spc700");
 
 #endif // ISA_SPC700_H

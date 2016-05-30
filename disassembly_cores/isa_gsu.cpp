@@ -93,7 +93,7 @@ QGridLayout *isa_gsu_ui::core_layout()
 isa_gsu_ui::isa_gsu_ui(QObject *parent) :
         disassembler_core_ui(parent)
 {
-	set_disassembler(new isa_gsu(this));
+	set_disassembler(disassembler_list->get_factory("isa_gsu")->get_core(this));
 	set_alt->setValidator(new QIntValidator(0, 3, this));
 }
 

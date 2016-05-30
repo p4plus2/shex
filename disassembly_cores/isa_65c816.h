@@ -58,7 +58,6 @@ class isa_65c816_ui : public disassembler_core_ui
 		explicit isa_65c816_ui(QObject *parent);
 		~isa_65c816_ui();
 		QGridLayout *core_layout();
-		static QString id(){ return "65c816"; }
 		
 	public slots:
 		void toggle_A(bool state){ ((isa_65c816 *)disassembler())->A_state = state; }
@@ -71,4 +70,18 @@ class isa_65c816_ui : public disassembler_core_ui
 		QCheckBox *stop = new QCheckBox("Stop on unlikely");
 };
 
+class isa_65c816_options : public disassembler_core_options
+{
+	using disassembler_core_options::disassembler_core_options;
+};
+
+struct isa_65c816_factory : public disassembler_core_factory
+{
+	using disassembler_core_factory::disassembler_core_factory;
+	virtual disassembler_core *get_core(QObject *parent) { return new isa_65c816(parent); }
+	virtual disassembler_core_ui *get_ui(QObject *parent) { return new isa_65c816_ui(parent); }
+	virtual disassembler_core_options *get_options(QObject *parent) { return new isa_65c816_options(parent); }
+};
+
+static isa_65c816_factory factory("isa_65c816");
 #endif // ISA_65C816_H

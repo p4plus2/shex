@@ -11,6 +11,7 @@ ROM_buffer::ROM_buffer(QString file_name, bool new_file)
 		get_rats_tags();
 	}else{
 		buffer.fill(0x00, 0x8000);
+		analyze();
 	}
 	clipboard = QApplication::clipboard(); //shared by all, but work around static initialization order
 	qDebug() << ENUM_STRING(memory_mapper, get_mapper());

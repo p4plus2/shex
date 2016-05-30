@@ -265,7 +265,7 @@ void isa_65c816::reset_stack()
 isa_65c816_ui::isa_65c816_ui(QObject *parent) : 
         disassembler_core_ui(parent)
 {
-	set_disassembler(new isa_65c816(this));
+	set_disassembler(disassembler_list->get_factory("isa_65c816")->get_core(this));
 	connect(set_A, &QCheckBox::toggled, this, &isa_65c816_ui::toggle_A);
 	connect(set_I, &QCheckBox::toggled, this, &isa_65c816_ui::toggle_I);
 	connect(stop, &QCheckBox::toggled, this, &isa_65c816_ui::toggle_error_stop);

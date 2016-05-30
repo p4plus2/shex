@@ -1,17 +1,17 @@
 #include "disassembler_panel.h"
 #include "debug.h"
-#include "disassembly_cores/isa_65c816.h"
-#include "disassembly_cores/isa_spc700.h"
-#include "disassembly_cores/isa_gsu.h"
 #include "events/event_types.h"
 #include "utility.h"
 
 disassembler_panel::disassembler_panel(panel_manager *parent, hex_editor *editor) :
         QPlainTextEdit(parent), abstract_panel(parent, editor)
 {
-	cores.insert(isa_65c816_ui::id(), new isa_65c816_ui(this));
-	cores.insert(isa_spc700_ui::id(), new isa_spc700_ui(this));
-	cores.insert(isa_gsu_ui::id(), new isa_gsu_ui(this));
+	QVector<disassembler_core_factory *> factories = disassembler_list->get_factories();
+	
+	for(auto factory : factories){
+		cores.insert(factory->name, factory->get_ui(this));
+	}
+	
         for(auto i = cores.begin(); i != cores.end(); i++){
 		disassembler_cores->addItem(i.key());
         }

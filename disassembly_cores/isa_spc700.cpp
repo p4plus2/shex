@@ -80,7 +80,7 @@ bool isa_spc700::is_unlikely_opcode(int op)
 isa_spc700_ui::isa_spc700_ui(QObject *parent) :
         disassembler_core_ui(parent)
 {
-	set_disassembler(new isa_spc700(this));
+	set_disassembler(disassembler_list->get_factory("isa_spc700")->get_core(this));
 	base_input->setInputMask("HHHH");
 }
 

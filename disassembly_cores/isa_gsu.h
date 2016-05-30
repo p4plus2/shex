@@ -45,7 +45,6 @@ class isa_gsu_ui : public disassembler_core_ui
 		explicit isa_gsu_ui(QObject *parent);
 		~isa_gsu_ui();
 		QGridLayout *core_layout();
-		static QString id(){ return "gsu"; }
 		
 	public slots:
 		void change_alt(const QString &text){ ((isa_gsu *)disassembler())->alt_state = text.toInt(); }
@@ -56,4 +55,18 @@ class isa_gsu_ui : public disassembler_core_ui
 		QCheckBox *stop = new QCheckBox("Stop on unlikely");
 };
 
+class isa_gsu_options : public disassembler_core_options
+{
+	using disassembler_core_options::disassembler_core_options;
+};
+
+struct isa_gsu_factory : public disassembler_core_factory
+{
+	using disassembler_core_factory::disassembler_core_factory;
+	virtual disassembler_core *get_core(QObject *parent) { return new isa_gsu(parent); }
+	virtual disassembler_core_ui *get_ui(QObject *parent) { return new isa_gsu_ui(parent); }
+	virtual disassembler_core_options *get_options(QObject *parent) { return new isa_gsu_options(parent); }
+};
+
+static isa_gsu_factory factory("isa_gsu");
 #endif // ISA_GSU_H

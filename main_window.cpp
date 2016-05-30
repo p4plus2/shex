@@ -12,6 +12,7 @@
 #include "panel_manager.h"
 #include "settings_manager.h"
 #include "utility.h"
+#include "disassembly_cores/disassembler_core.h"
 
 main_window::main_window(QWidget *parent)
         : QMainWindow(parent)
@@ -288,5 +289,6 @@ hex_editor *main_window::get_editor(int i) const
 main_window::~main_window()
 {
 	character_mapper::delete_active_map();
+	delete disassembler_list;
 }
 

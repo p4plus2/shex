@@ -3,10 +3,6 @@
 #include "utility.h"
 #include "disassembler_core.h"
 
-#include "isa_65c816.h"
-#include "isa_spc700.h"
-#include "isa_gsu.h"
-
 #include "debug.h"
 
 QString disassembler_core::disassemble(selection selection_area, const ROM_buffer *b)
@@ -313,3 +309,15 @@ QString disassembler_core_ui::disassemble(selection selection_area, const ROM_bu
 {
 	return core->disassemble(selection_area, b);
 }
+
+disassembler_core_factory *disassembler_factory_list::get_factory(QString name)
+{
+	for(auto factory : factories){
+		if(factory->name == name){
+			return factory;
+		}
+	}
+	return nullptr;
+}
+
+disassembler_factory_list *disassembler_list;

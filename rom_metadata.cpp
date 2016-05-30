@@ -16,6 +16,7 @@ void ROM_metadata::analyze()
 		has_header = false;
 	}
 	if(size() < 0x8000){
+		mapper.set_type(LOROM);
 		return;
 	}
 

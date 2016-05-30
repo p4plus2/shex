@@ -112,4 +112,43 @@ class disassembler_core_ui : public QObject
 		disassembler_core *core;
 };
 
+//QObject is temporary, not sure if I do or don't want this yet
+class disassembler_core_options : public QObject
+{
+	public:
+		using QObject::QObject;
+};
+
+struct disassembler_core_factory;
+
+class disassembler_factory_list
+{
+	public:
+		QVector<disassembler_core_factory *> &get_factories(){ return factories; }
+		disassembler_core_factory *get_factory(QString name);
+
+		void add_factory(disassembler_core_factory *factory){ factories.append(factory); }
+	private:
+		QVector<disassembler_core_factory *> factories;
+};
+
+extern disassembler_factory_list *disassembler_list;
+
+struct disassembler_core_factory
+{		
+	disassembler_core_factory(QString n)
+	{
+		if(!disassembler_list){
+			disassembler_list = new disassembler_factory_list;
+		}
+		name = n;
+		disassembler_list->add_factory(this);
+	};
+	virtual disassembler_core *get_core(QObject *parent) = 0;
+	virtual disassembler_core_ui *get_ui(QObject *parent) = 0;
+	virtual disassembler_core_options *get_options(QObject *parent) = 0;
+	
+	QString name;
+};
+
 #endif // DISASSEMBLER_CORE_H
