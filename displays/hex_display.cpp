@@ -2,6 +2,8 @@
 #include "utility.h"
 #include "debug.h"
 
+#include <cmath>
+
 void hex_display::paintEvent(QPaintEvent *event)
 {
 	text_display::paintEvent(event);
