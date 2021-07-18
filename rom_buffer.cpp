@@ -24,16 +24,14 @@ void ROM_buffer::remove_copy_header()
 
 void ROM_buffer::open(QString path)
 {
-	if(ROM.isOpen()){
-		ROM.close();
-	}
 	ROM.setFileName(path);
-	ROM.open(QFile::ReadWrite);
+    ROM.open(QFile::ReadOnly);
 	buffer = ROM.readAll();
 	if(ROM.size() < 0x8000){
 		ROM_error = "The ROM is too small to be valid.";
 		return;
 	}
+    ROM.close();
 	analyze();
 }
 
@@ -41,16 +39,16 @@ void ROM_buffer::save(QString path)
 {
 	QFileInfo info(ROM);
 	if(path != "" && path != info.absolutePath()){
-		ROM.close();
 		ROM.setFileName(path);	
-		ROM.open(QFile::ReadWrite);
 	}
+    ROM.open(QFile::WriteOnly);
 	if(header_size()){
 		ROM.seek(0);
 		ROM.write(header_buffer);
 	}
 	ROM.seek(header_size());
 	ROM.write(buffer);
+    ROM.close();
 }
 
 void ROM_buffer::initialize_undo(QUndoGroup *undo_group)
