@@ -68,7 +68,7 @@ void hex_editor::set_focus()
 	emit update_status_text(get_status_text());
 	hex->setFocus();
 	buffer->set_active();
-	emit update_save_state(0);
+	update_save_state(0);
 	update_window();
 }
 
@@ -135,7 +135,7 @@ void hex_editor::goto_diff(bool direction)
 	if(offset != -1){
 		goto_offset(buffer->pc_to_snes(offset));
 	}else{
-		update_status_text("No differences found!");
+		emit update_status_text("No differences found!");
 	}
 }
 
@@ -410,7 +410,7 @@ void hex_editor::count(QString find, bool mode)
 	if(result < 0){
 		search_error(result, find);
 	}else{
-		update_status_text(QString::number(result) + " Results found for " + find);
+		emit update_status_text(QString::number(result) + " Results found for " + find);
 	}
 
 }
@@ -458,7 +458,7 @@ void hex_editor::replace_all(QString find, QString replace, bool mode)
 	if(result < 0){
 		search_error(result, find, replace);
 	}else{
-		update_status_text(QString::number(result) + " Results found for " + find);
+		emit update_status_text(QString::number(result) + " Results found for " + find);
 	}
 	update_save_state(1);
 }
@@ -680,11 +680,11 @@ void hex_editor::set_offset(int o)
 void hex_editor::search_error(int error, QString find, QString replace_with)
 {
 	if(error == ROM_buffer::INVALID_REPLACE){
-		update_status_text("Error: Invalid replace hex string: " + replace_with);
+		emit update_status_text("Error: Invalid replace hex string: " + replace_with);
 	}else if(error == ROM_buffer::INVALID_FIND){
-		update_status_text("Error: Invalid find hex string: " + find);
+		emit update_status_text("Error: Invalid find hex string: " + find);
 	}else if(error == ROM_buffer::NOT_FOUND){
-		update_status_text("Error: String " + find + " not found.");
+		emit update_status_text("Error: String " + find + " not found.");
 	}
 }
 
